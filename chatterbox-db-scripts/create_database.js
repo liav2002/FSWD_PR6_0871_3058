@@ -23,6 +23,19 @@ function executeQuery(query) {
   });
 }
 
+// Function to close the database connection
+function closeConnection() {
+  return new Promise((resolve, reject) => {
+    con.end((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
 // Function to create the "users" table and insert data from "users.json"
 async function setupUsersTable() {
   try {
@@ -177,8 +190,15 @@ async function setupReportedMessagesTable() {
   }
 }
 
-// Call the functions to insert data into tables
-setupUsersTable();
-setupMessagesTable();
-setupChatGroupsTable();
-setupReportedMessagesTable();
+// Function to initialize database and insert data
+async function initializeDatabase() {
+  await setupUsersTable();
+  await setupMessagesTable();
+  await setupChatGroupsTable();
+  await setupReportedMessagesTable();
+  await closeConnection();
+  console.log('Database setup complete. All data inserted successfully.');
+}
+
+// Call the initializeDatabase function
+initializeDatabase();
