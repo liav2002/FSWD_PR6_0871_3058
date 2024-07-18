@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "adminId": 1,
+    "participantsId": [1,2,3],
+    "title": "IDF - Amirim - FullStack",
+    "profil": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Atuda_Insignia.png",
+    "description": "Your path to the coveted R&D positions in the military."
+  }
+]
