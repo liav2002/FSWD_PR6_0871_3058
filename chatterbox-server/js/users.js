@@ -1,5 +1,3 @@
-const https = require('https');
-const mysql = require('mysql2');
 const express = require('express');
 const router = express.Router();
 
