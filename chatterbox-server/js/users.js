@@ -10,43 +10,63 @@ module.exports = (connection) => {
 
         const phone = req.query.phone;
         const password = req.query.password;
-        
+
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: phone <- " + phone);
         console.log("SERVER-DEBUG: password <- " + password);
 
-         // Check if the phone and password are provided
+        // Check if the phone and password are provided
         if (!phone || !password) {
             console.error("SERVER-ERROR: Missing required parameters 'phone' or 'password'.");
             return res.status(400).send("Bad Request: 'phone' and 'password' are required.");
         }
-        
-        // SQL query to retrieve the user's information with the corresponding phone and password
-        connection.query('SELECT * FROM users WHERE phone = ? AND password = ?', [phone, password], (err, rows) => {
+
+        // Validate phone format (10 digits)
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(phone)) {
+            console.error("SERVER-ERROR: Invalid phone format.");
+            return res.status(400).send("Bad Request: Invalid phone format. Must be 10 digits.");
+        }
+
+        // SQL query to retrieve the user's information by phone number
+        connection.query('SELECT * FROM users WHERE phone = ?', [phone], (err, rows) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
-                res.status(500).send('Failed retrieving user information');
-            } 
-            
-            else {
-                if (rows.length === 0) {
-                    res.status(404).send('User not found');
-                } 
-                
-                else {
-                    const user = rows[0]; // First result row
-                    const userInfo = {
-                        id: user.id,
-                        name: user.name,
-                        phone: user.phone,
-                        email: user.email,
-                        profile: user.profil,
-                        status: user.status,
-                        password: user.password
-                    };
-                    res.json(userInfo);
-                }
+                return res.status(500).send('Failed retrieving user information');
             }
+
+            if (rows.length === 0) {
+                console.log("SERVER-DEBUG: No user found with the provided phone.");
+                return res.status(404).send('User not found');
+            }
+
+            const user = rows[0]; // First result row
+
+            // Compare the provided plain-text password with the hashed password in the database
+            bcrypt.compare(password, user.password, (err, isMatch) => {
+                if (err) {
+                    console.error('SERVER-ERROR: Error comparing passwords:', err);
+                    return res.status(500).send('Failed to verify password');
+                }
+
+                if (!isMatch) {
+                    console.log("SERVER-DEBUG: Incorrect password.");
+                    return res.status(401).send('Invalid credentials');
+                }
+
+                // Password is correct, return user info
+                const userInfo = {
+                    id: user.id,
+                    name: user.name,
+                    phone: user.phone,
+                    email: user.email,
+                    profile: user.profil,
+                    status: user.status
+                };
+
+                console.log("SERVER-DEBUG: User successfully authenticated.");
+                res.json(userInfo);
+            });
         });
     });
 
@@ -114,18 +134,8 @@ module.exports = (connection) => {
             // Hash the password using bcrypt
             const hashedPassword = await bcrypt.hash(user.password, 10); // 10 is the salt rounds
 
-            // Sanitize inputs (e.g., escape special characters)
-            const sanitizedUser = {
-                name: connection.escape(user.name.trim()),
-                phone: connection.escape(user.phone.trim()),
-                email: connection.escape(user.email.trim()),
-                profilePictureOption: connection.escape(user.profilePictureOption.trim()),
-                status: connection.escape(user.status.trim()),
-                password: hashedPassword // Save the hashed password
-            };
-
             // Check if the phone number is already in use
-            connection.query('SELECT * FROM users WHERE phone = ?', [sanitizedUser.phone], (err, rows) => {
+            connection.query('SELECT * FROM users WHERE phone = ?', [user.phone], (err, rows) => {
                 if (err) {
                     console.error('SERVER-ERROR: Error while executing the query:', err);
                     return res.status(500).send('SERVER-ERROR: Failed checking phone');
@@ -139,7 +149,7 @@ module.exports = (connection) => {
                 // Insert the user into the database using prepared statements
                 connection.query(
                     'INSERT INTO users (name, phone, email, profil, status, password) VALUES (?, ?, ?, ?, ?, ?)',
-                    [sanitizedUser.name, sanitizedUser.phone, sanitizedUser.email, sanitizedUser.profilePictureOption, sanitizedUser.status, sanitizedUser.password],
+                    [user.name.trim(), user.phone.trim(), user.email.trim(), user.profilePictureOption.trim(), user.status.trim(), hashedPassword],
                     (err, result) => {
                         if (err) {
                             console.error('SERVER-ERROR: Failed while inserting user into the database:', err);

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const mysql = require('mysql2');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 // Read the database configuration from config.json
 const configFilePath = path.join(__dirname, '..', 'config.json');
@@ -60,9 +61,11 @@ async function setupUsersTable() {
 
     for (const user of usersArray) {
       const { id, name, phone, email, profil, status, password } = user;
+      const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
+
       await executeQuery(`
         INSERT INTO users (id, name, phone, email, profil, status, password)
-        VALUES (${id}, '${name}', '${phone}', '${email}', '${profil}', '${status}', '${password}')
+        VALUES (${id}, '${name}', '${phone}', '${email}', '${profil}', '${status}', '${hashedPassword}')
       `);
     }
 
