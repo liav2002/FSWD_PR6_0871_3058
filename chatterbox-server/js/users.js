@@ -19,8 +19,8 @@ module.exports = (connection) => {
         // SQL query to retrieve the user's information with the corresponding phone and password
         connection.query('SELECT * FROM users WHERE phone = ? AND password = ?', [phone, password], (err, rows) => {
             if (err) {
-                console.error('Error executing the query:', err);
-                res.status(500).send('Error retrieving user information');
+                console.error('ERROR: Failed executing the query:', err);
+                res.status(500).send('Failed retrieving user information');
             } 
             
             else {
@@ -55,7 +55,44 @@ module.exports = (connection) => {
         console.log("DEBUG: user detalis:");
         console.log(user);
 
-        
+        // Check if the phone number is already in use
+        connection.query('SELECT * FROM users WHERE phone = ?', [user.phone], (err, rows) => {
+            if (err) {
+              console.error('Error while executing the query: ', err);
+              res.status(500).send('ERROR: Failed checking phone');
+            } 
+            
+            else {
+              if (rows.length > 0) {
+                console.log("DEBUG: rows", rows);
+                res.status(400).send('Phone number is already in use');
+              } 
+              
+              else {
+                // Insert the user into the database
+                connection.query('INSERT INTO users (name, phone, email, profil, status, password) VALUES (?, ?, ?, ?, ?, ?)',
+                  [user.name, user.phone, user.email, user.profilePictureOption, user.status, user.password],
+                  (err, result) => {
+                    if (err) {
+                      console.error('ERROR: Failed while inserting user into the database: ', err);
+                      res.status(500).send('Failed inserting user into the database');
+                    } else {
+                      const userToAdd = {
+                        id: result.insertId,
+                        name: user.name,
+                        email: user.email,
+                        phone: user.phone,
+                        profil: user.profilePictureOption,
+                        status: user.status,
+                        password: user.password
+                      };
+                      res.json(userToAdd);
+                    }
+                  }
+                );
+              }
+            }
+          });
     });
     
     return router;
