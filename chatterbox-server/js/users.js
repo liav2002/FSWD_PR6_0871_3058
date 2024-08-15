@@ -94,6 +94,71 @@ module.exports = (connection) => {
             }
           });
     });
+
+    // User Information
+    router.get('/UserInfo', (req, res) => {
+        console.log("DEBUG: router '/UserInfo' handler.");
+
+        const userId = req.query.UserId;
+        console.log("DEBUG: user_id <- " + userId);
+        
+        // Create an SQL query with a prepared parameter
+        const query = 'SELECT * FROM users WHERE id = ?';
+      
+        // Execute the SQL query with the parameter
+        connection.query(query, [userId], (err, results) => {
+          if (err) {
+            console.error('ERROR: Failed in request execution', err);
+            res.status(500);
+            return res.send({ error: 'An error occurred while retrieving user details.' });
+          }
+      
+          // If the query executed successfully without any errors
+          const user = results[0]; 
+          console.log("DEBUG: user information:");
+          console.log(user);
+          res.json(user); // Send the new user as a response
+        });
+    });
+
+    // Update User Information
+    router.put('/updateUserInfo', (req, res) => {
+        console.log("DEBUG: router '/updateUserInfo' handler.");
+
+        const userId = req.query.id; 
+        const userName = req.query.name;
+        const userStatus = req.query.status;
+        const userPassword = req.query.password;
+        const userEmail = req.query.email;
+        const userProfile = req.query.profil;
+
+        console.log("DEBUG: request information:");
+        console.log("DEBUG: user_id <- " + userId);
+        console.log("DEBUG: user_name <- " + userName);
+        console.log("DEBUG: user_status <- " + userStatus);
+        console.log("DEBUG: user_password <- " + userPassword);
+        console.log("DEBUG: user_email <- " + userEmail);
+        console.log("DEBUG: user_profile <- " + userProfile);
+      
+        const query = `UPDATE users SET name = ?, email = ?, profil = ?, status = ?, password = ? WHERE id = ?`;
+      
+        // Execute the SQL query with the parameters
+        connection.query(query, [userName, userEmail, userProfile, userStatus, userPassword, userId], (error, results) => {
+          if (error) {
+            console.error('ERROR: Failed in request execution', error);
+            res.status(500);
+            return res.send({ error: 'An error occurred while updating the user profile.' });
+          }
+      
+          // Check if the update query affected any rows in the database
+          if (results.affectedRows === 0) {
+            return res.send({ error: 'User not found' });
+          }
+      
+          res.status(200);
+          res.json(userId);
+        });
+    });
     
     return router;
 };
