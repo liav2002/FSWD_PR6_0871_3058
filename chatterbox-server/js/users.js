@@ -159,6 +159,37 @@ module.exports = (connection) => {
           res.json(userId);
         });
     });
+
+    // Information about chat group participants
+    router.get('/ParticipantsInfo', (req, res) => {
+        console.log("DEBUG: router '/ParticipantsInfo' handler.");
+
+        const groupId = req.query.GroupId;
+
+        console.log("DEBUG: request information:");
+        console.log("DEBUG: group_id <- " + usergroupIdId);
+      
+        const query = 'SELECT participantsId FROM chat_groups WHERE id = ?';
+      
+        // Execute the SQL query with the parameter
+        connection.query(query, [groupId], (err, results) => {
+          if (err) {
+            console.error('ERROR: Failed in request execution', err);
+            res.status(500);
+            return res.send({ error: 'An error occurred while retrieving participants information.' });
+          }
+      
+          const group = results[0];
+          const participantsIdArray = JSON.parse(group.participantsId);
+          const participantsIdIntegers = participantsIdArray.map(id => parseInt(id));
+      
+          console.log("DEBUG: participantsId as integers:");
+          console.log(participantsIdIntegers);
+          res.json({ participantsId: participantsIdIntegers });
+        });
+    });
+
+
     
     return router;
 };
