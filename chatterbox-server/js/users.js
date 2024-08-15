@@ -189,16 +189,16 @@ module.exports = (connection) => {
         });
     });
 
-    // Route GET to retrieve all users except the currently logged-in user
+    // Route to retrieve all users except the currently logged-in user
     router.get('/AllUsers', (req, res) => {
         console.log("SERVER-DEBUG: router '/AllUsers' handler.");
 
-        const loggedInUsername = req.query.loggedInUsername;
+        const currentUserID = req.query.currentUsername;
 
         console.log("SERVER-DEBUG: request information:");
-        console.log("SERVER-DEBUG: Logged-In-Username <- " + loggedInUsername);
+        console.log("SERVER-DEBUG: current_user_id <- " + currentUserID);
 
-        connection.query('SELECT * FROM users WHERE name != ?', [loggedInUsername], (err, rows) => {
+        connection.query('SELECT * FROM users WHERE id != ?', [currentUserID], (err, rows) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
                 res.status(500).send('Error retrieving users');
@@ -209,6 +209,36 @@ module.exports = (connection) => {
             }
         });
     });
+
+    // Route GET to retrieve all users and groups except the currently logged-in user
+    router.get('/AllUsersAndGroups', (req, res) => {
+        console.log("SERVER-DEBUG: router '/AllUsers' handler.");
+
+        const currentUserID = req.query.currentUsername;
+
+        console.log("SERVER-DEBUG: request information:");
+        console.log("SERVER-DEBUG: current_user_id <- " + currentUserID);
     
+        // Make an SQL query to retrieve all users except the currently logged-in user
+        connection.query('SELECT * FROM users WHERE id != ?', [currentUserID], (err, rows) => {
+        if (err) {
+            console.error('SERVER-ERROR: Failed executing the query:', err);
+            res.status(500).send('Error retrieving users');
+        } else {
+            // Retrieve groups from the database that contain the currentUser's id in the participantsId list
+            connection.query('SELECT * FROM chat_groups WHERE JSON_CONTAINS(participantsId, ?)', [currentUserID], (err, groupRows) => {
+            if (err) {
+                console.error('SERVER-ERROR: Failed executing the query:', err);
+                res.status(500).send('Error retrieving groups');
+            } else {
+                // Combine the filtered group list with the list of users retrieved from the database
+                const combinedData = [...rows, ...groupRows];
+                res.json(combinedData);
+            }
+            });
+        }
+        });
+    });
+
     return router;
 };
