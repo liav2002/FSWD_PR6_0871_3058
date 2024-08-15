@@ -94,6 +94,32 @@ module.exports = (connection) => {
             }
           });
     });
+
+    // User Information
+    router.get('/UserInfo', (req, res) => {
+        console.log("DEBUG: router '/UserInfo' handler.");
+
+        const userId = req.query.UserId;
+        console.log("DEBUG: user_id <- " + userId);
+        
+        // Create an SQL query with a prepared parameter
+        const query = 'SELECT * FROM users WHERE id = ?';
+      
+        // Execute the SQL query with the parameter
+        connection.query(query, [userId], (err, results) => {
+          if (err) {
+            console.error('ERROR: Failed in request execution', err);
+            res.status(500);
+            return res.send({ error: 'An error occurred while retrieving user details.' });
+          }
+      
+          // If the query executed successfully without any errors
+          const user = results[0]; 
+          console.log("DEBUG: user information:");
+          console.log(user);
+          res.json(user); // Send the new user as a response
+        });
+    });
     
     return router;
 };
