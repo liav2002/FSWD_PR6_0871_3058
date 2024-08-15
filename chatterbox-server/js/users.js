@@ -214,7 +214,7 @@ module.exports = (connection) => {
     });
 
     // Update User Information
-    router.put('/updateUserInfo', (req, res) => {
+    router.put('/updateUserInfo', async (req, res) => {
         console.log("SERVER-DEBUG: router '/updateUserInfo' handler.");
 
         const userId = req.query.id; 
@@ -237,25 +237,53 @@ module.exports = (connection) => {
             console.error("SERVER-ERROR: Missing required parameter(s).");
             return res.status(400).send("Bad Request: All fields (id, name, status, password, email, profil) are required.");
         }
-      
-        const query = `UPDATE users SET name = ?, email = ?, profil = ?, status = ?, password = ? WHERE id = ?`;
-      
-        // Execute the SQL query with the parameters
-        connection.query(query, [userName, userEmail, userProfile, userStatus, userPassword, userId], (error, results) => {
-          if (error) {
-            console.error('SERVER-ERROR: Failed in request execution', error);
-            res.status(500);
-            return res.send({ error: 'An error occurred while updating the user profile.' });
-          }
-      
-          // Check if the update query affected any rows in the database
-          if (results.affectedRows === 0) {
-            return res.send({ error: 'User not found' });
-          }
-      
-          res.status(200);
-          res.json(userId);
-        });
+
+        // Validate the format of the fields
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
+        const statusOptions = ['available', 'busy']; // Valid status options
+
+        // Validate userId (must be a positive integer)
+        if (isNaN(userId) || parseInt(userId) <= 0 || !Number.isInteger(Number(userId))) {
+            console.error("SERVER-ERROR: Invalid 'UserId'. It must be a positive integer.");
+            return res.status(400).send("Bad Request: 'UserId' must be a positive integer.");
+        }
+
+        // Validate email
+        if (!emailRegex.test(userEmail)) {
+            console.error("SERVER-ERROR: Invalid email format.");
+            return res.status(400).send("Bad Request: Invalid email format.");
+        }
+
+        // Validate status
+        if (!statusOptions.includes(userStatus)) {
+            console.error("SERVER-ERROR: Invalid status. Must be 'available' or 'busy'.");
+            return res.status(400).send("Bad Request: Invalid status. Must be 'available' or 'busy'.");
+        }
+
+        try {
+            // Hash the password using bcrypt
+            const hashedPassword = await bcrypt.hash(userPassword, 10); // 10 is the salt rounds
+
+            const query = `UPDATE users SET name = ?, email = ?, profil = ?, status = ?, password = ? WHERE id = ?`;
+
+            // Execute the SQL query with the parameters
+            connection.query(query, [userName.trim(), userEmail.trim(), userProfile.trim(), userStatus.trim(), hashedPassword, parseInt(userId)], (error, results) => {
+                if (error) {
+                    console.error('SERVER-ERROR: Failed in request execution', error);
+                    return res.status(500).send({ error: 'An error occurred while updating the user profile.' });
+                }
+
+                // Check if the update query affected any rows in the database
+                if (results.affectedRows === 0) {
+                    return res.status(404).send({ error: 'User not found' });
+                }
+
+                res.status(200).json({ message: 'User profile updated successfully', userId: parseInt(userId) });
+            });
+        } catch (error) {
+            console.error("SERVER-ERROR: Error while hashing password:", error);
+            res.status(500).send("SERVER-ERROR: Failed to hash the password.");
+        }
     });
 
     // Information about chat group participants
