@@ -15,6 +15,12 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: phone <- " + phone);
         console.log("SERVER-DEBUG: password <- " + password);
+
+         // Check if the phone and password are provided
+        if (!phone || !password) {
+            console.error("SERVER-ERROR: Missing required parameters 'phone' or 'password'.");
+            return res.status(400).send("Bad Request: 'phone' and 'password' are required.");
+        }
         
         // SQL query to retrieve the user's information with the corresponding phone and password
         connection.query('SELECT * FROM users WHERE phone = ? AND password = ?', [phone, password], (err, rows) => {
@@ -54,6 +60,16 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: request body:");
         console.log("SERVER-DEBUG: user detalis:");
         console.log(user);
+
+         // Validate required parameters
+        const requiredFields = ['name', 'phone', 'email', 'profilePictureOption', 'status', 'password'];
+
+        for (let field of requiredFields) {
+            if (!user[field]) {
+                console.error(`SERVER-ERROR: Missing required parameter '${field}'.`);
+                return res.status(400).send(`Bad Request: '${field}' is required.`);
+            }
+        }
 
         // Check if the phone number is already in use
         connection.query('SELECT * FROM users WHERE phone = ?', [user.phone], (err, rows) => {
@@ -101,6 +117,12 @@ module.exports = (connection) => {
 
         const userId = req.query.UserId;
         console.log("SERVER-DEBUG: user_id <- " + userId);
+
+        // Validate that the userId is provided
+        if (!userId) {
+            console.error("SERVER-ERROR: Missing required parameter 'UserId'.");
+            return res.status(400).send("Bad Request: 'UserId' is required.");
+        }
         
         // Create an SQL query with a prepared parameter
         const query = 'SELECT * FROM users WHERE id = ?';
@@ -139,6 +161,12 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: user_password <- " + userPassword);
         console.log("SERVER-DEBUG: user_email <- " + userEmail);
         console.log("SERVER-DEBUG: user_profile <- " + userProfile);
+
+        // Validate required parameters
+        if (!userId || !userName || !userStatus || !userPassword || !userEmail || !userProfile) {
+            console.error("SERVER-ERROR: Missing required parameter(s).");
+            return res.status(400).send("Bad Request: All fields (id, name, status, password, email, profil) are required.");
+        }
       
         const query = `UPDATE users SET name = ?, email = ?, profil = ?, status = ?, password = ? WHERE id = ?`;
       
@@ -168,6 +196,12 @@ module.exports = (connection) => {
 
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: group_id <- " + usergroupIdId);
+
+        // Validate required parameters
+        if (!groupId) {
+            console.error("SERVER-ERROR: Missing required parameter 'GroupId'.");
+            return res.status(400).send("Bad Request: 'GroupId' is required.");
+        }
       
         const query = 'SELECT participantsId FROM chat_groups WHERE id = ?';
       
@@ -193,10 +227,16 @@ module.exports = (connection) => {
     router.get('/AllUsers', (req, res) => {
         console.log("SERVER-DEBUG: router '/AllUsers' handler.");
 
-        const currentUserID = req.query.currentUsername;
+        const currentUserID = req.query.currentUserID;
 
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: current_user_id <- " + currentUserID);
+
+        // Validate that currentUserID is provided
+        if (!currentUserID) {
+            console.error("SERVER-ERROR: Missing required parameter 'currentUserID'.");
+            return res.status(400).send("Bad Request: 'currentUserID' is required.");
+        }
 
         connection.query('SELECT * FROM users WHERE id != ?', [currentUserID], (err, rows) => {
             if (err) {
@@ -214,29 +254,39 @@ module.exports = (connection) => {
     router.get('/AllUsersAndGroups', (req, res) => {
         console.log("SERVER-DEBUG: router '/AllUsers' handler.");
 
-        const currentUserID = req.query.currentUsername;
+        const currentUserID = req.query.currentUserID;
 
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: current_user_id <- " + currentUserID);
+
+        // Validate that currentUserID is provided
+        if (!currentUserID) {
+            console.error("SERVER-ERROR: Missing required parameter 'currentUserID'.");
+            return res.status(400).send("Bad Request: 'currentUserID' is required.");
+        }
     
         // Make an SQL query to retrieve all users except the currently logged-in user
-        connection.query('SELECT * FROM users WHERE id != ?', [currentUserID], (err, rows) => {
-        if (err) {
-            console.error('SERVER-ERROR: Failed executing the query:', err);
-            res.status(500).send('Error retrieving users');
-        } else {
-            // Retrieve groups from the database that contain the currentUser's id in the participantsId list
-            connection.query('SELECT * FROM chat_groups WHERE JSON_CONTAINS(participantsId, ?)', [currentUserID], (err, groupRows) => {
+        connection.query('SELECT * FROM users WHERE id != ?', [currentUserID], (err, rows) => { 
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
-                res.status(500).send('Error retrieving groups');
-            } else {
-                // Combine the filtered group list with the list of users retrieved from the database
-                const combinedData = [...rows, ...groupRows];
-                res.json(combinedData);
+                res.status(500).send('Error retrieving users');
+            } 
+            
+            else {
+                // Retrieve groups from the database that contain the currentUser's id in the participantsId list
+                connection.query('SELECT * FROM chat_groups WHERE JSON_CONTAINS(participantsId, ?)', [currentUserID], (err, groupRows) => {  
+                    if (err) {
+                        console.error('SERVER-ERROR: Failed executing the query:', err);
+                        res.status(500).send('Error retrieving groups');
+                    } 
+                    
+                    else {
+                        // Combine the filtered group list with the list of users retrieved from the database
+                        const combinedData = [...rows, ...groupRows];
+                        res.json(combinedData);
+                    }
+                });
             }
-            });
-        }
         });
     });
 
