@@ -183,28 +183,33 @@ module.exports = (connection) => {
         const userId = req.query.UserId;
         console.log("SERVER-DEBUG: user_id <- " + userId);
 
-        // Validate that the userId is provided
-        if (!userId) {
-            console.error("SERVER-ERROR: Missing required parameter 'UserId'.");
-            return res.status(400).send("Bad Request: 'UserId' is required.");
+        // Validate that the userId is provided and is a positive integer
+        if (!userId || isNaN(userId) || parseInt(userId) <= 0 || !Number.isInteger(Number(userId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'UserId'. It must be a positive integer.");
+            return res.status(400).send("Bad Request: 'UserId' is required and must be a positive integer.");
         }
-        
+
         // Create an SQL query with a prepared parameter
         const query = 'SELECT * FROM users WHERE id = ?';
-      
-        // Execute the SQL query with the parameter
-        connection.query(query, [userId], (err, results) => {
-          if (err) {
-            console.error('SERVER-ERROR: Failed in request execution', err);
-            res.status(500);
-            return res.send({ error: 'An error occurred while retrieving user details.' });
-          }
-      
-          // If the query executed successfully without any errors
-          const user = results[0]; 
-          console.log("SERVER-DEBUG: user information:");
-          console.log(user);
-          res.json(user); // Send the new user as a response
+    
+        // Execute the SQL query with the parameter (userId)
+        connection.query(query, [parseInt(userId)], (err, results) => {
+            if (err) {
+                console.error('SERVER-ERROR: Failed in request execution', err);
+                return res.status(500).send({ error: 'An error occurred while retrieving user details.' });
+            }
+
+            // Check if user exists
+            if (results.length === 0) {
+                console.error("SERVER-DEBUG: No user found with the provided 'UserId'.");
+                return res.status(404).send("User not found.");
+            }
+
+            // If the query executed successfully and user exists
+            const user = results[0]; 
+            console.log("SERVER-DEBUG: user information:");
+            console.log(user);
+            res.json(user); // Send the user information as a response
         });
     });
 
