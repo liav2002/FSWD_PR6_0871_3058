@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 
 module.exports = (connection) => {
 
@@ -50,18 +51,23 @@ module.exports = (connection) => {
     });
 
     // Register
-    router.post('registerUser', (req, res) => {
+    router.post('/registerUser', async (req, res) => {
         console.log("SERVER-DEBUG: router '/registerUser' handler.");
+
+        // Check if the Content-Type is application/json
+        if (!req.is('application/json')) {
+            console.error("SERVER-ERROR: Invalid or missing Content-Type. Expected 'application/json'.");
+            return res.status(400).send("Bad Request: Content-Type must be application/json.");
+        }
 
         const user = req.body; // Retrieve user data from the request
 
         console.log("SERVER-DEBUG: request body:");
-        console.log("SERVER-DEBUG: user detalis:");
+        console.log("SERVER-DEBUG: user details:");
         console.log(user);
 
-         // Validate required parameters
+        // Validate required parameters
         const requiredFields = ['name', 'phone', 'email', 'profilePictureOption', 'status', 'password'];
-
         for (let field of requiredFields) {
             if (!user[field]) {
                 console.error(`SERVER-ERROR: Missing required parameter '${field}'.`);
@@ -69,44 +75,95 @@ module.exports = (connection) => {
             }
         }
 
-        // Check if the phone number is already in use
-        connection.query('SELECT * FROM users WHERE phone = ?', [user.phone], (err, rows) => {
-            if (err) {
-              console.error('Error while executing the query: ', err);
-              res.status(500).send('SERVER-ERROR: Failed checking phone');
-            } 
-            
-            else {
-              if (rows.length > 0) {
-                console.log("SERVER-DEBUG: rows", rows);
-                res.status(400).send('Phone number is already in use');
-              } 
-              
-              else {
-                // Insert the user into the database
-                connection.query('INSERT INTO users (name, phone, email, profil, status, password) VALUES (?, ?, ?, ?, ?, ?)',
-                  [user.name, user.phone, user.email, user.profilePictureOption, user.status, user.password],
-                  (err, result) => {
-                    if (err) {
-                      console.error('SERVER-ERROR: Failed while inserting user into the database: ', err);
-                      res.status(500).send('Failed inserting user into the database');
-                    } else {
-                      const userToAdd = {
-                        id: result.insertId,
-                        name: user.name,
-                        email: user.email,
-                        phone: user.phone,
-                        profil: user.profilePictureOption,
-                        status: user.status,
-                        password: user.password
-                      };
-                      res.json(userToAdd);
+        // Validation rules
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
+        const phoneRegex = /^[0-9]{10}$/; // Basic phone validation: 10 digits
+        const statusOptions = ['available', 'busy']; // Valid status options
+
+        // Validate name (must be a non-empty string)
+        if (typeof user.name !== 'string' || user.name.trim().length === 0) {
+            console.error("SERVER-ERROR: Invalid name format.");
+            return res.status(400).send("Bad Request: Invalid name format.");
+        }
+
+        // Validate email format
+        if (!emailRegex.test(user.email)) {
+            console.error("SERVER-ERROR: Invalid email format.");
+            return res.status(400).send("Bad Request: Invalid email format.");
+        }
+
+        // Validate phone format
+        if (!phoneRegex.test(user.phone)) {
+            console.error("SERVER-ERROR: Invalid phone format. Must be 10 digits.");
+            return res.status(400).send("Bad Request: Invalid phone format. Must be 10 digits.");
+        }
+
+        // Validate status
+        if (!statusOptions.includes(user.status)) {
+            console.error("SERVER-ERROR: Invalid status. Must be 'available' or 'busy'.");
+            return res.status(400).send("Bad Request: Invalid status. Must be 'available' or 'busy'.");
+        }
+
+        // Validate password (must be at least 6 characters long)
+        if (typeof user.password !== 'string' || user.password.length < 6) {
+            console.error("SERVER-ERROR: Invalid password. Must be at least 6 characters long.");
+            return res.status(400).send("Bad Request: Invalid password. Must be at least 6 characters long.");
+        }
+
+        try {
+            // Hash the password using bcrypt
+            const hashedPassword = await bcrypt.hash(user.password, 10); // 10 is the salt rounds
+
+            // Sanitize inputs (e.g., escape special characters)
+            const sanitizedUser = {
+                name: connection.escape(user.name.trim()),
+                phone: connection.escape(user.phone.trim()),
+                email: connection.escape(user.email.trim()),
+                profilePictureOption: connection.escape(user.profilePictureOption.trim()),
+                status: connection.escape(user.status.trim()),
+                password: hashedPassword // Save the hashed password
+            };
+
+            // Check if the phone number is already in use
+            connection.query('SELECT * FROM users WHERE phone = ?', [sanitizedUser.phone], (err, rows) => {
+                if (err) {
+                    console.error('SERVER-ERROR: Error while executing the query:', err);
+                    return res.status(500).send('SERVER-ERROR: Failed checking phone');
+                }
+
+                if (rows.length > 0) {
+                    console.log("SERVER-DEBUG: Phone number already in use. Rows:", rows);
+                    return res.status(400).send('Phone number is already in use');
+                }
+
+                // Insert the user into the database using prepared statements
+                connection.query(
+                    'INSERT INTO users (name, phone, email, profil, status, password) VALUES (?, ?, ?, ?, ?, ?)',
+                    [sanitizedUser.name, sanitizedUser.phone, sanitizedUser.email, sanitizedUser.profilePictureOption, sanitizedUser.status, sanitizedUser.password],
+                    (err, result) => {
+                        if (err) {
+                            console.error('SERVER-ERROR: Failed while inserting user into the database:', err);
+                            return res.status(500).send('Failed inserting user into the database');
+                        }
+
+                        const userToAdd = {
+                            id: result.insertId,
+                            name: user.name,
+                            email: user.email,
+                            phone: user.phone,
+                            profil: user.profilePictureOption,
+                            status: user.status
+                        };
+
+                        console.log("SERVER-DEBUG: User successfully registered:", userToAdd);
+                        res.status(201).json(userToAdd); // 201 Created
                     }
-                  }
                 );
-              }
-            }
-          });
+            });
+        } catch (error) {
+            console.error("SERVER-ERROR: Error while hashing password:", error);
+            res.status(500).send("SERVER-ERROR: Failed hashing password");
+        }
     });
 
     // User Information

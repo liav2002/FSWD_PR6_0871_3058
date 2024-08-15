@@ -21,13 +21,13 @@ connection.connect((err) => {
   });
 
 // Import routers
-const usersRouter = require('./users')(connection);
+const usersRouter = require('./js/users')(connection);
 
 // Set routes
 app.use('/users', usersRouter);
 
 // Start the server on the desired port
-const port = 5001;
+const port = 5002;
 app.listen(port, () => {
 console.log(`Server running on port ${port}`);
 });
