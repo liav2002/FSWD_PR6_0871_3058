@@ -293,31 +293,56 @@ module.exports = (connection) => {
         const groupId = req.query.GroupId;
 
         console.log("SERVER-DEBUG: request information:");
-        console.log("SERVER-DEBUG: group_id <- " + usergroupIdId);
+        console.log("SERVER-DEBUG: group_id <- " + groupId);
 
-        // Validate required parameters
-        if (!groupId) {
-            console.error("SERVER-ERROR: Missing required parameter 'GroupId'.");
-            return res.status(400).send("Bad Request: 'GroupId' is required.");
+        // Validate that groupId is provided and is a positive integer
+        if (!groupId || isNaN(groupId) || parseInt(groupId) <= 0 || !Number.isInteger(Number(groupId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'GroupId'. It must be a positive integer.");
+            return res.status(400).send("Bad Request: 'GroupId' is required and must be a positive integer.");
         }
-      
+
         const query = 'SELECT participantsId FROM chat_groups WHERE id = ?';
-      
+
         // Execute the SQL query with the parameter
-        connection.query(query, [groupId], (err, results) => {
-          if (err) {
-            console.error('SERVER-ERROR: Failed in request execution', err);
-            res.status(500);
-            return res.send({ error: 'An error occurred while retrieving participants information.' });
-          }
-      
-          const group = results[0];
-          const participantsIdArray = JSON.parse(group.participantsId);
-          const participantsIdIntegers = participantsIdArray.map(id => parseInt(id));
-      
-          console.log("SERVER-DEBUG: participantsId as integers:");
-          console.log(participantsIdIntegers);
-          res.json({ participantsId: participantsIdIntegers });
+        connection.query(query, [parseInt(groupId)], (err, results) => {
+            if (err) {
+                console.error('SERVER-ERROR: Failed in request execution', err);
+                return res.status(500).send({ error: 'An error occurred while retrieving participants information.' });
+            }
+
+            // Check if the group exists
+            if (results.length === 0) {
+                console.error("SERVER-DEBUG: No group found with the provided 'GroupId'.");
+                return res.status(404).send("Group not found.");
+            }
+
+            try {
+                // Parse the participantsId field as JSON
+                const group = results[0];
+                let participantsIdArray;
+
+                if (typeof group.participantsId === 'string') {
+                    participantsIdArray = JSON.parse(group.participantsId);
+                } else {
+                    participantsIdArray = group.participantsId;
+                }
+
+                // Validate that participantsIdArray is an array
+                if (!Array.isArray(participantsIdArray)) {
+                    console.error("SERVER-ERROR: participantsId is not a valid array.");
+                    return res.status(500).send({ error: "Invalid participantsId format." });
+                }
+
+                // Convert participants IDs to integers
+                const participantsIdIntegers = participantsIdArray.map(id => parseInt(id)).filter(id => !isNaN(id));
+
+                console.log("SERVER-DEBUG: participantsId as integers: " + participantsIdIntegers);
+                res.json({ participantsId: participantsIdIntegers });
+
+            } catch (error) {
+                console.error("SERVER-ERROR: Error parsing participantsId JSON:", error);
+                res.status(500).send({ error: 'Failed to parse participants information.' });
+            }
         });
     });
 
