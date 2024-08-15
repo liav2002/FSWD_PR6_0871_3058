@@ -1,4 +1,7 @@
 const mysql = require('mysql2');
+const express = require('express');
+const app = express();
+app.use(express.json());
 
 // Database connection configuration
 const connection = mysql.createConnection({
@@ -17,4 +20,14 @@ connection.connect((err) => {
     }
   });
 
-  
+// Import routers
+const usersRouter = require('./users')(connection);
+
+// Set routes
+app.use('/users', usersRouter);
+
+// Start the server on the desired port
+const port = 5001;
+app.listen(port, () => {
+console.log(`Server running on port ${port}`);
+});
