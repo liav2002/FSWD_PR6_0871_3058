@@ -374,43 +374,44 @@ module.exports = (connection) => {
 
     // Route GET to retrieve all users and groups except the currently logged-in user
     router.get('/AllUsersAndGroups', (req, res) => {
-        console.log("SERVER-DEBUG: router '/AllUsers' handler.");
+        console.log("SERVER-DEBUG: router '/AllUsersAndGroups' handler.");
 
         const currentUserID = req.query.currentUserID;
 
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: current_user_id <- " + currentUserID);
 
-        // Validate that currentUserID is provided
-        if (!currentUserID) {
-            console.error("SERVER-ERROR: Missing required parameter 'currentUserID'.");
-            return res.status(400).send("Bad Request: 'currentUserID' is required.");
+        // Validate that currentUserID is provided and is a positive integer
+        if (!currentUserID || isNaN(currentUserID) || parseInt(currentUserID) <= 0 || !Number.isInteger(Number(currentUserID))) {
+            console.error("SERVER-ERROR: Invalid or missing 'currentUserID'. It must be a positive integer.");
+            return res.status(400).send("Bad Request: 'currentUserID' is required and must be a positive integer.");
         }
-    
+
         // Make an SQL query to retrieve all users except the currently logged-in user
-        connection.query('SELECT * FROM users WHERE id != ?', [currentUserID], (err, rows) => { 
+        connection.query('SELECT * FROM users WHERE id != ?', [parseInt(currentUserID)], (err, users) => { 
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
-                res.status(500).send('Error retrieving users');
-            } 
-            
-            else {
-                // Retrieve groups from the database that contain the currentUser's id in the participantsId list
-                connection.query('SELECT * FROM chat_groups WHERE JSON_CONTAINS(participantsId, ?)', [currentUserID], (err, groupRows) => {  
-                    if (err) {
-                        console.error('SERVER-ERROR: Failed executing the query:', err);
-                        res.status(500).send('Error retrieving groups');
-                    } 
-                    
-                    else {
-                        // Combine the filtered group list with the list of users retrieved from the database
-                        const combinedData = [...rows, ...groupRows];
-                        res.json(combinedData);
-                    }
-                });
+                return res.status(500).send('Error retrieving users.');
             }
+            
+            // Retrieve groups from the database that contain the currentUser's id in the participantsId list
+            connection.query('SELECT * FROM chat_groups WHERE JSON_CONTAINS(participantsId, ?)', [JSON.stringify([parseInt(currentUserID)])], (err, groups) => {  
+                if (err) {
+                    console.error('SERVER-ERROR: Failed executing the query:', err);
+                    return res.status(500).send('Error retrieving groups.');
+                }
+
+                // Combine the filtered group list with the list of users retrieved from the database
+                const combinedData = {
+                    users: users,
+                    groups: groups
+                };
+
+                res.json(combinedData);
+            });
         });
     });
+
 
     return router;
 };
