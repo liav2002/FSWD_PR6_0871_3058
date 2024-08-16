@@ -316,6 +316,57 @@ module.exports = (connection) => {
         });
     });
 
+    // Route to update the modified status of a message by ID
+    router.put('/modifiedMessage', (req, res) => {
+        console.log("SERVER-DEBUG: router '/modifiedMessage' handler.");
+
+        // Extract the msgId and modified from the query parameters
+        const msgId = req.query.id;
+        const msgModified = req.query.modified === 'true' ? 1 : 0;
+
+        // Log the extracted parameters for debugging
+        console.log("SERVER-DEBUG: msg_id <- " + msgId);
+        console.log("SERVER-DEBUG: msg_modified <- " + msgModified);
+
+        // Validate that msgId is a positive integer
+        if (!msgId || isNaN(msgId) || parseInt(msgId) <= 0 || !Number.isInteger(Number(msgId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'id'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'id' is required and must be a positive integer.");
+        }
+
+        // Validate that modified is either true or false
+        if (req.query.modified !== 'true' && req.query.modified !== 'false') {
+            console.error("SERVER-ERROR: Invalid or missing 'modified'. It must be 'true' or 'false'.");
+            return sendResponse(res, 400, "Bad Request: 'modified' is required and must be 'true' or 'false'.");
+        }
+
+        // Define the SQL query to update the modified status of the message with the given msgId
+        const query = `UPDATE messages SET modified = ? WHERE id = ?`;
+
+        // Execute the SQL query
+        connection.query(query, [msgModified, parseInt(msgId)], (error, results) => {
+            if (error) {
+                console.error('SERVER-ERROR: Error executing query:', error);
+                return sendResponse(res, 500, 'An error occurred while updating the modified field.');
+            }
+
+            // Check if the update query affected any rows in the database
+            if (results.affectedRows === 0) {
+                console.error("SERVER-DEBUG: No message found with the provided 'id'.");
+                return sendResponse(res, 404, "Message not found.");
+            }
+
+            // Log successful update
+            console.log("SERVER-DEBUG: Message modified status updated successfully. msgId:", msgId);
+
+            // If the update was successful, return the updated modified status
+            return sendResponse(res, 200, "Message modified status updated successfully", {
+                id: msgId,
+                modified: msgModified === 1 ? true : false
+            });
+        });
+    });
+
 
     return router;
 };
