@@ -367,6 +367,44 @@ module.exports = (connection) => {
         });
     });
 
+    // Route to get unread sender IDs for the current user
+    router.get('/getUnreadSenderIDs', (req, res) => {
+        console.log("SERVER-DEBUG: router '/getUnreadSenderIDs' handler.");
+
+        // Extract the currentUserId from the query parameters
+        const currentUserId = req.query.currentUserId;
+
+        // Log the extracted parameter for debugging
+        console.log("SERVER-DEBUG: current_user_id <- " + currentUserId);
+
+        // Validate that currentUserId is a positive integer
+        if (!currentUserId || isNaN(currentUserId) || parseInt(currentUserId) <= 0 || !Number.isInteger(Number(currentUserId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'currentUserId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'currentUserId' is required and must be a positive integer.");
+        }
+
+        // Define the SQL query to fetch distinct unread sender IDs for the current user
+        const query = `SELECT DISTINCT sender FROM messages WHERE receiver = ? AND isItRead = 0 AND isItGroup = 0`;
+
+        // Execute the SQL query with the currentUserId
+        connection.query(query, [parseInt(currentUserId)], (error, results) => {
+            if (error) {
+                console.error("SERVER-ERROR: Error fetching unread sender IDs:", error);
+                return sendResponse(res, 500, "An error occurred while fetching unread sender IDs.");
+            }
+
+            // Map the results to extract sender IDs and convert them to integers
+            const senderIDs = results.map(result => parseInt(result.sender));
+
+            // Log the result for debugging
+            console.log("SERVER-DEBUG: Unread sender IDs:", senderIDs);
+
+            // Send the response with the list of sender IDs
+            return sendResponse(res, 200, "Unread sender IDs fetched successfully.", senderIDs);
+        });
+    });
+
+
 
     return router;
 };
