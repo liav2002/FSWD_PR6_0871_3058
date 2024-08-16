@@ -24,9 +24,11 @@ connection.connect((err) => {
 
 // Import routers
 const usersRouter = require('./js/users')(connection);
+const messagesRouter = require('./js/messages')(connection);
 
 // Set routes
 app.use('/users', usersRouter);
+app.use('/messages', messagesRouter);
 
 // Start the server on the desired port
 const port = 5002;
