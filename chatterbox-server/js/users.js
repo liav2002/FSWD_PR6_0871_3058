@@ -2,8 +2,19 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 
-module.exports = (connection) => {
+// Utility function to send a consistent JSON response
+function sendResponse(res, status, message, data = null) {
+    const response = { message };
 
+    if (data !== null) {
+        response.data = data;
+    }
+
+    res.status(status).json(response);
+}
+
+module.exports = (connection) => {
+    
     // Login
     router.get('/loginUser', (req, res) => {
         console.log("SERVER-DEBUG: router '/loginUser' handler.");
@@ -18,26 +29,26 @@ module.exports = (connection) => {
         // Check if the phone and password are provided
         if (!phone || !password) {
             console.error("SERVER-ERROR: Missing required parameters 'phone' or 'password'.");
-            return res.status(400).send("Bad Request: 'phone' and 'password' are required.");
+            return sendResponse(res, 400, "Bad Request: 'phone' and 'password' are required.");
         }
 
         // Validate phone format (10 digits)
         const phoneRegex = /^[0-9]{10}$/;
         if (!phoneRegex.test(phone)) {
             console.error("SERVER-ERROR: Invalid phone format.");
-            return res.status(400).send("Bad Request: Invalid phone format. Must be 10 digits.");
+            return sendResponse(res, 400, "Bad Request: Invalid phone format. Must be 10 digits.");
         }
 
         // SQL query to retrieve the user's information by phone number
         connection.query('SELECT * FROM users WHERE phone = ?', [phone], (err, rows) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
-                return res.status(500).send('Failed retrieving user information');
+                return sendResponse(res, 500, 'Failed retrieving user information');
             }
 
             if (rows.length === 0) {
                 console.log("SERVER-DEBUG: No user found with the provided phone.");
-                return res.status(404).send('User not found');
+                return sendResponse(res, 404, 'User not found');
             }
 
             const user = rows[0]; // First result row
@@ -46,12 +57,12 @@ module.exports = (connection) => {
             bcrypt.compare(password, user.password, (err, isMatch) => {
                 if (err) {
                     console.error('SERVER-ERROR: Error comparing passwords:', err);
-                    return res.status(500).send('Failed to verify password');
+                    return sendResponse(res, 500, 'Failed to verify password');
                 }
 
                 if (!isMatch) {
                     console.log("SERVER-DEBUG: Incorrect password.");
-                    return res.status(401).send('Invalid credentials');
+                    return sendResponse(res, 401, 'Invalid credentials');
                 }
 
                 // Password is correct, return user info
@@ -65,7 +76,7 @@ module.exports = (connection) => {
                 };
 
                 console.log("SERVER-DEBUG: User successfully authenticated.");
-                res.json(userInfo);
+                return sendResponse(res, 200, 'User authenticated successfully', userInfo);
             });
         });
     });
@@ -77,7 +88,7 @@ module.exports = (connection) => {
         // Check if the Content-Type is application/json
         if (!req.is('application/json')) {
             console.error("SERVER-ERROR: Invalid or missing Content-Type. Expected 'application/json'.");
-            return res.status(400).send("Bad Request: Content-Type must be application/json.");
+            return sendResponse(res, 400, "Bad Request: Content-Type must be application/json.");
         }
 
         const user = req.body; // Retrieve user data from the request
@@ -91,7 +102,7 @@ module.exports = (connection) => {
         for (let field of requiredFields) {
             if (!user[field]) {
                 console.error(`SERVER-ERROR: Missing required parameter '${field}'.`);
-                return res.status(400).send(`Bad Request: '${field}' is required.`);
+                return sendResponse(res, 400, `Bad Request: '${field}' is required.`);
             }
         }
 
@@ -103,31 +114,31 @@ module.exports = (connection) => {
         // Validate name (must be a non-empty string)
         if (typeof user.name !== 'string' || user.name.trim().length === 0) {
             console.error("SERVER-ERROR: Invalid name format.");
-            return res.status(400).send("Bad Request: Invalid name format.");
+            return sendResponse(res, 400, "Bad Request: Invalid name format.");
         }
 
         // Validate email format
         if (!emailRegex.test(user.email)) {
             console.error("SERVER-ERROR: Invalid email format.");
-            return res.status(400).send("Bad Request: Invalid email format.");
+            return sendResponse(res, 400, "Bad Request: Invalid email format.");
         }
 
         // Validate phone format
         if (!phoneRegex.test(user.phone)) {
             console.error("SERVER-ERROR: Invalid phone format. Must be 10 digits.");
-            return res.status(400).send("Bad Request: Invalid phone format. Must be 10 digits.");
+            return sendResponse(res, 400, "Bad Request: Invalid phone format. Must be 10 digits.");
         }
 
         // Validate status
         if (!statusOptions.includes(user.status)) {
             console.error("SERVER-ERROR: Invalid status. Must be 'available' or 'busy'.");
-            return res.status(400).send("Bad Request: Invalid status. Must be 'available' or 'busy'.");
+            return sendResponse(res, 400, "Bad Request: Invalid status. Must be 'available' or 'busy'.");
         }
 
         // Validate password (must be at least 6 characters long)
         if (typeof user.password !== 'string' || user.password.length < 6) {
             console.error("SERVER-ERROR: Invalid password. Must be at least 6 characters long.");
-            return res.status(400).send("Bad Request: Invalid password. Must be at least 6 characters long.");
+            return sendResponse(res, 400, "Bad Request: Invalid password. Must be at least 6 characters long.");
         }
 
         try {
@@ -138,12 +149,12 @@ module.exports = (connection) => {
             connection.query('SELECT * FROM users WHERE phone = ?', [user.phone], (err, rows) => {
                 if (err) {
                     console.error('SERVER-ERROR: Error while executing the query:', err);
-                    return res.status(500).send('SERVER-ERROR: Failed checking phone');
+                    return sendResponse(res, 500, 'SERVER-ERROR: Failed checking phone');
                 }
 
                 if (rows.length > 0) {
                     console.log("SERVER-DEBUG: Phone number already in use. Rows:", rows);
-                    return res.status(400).send('Phone number is already in use');
+                    return sendResponse(res, 400, 'Phone number is already in use');
                 }
 
                 // Insert the user into the database using prepared statements
@@ -153,7 +164,7 @@ module.exports = (connection) => {
                     (err, result) => {
                         if (err) {
                             console.error('SERVER-ERROR: Failed while inserting user into the database:', err);
-                            return res.status(500).send('Failed inserting user into the database');
+                            return sendResponse(res, 500, 'Failed inserting user into the database');
                         }
 
                         const userToAdd = {
@@ -166,17 +177,17 @@ module.exports = (connection) => {
                         };
 
                         console.log("SERVER-DEBUG: User successfully registered:", userToAdd);
-                        res.status(201).json(userToAdd); // 201 Created
+                        return sendResponse(res, 201, 'User registered successfully', userToAdd); // 201 Created
                     }
                 );
             });
         } catch (error) {
             console.error("SERVER-ERROR: Error while hashing password:", error);
-            res.status(500).send("SERVER-ERROR: Failed hashing password");
+            return sendResponse(res, 500, "SERVER-ERROR: Failed hashing password");
         }
     });
 
-    // User Information
+    // Get User Info
     router.get('/UserInfo', (req, res) => {
         console.log("SERVER-DEBUG: router '/UserInfo' handler.");
 
@@ -186,30 +197,25 @@ module.exports = (connection) => {
         // Validate that the userId is provided and is a positive integer
         if (!userId || isNaN(userId) || parseInt(userId) <= 0 || !Number.isInteger(Number(userId))) {
             console.error("SERVER-ERROR: Invalid or missing 'UserId'. It must be a positive integer.");
-            return res.status(400).send("Bad Request: 'UserId' is required and must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'UserId' is required and must be a positive integer.");
         }
 
-        // Create an SQL query with a prepared parameter
+        // SQL query to retrieve user information by ID
         const query = 'SELECT * FROM users WHERE id = ?';
-    
-        // Execute the SQL query with the parameter (userId)
         connection.query(query, [parseInt(userId)], (err, results) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed in request execution', err);
-                return res.status(500).send({ error: 'An error occurred while retrieving user details.' });
+                return sendResponse(res, 500, 'An error occurred while retrieving user details.');
             }
 
-            // Check if user exists
             if (results.length === 0) {
                 console.error("SERVER-DEBUG: No user found with the provided 'UserId'.");
-                return res.status(404).send("User not found.");
+                return sendResponse(res, 404, 'User not found');
             }
 
-            // If the query executed successfully and user exists
-            const user = results[0]; 
-            console.log("SERVER-DEBUG: user information:");
-            console.log(user);
-            res.json(user); // Send the user information as a response
+            const user = results[0];
+            console.log("SERVER-DEBUG: user information:", user);
+            return sendResponse(res, 200, 'User found', user);
         });
     });
 
@@ -235,54 +241,43 @@ module.exports = (connection) => {
         // Validate required parameters
         if (!userId || !userName || !userStatus || !userPassword || !userEmail || !userProfile) {
             console.error("SERVER-ERROR: Missing required parameter(s).");
-            return res.status(400).send("Bad Request: All fields (id, name, status, password, email, profil) are required.");
+            return sendResponse(res, 400, "Bad Request: All fields (id, name, status, password, email, profil) are required.");
         }
 
-        // Validate the format of the fields
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
-        const statusOptions = ['available', 'busy']; // Valid status options
+        // Validate input format (same as registration validation)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const statusOptions = ['available', 'busy'];
 
-        // Validate userId (must be a positive integer)
-        if (isNaN(userId) || parseInt(userId) <= 0 || !Number.isInteger(Number(userId))) {
-            console.error("SERVER-ERROR: Invalid 'UserId'. It must be a positive integer.");
-            return res.status(400).send("Bad Request: 'UserId' must be a positive integer.");
-        }
-
-        // Validate email
         if (!emailRegex.test(userEmail)) {
             console.error("SERVER-ERROR: Invalid email format.");
-            return res.status(400).send("Bad Request: Invalid email format.");
+            return sendResponse(res, 400, "Bad Request: Invalid email format.");
         }
 
-        // Validate status
         if (!statusOptions.includes(userStatus)) {
             console.error("SERVER-ERROR: Invalid status. Must be 'available' or 'busy'.");
-            return res.status(400).send("Bad Request: Invalid status. Must be 'available' or 'busy'.");
+            return sendResponse(res, 400, "Bad Request: Invalid status. Must be 'available' or 'busy'.");
         }
 
         try {
-            // Hash the password using bcrypt
-            const hashedPassword = await bcrypt.hash(userPassword, 10); // 10 is the salt rounds
+            // Hash the new password
+            const hashedPassword = await bcrypt.hash(userPassword, 10);
 
-            const query = `UPDATE users SET name = ?, email = ?, profil = ?, status = ?, password = ? WHERE id = ?`;
-
-            // Execute the SQL query with the parameters
-            connection.query(query, [userName.trim(), userEmail.trim(), userProfile.trim(), userStatus.trim(), hashedPassword, parseInt(userId)], (error, results) => {
-                if (error) {
-                    console.error('SERVER-ERROR: Failed in request execution', error);
-                    return res.status(500).send({ error: 'An error occurred while updating the user profile.' });
+            const query = 'UPDATE users SET name = ?, email = ?, profil = ?, status = ?, password = ? WHERE id = ?';
+            connection.query(query, [userName.trim(), userEmail.trim(), userProfile.trim(), userStatus.trim(), hashedPassword, parseInt(userId)], (err, results) => {
+                if (err) {
+                    console.error('SERVER-ERROR: Failed in request execution', err);
+                    return sendResponse(res, 500, 'An error occurred while updating user details.');
                 }
 
-                // Check if the update query affected any rows in the database
                 if (results.affectedRows === 0) {
-                    return res.status(404).send({ error: 'User not found' });
+                    return sendResponse(res, 404, 'User not found');
                 }
 
-                res.status(200).json({ message: 'User profile updated successfully', userId: parseInt(userId) });
+                return sendResponse(res, 200, 'User profile updated successfully', { userId: parseInt(userId) });
             });
         } catch (error) {
             console.error("SERVER-ERROR: Error while hashing password:", error);
-            res.status(500).send("SERVER-ERROR: Failed to hash the password.");
+            return sendResponse(res, 500, "Failed to hash the password.");
         }
     });
 
@@ -298,7 +293,7 @@ module.exports = (connection) => {
         // Validate that groupId is provided and is a positive integer
         if (!groupId || isNaN(groupId) || parseInt(groupId) <= 0 || !Number.isInteger(Number(groupId))) {
             console.error("SERVER-ERROR: Invalid or missing 'GroupId'. It must be a positive integer.");
-            return res.status(400).send("Bad Request: 'GroupId' is required and must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'GroupId' is required and must be a positive integer.");
         }
 
         const query = 'SELECT participantsId FROM chat_groups WHERE id = ?';
@@ -307,41 +302,35 @@ module.exports = (connection) => {
         connection.query(query, [parseInt(groupId)], (err, results) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed in request execution', err);
-                return res.status(500).send({ error: 'An error occurred while retrieving participants information.' });
+                return sendResponse(res, 500, 'An error occurred while retrieving participants information.');
             }
 
             // Check if the group exists
             if (results.length === 0) {
                 console.error("SERVER-DEBUG: No group found with the provided 'GroupId'.");
-                return res.status(404).send("Group not found.");
+                return sendResponse(res, 404, 'Group not found.');
             }
 
             try {
-                // Parse the participantsId field as JSON
                 const group = results[0];
-                let participantsIdArray;
-
-                if (typeof group.participantsId === 'string') {
-                    participantsIdArray = JSON.parse(group.participantsId);
-                } else {
-                    participantsIdArray = group.participantsId;
-                }
+                let participantsIdArray = typeof group.participantsId === 'string'
+                    ? JSON.parse(group.participantsId)
+                    : group.participantsId;
 
                 // Validate that participantsIdArray is an array
                 if (!Array.isArray(participantsIdArray)) {
                     console.error("SERVER-ERROR: participantsId is not a valid array.");
-                    return res.status(500).send({ error: "Invalid participantsId format." });
+                    return sendResponse(res, 500, 'Invalid participantsId format.');
                 }
 
                 // Convert participants IDs to integers
                 const participantsIdIntegers = participantsIdArray.map(id => parseInt(id)).filter(id => !isNaN(id));
 
-                console.log("SERVER-DEBUG: participantsId as integers: " + participantsIdIntegers);
-                res.json({ participantsId: participantsIdIntegers });
-
+                console.log("SERVER-DEBUG: participantsId as integers:", participantsIdIntegers);
+                return sendResponse(res, 200, 'Participants retrieved successfully', { participantsId: participantsIdIntegers });
             } catch (error) {
                 console.error("SERVER-ERROR: Error parsing participantsId JSON:", error);
-                res.status(500).send({ error: 'Failed to parse participants information.' });
+                return sendResponse(res, 500, 'Failed to parse participants information.');
             }
         });
     });
@@ -358,17 +347,17 @@ module.exports = (connection) => {
         // Validate that currentUserID is provided and is a positive integer
         if (!currentUserID || isNaN(currentUserID) || parseInt(currentUserID) <= 0 || !Number.isInteger(Number(currentUserID))) {
             console.error("SERVER-ERROR: Invalid or missing 'currentUserID'. It must be a positive integer.");
-            return res.status(400).send("Bad Request: 'currentUserID' is required and must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'currentUserID' is required and must be a positive integer.");
         }
 
         // Perform the SQL query to get all users except the current user
         connection.query('SELECT * FROM users WHERE id != ?', [parseInt(currentUserID)], (err, rows) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
-                return res.status(500).send('Error retrieving users.');
+                return sendResponse(res, 500, 'Error retrieving users.');
             }
-            
-            res.json(rows);
+
+            return sendResponse(res, 200, 'Users retrieved successfully', rows);
         });
     });
 
@@ -384,21 +373,21 @@ module.exports = (connection) => {
         // Validate that currentUserID is provided and is a positive integer
         if (!currentUserID || isNaN(currentUserID) || parseInt(currentUserID) <= 0 || !Number.isInteger(Number(currentUserID))) {
             console.error("SERVER-ERROR: Invalid or missing 'currentUserID'. It must be a positive integer.");
-            return res.status(400).send("Bad Request: 'currentUserID' is required and must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'currentUserID' is required and must be a positive integer.");
         }
 
         // Make an SQL query to retrieve all users except the currently logged-in user
-        connection.query('SELECT * FROM users WHERE id != ?', [parseInt(currentUserID)], (err, users) => { 
+        connection.query('SELECT * FROM users WHERE id != ?', [parseInt(currentUserID)], (err, users) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
-                return res.status(500).send('Error retrieving users.');
+                return sendResponse(res, 500, 'Error retrieving users.');
             }
-            
+
             // Retrieve groups from the database that contain the currentUser's id in the participantsId list
-            connection.query('SELECT * FROM chat_groups WHERE JSON_CONTAINS(participantsId, ?)', [JSON.stringify([parseInt(currentUserID)])], (err, groups) => {  
+            connection.query('SELECT * FROM chat_groups WHERE JSON_CONTAINS(participantsId, ?)', [JSON.stringify([parseInt(currentUserID)])], (err, groups) => {
                 if (err) {
                     console.error('SERVER-ERROR: Failed executing the query:', err);
-                    return res.status(500).send('Error retrieving groups.');
+                    return sendResponse(res, 500, 'Error retrieving groups.');
                 }
 
                 // Combine the filtered group list with the list of users retrieved from the database
@@ -407,11 +396,10 @@ module.exports = (connection) => {
                     groups: groups
                 };
 
-                res.json(combinedData);
+                return sendResponse(res, 200, 'Users and groups retrieved successfully', combinedData);
             });
         });
     });
-
 
     return router;
 };
