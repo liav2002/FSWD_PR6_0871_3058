@@ -224,6 +224,46 @@ module.exports = (connection) => {
         });
     });
 
+    // Route to delete a message by ID
+    router.delete('/deleteMessage', (req, res) => {
+        console.log("SERVER-DEBUG: router '/deleteMessage' handler.");
+
+        // Extract the msgId from the query parameters
+        let msgId = req.query.id;
+
+        // Log the extracted parameter
+        console.log("SERVER-DEBUG: msg_id <- " + msgId);
+
+        // Validate that the msgId is provided and is a positive integer
+        if (!msgId || isNaN(msgId) || parseInt(msgId) <= 0 || !Number.isInteger(Number(msgId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'id'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'id' is required and must be a positive integer.");
+        }
+
+        // Define the SQL query to delete a message with the given id
+        const query = `DELETE FROM messages WHERE id = ?`;
+
+        // Execute the SQL query with the msgId as a parameter
+        connection.query(query, [parseInt(msgId)], (error, results) => {
+            if (error) {
+                // If an error occurs during query execution, log the error and send a response with an error message
+                console.error('SERVER-ERROR: Error executing query:', error);
+                return sendResponse(res, 500, 'An error occurred while deleting the message.');
+            }
+
+            // Check if any rows were affected by the delete operation
+            if (results.affectedRows === 0) {
+                console.error("SERVER-DEBUG: No message found with the provided 'id'.");
+                return sendResponse(res, 404, "Message not found.");
+            }
+
+            // Log successful deletion
+            console.log("SERVER-DEBUG: Message deleted successfully. msgId:", msgId);
+
+            // If a row was deleted, send a response with the deleted message id
+            return sendResponse(res, 200, "Message deleted successfully", { id: msgId });
+        });
+    });
 
     return router;
 };
