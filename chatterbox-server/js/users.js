@@ -355,21 +355,20 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: current_user_id <- " + currentUserID);
 
-        // Validate that currentUserID is provided
-        if (!currentUserID) {
-            console.error("SERVER-ERROR: Missing required parameter 'currentUserID'.");
-            return res.status(400).send("Bad Request: 'currentUserID' is required.");
+        // Validate that currentUserID is provided and is a positive integer
+        if (!currentUserID || isNaN(currentUserID) || parseInt(currentUserID) <= 0 || !Number.isInteger(Number(currentUserID))) {
+            console.error("SERVER-ERROR: Invalid or missing 'currentUserID'. It must be a positive integer.");
+            return res.status(400).send("Bad Request: 'currentUserID' is required and must be a positive integer.");
         }
 
-        connection.query('SELECT * FROM users WHERE id != ?', [currentUserID], (err, rows) => {
+        // Perform the SQL query to get all users except the current user
+        connection.query('SELECT * FROM users WHERE id != ?', [parseInt(currentUserID)], (err, rows) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
-                res.status(500).send('Error retrieving users');
-            } 
-            
-            else {
-                res.json(rows);
+                return res.status(500).send('Error retrieving users.');
             }
+            
+            res.json(rows);
         });
     });
 
