@@ -59,5 +59,42 @@ module.exports = (connection) => {
         });
     });
 
+    // Route to retrieve all messages sent in a specific group
+    router.get('/messagesWithCurrentGroup', (req, res) => {
+        console.log("SERVER-DEBUG: router '/messagesWithCurrentGroup' handler.");
+
+        const groupId = req.query.groupId;
+
+        console.log("SERVER-DEBUG: group_id <- " + groupId);
+
+        // Validate that groupId is provided and is a positive integer
+        if (!groupId || isNaN(groupId) || parseInt(groupId) <= 0 || !Number.isInteger(Number(groupId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'groupId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'groupId' is required and must be a positive integer.");
+        }
+
+        // SQL query to retrieve all messages sent in the group
+        const query = `
+            SELECT * FROM messages 
+            WHERE (receiver = ?) AND (isItGroup = true) 
+            ORDER BY date ASC, hour ASC;
+        `;
+
+        connection.query(query, [parseInt(groupId)], (err, rows) => {
+            if (err) {
+                console.error("SERVER-ERROR: Failed executing the query:", err);
+                return sendResponse(res, 500, "Error retrieving messages.");
+            }
+
+            if (rows.length === 0) {
+                console.log("SERVER-DEBUG: No messages found in the group.");
+                return sendResponse(res, 404, "No messages found in the group.");
+            }
+
+            console.log("SERVER-DEBUG: Messages retrieved successfully:", rows);
+            return sendResponse(res, 200, "Messages retrieved successfully", rows);
+        });
+    });
+
     return router;
 };
