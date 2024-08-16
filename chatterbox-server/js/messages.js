@@ -96,5 +96,69 @@ module.exports = (connection) => {
         });
     });
 
+    // Route to add a new message
+    router.post('/addMessage', (req, res) => {
+        console.log("SERVER-DEBUG: router '/addMessage' handler.");
+
+        // Check if the Content-Type is application/json
+        if (!req.is('application/json')) {
+            console.error("SERVER-ERROR: Invalid or missing Content-Type. Expected 'application/json'.");
+            return sendResponse(res, 400, "Bad Request: Content-Type must be application/json.");
+        }
+
+        const newMsg = req.body; // Extract the new message data from the request body
+
+        console.log("SERVER-DEBUG: request body:");
+        console.log("SERVER-DEBUG: message details:", newMsg);
+
+        // Validate required parameters
+        const requiredFields = ['sender', 'receiver', 'text', 'date', 'hour', 'isItGroup'];
+        for (let field of requiredFields) {
+            if (newMsg[field] === undefined) {
+                console.error(`SERVER-ERROR: Missing required parameter '${field}'.`);
+                return sendResponse(res, 400, `Bad Request: '${field}' is required.`);
+            }
+        }
+
+        // Validate sender and receiver are positive integers
+        if (isNaN(newMsg.sender) || parseInt(newMsg.sender) <= 0 || !Number.isInteger(Number(newMsg.sender))) {
+            console.error("SERVER-ERROR: Invalid 'sender'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'sender' must be a positive integer.");
+        }
+
+        if (isNaN(newMsg.receiver) || parseInt(newMsg.receiver) <= 0 || !Number.isInteger(Number(newMsg.receiver))) {
+            console.error("SERVER-ERROR: Invalid 'receiver'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'receiver' must be a positive integer.");
+        }
+
+        // SQL query to insert the new message into the 'messages' table
+        const insertQuery = 'INSERT INTO messages SET ?';
+        // SQL query to retrieve the newly inserted message details
+        const selectQuery = 'SELECT * FROM messages WHERE id = ?';
+
+        connection.query(insertQuery, [newMsg], (err, results) => {
+            if (err) {
+                // If an error occurs during query execution, log the error and send a response with an error message
+                console.error('SERVER-ERROR: Error executing query:', err);
+                return sendResponse(res, 500, 'An error occurred while adding the new message.');
+            }
+
+            const newMsgId = results.insertId; // Get the ID of the newly inserted message
+
+            connection.query(selectQuery, [newMsgId], (err, results1) => {
+                if (err) {
+                    console.error('SERVER-ERROR: Error executing query:', err);
+                    return sendResponse(res, 500, 'An error occurred while retrieving the newly added message.');
+                }
+
+                const newMessage = results1[0]; // Retrieve the newly inserted message details
+                console.log("SERVER-DEBUG: New message successfully added:", newMessage);
+
+                // Send the new message as a response
+                return sendResponse(res, 200, "Message added successfully", newMessage);
+            });
+        });
+    });
+
     return router;
 };
