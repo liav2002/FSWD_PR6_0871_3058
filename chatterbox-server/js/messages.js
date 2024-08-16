@@ -462,7 +462,7 @@ module.exports = (connection) => {
     });
 
     // Route to mark messages as read between the current user and selected user
-    router.post('/markMessagesAsRead', (req, res) => {
+    router.put('/markMessagesAsRead', (req, res) => {
         console.log("SERVER-DEBUG: router '/markMessagesAsRead' handler.");
 
         // Check if the Content-Type is application/json
@@ -508,6 +508,101 @@ module.exports = (connection) => {
 
             // Send the success response
             return sendResponse(res, 200, "Messages marked as read.");
+        });
+    });
+
+    // Route to mark group messages as read for the current user
+    router.put('/markMessagesGroupAsRead', (req, res) => {
+        console.log("SERVER-DEBUG: router '/markMessagesGroupAsRead' handler.");
+
+        // Check if the Content-Type is application/json
+        if (!req.is('application/json')) {
+            console.error("SERVER-ERROR: Invalid or missing Content-Type. Expected 'application/json'.");
+            return sendResponse(res, 400, "Bad Request: Content-Type must be application/json.");
+        }
+
+        // Extract currentUserId and selectedUserId from the request body
+        const { currentUserId, selectedUserId } = req.body;
+
+        // Log the extracted parameters for debugging
+        console.log("SERVER-DEBUG: current_user_id <- " + currentUserId);
+        console.log("SERVER-DEBUG: selected_user_id <- " + selectedUserId);
+
+        // Validate that currentUserId and selectedUserId are positive integers
+        if (!currentUserId || isNaN(currentUserId) || parseInt(currentUserId) <= 0 || !Number.isInteger(Number(currentUserId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'currentUserId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'currentUserId' is required and must be a positive integer.");
+        }
+
+        if (!selectedUserId || isNaN(selectedUserId) || parseInt(selectedUserId) <= 0 || !Number.isInteger(Number(selectedUserId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'selectedUserId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'selectedUserId' is required and must be a positive integer.");
+        }
+
+        // SQL query to select message IDs in the group that the current user did not send
+        const query0 = `SELECT id FROM messages WHERE receiver = ? AND sender != ? AND isItGroup = 1;`;
+
+        connection.query(query0, [selectedUserId, currentUserId], (err, result0) => {
+            if (err) {
+                console.error("SERVER-ERROR: Error fetching messages:", err);
+                return sendResponse(res, 500, "Error fetching messages.");
+            }
+
+            const groupIds = result0.map(row => row.id);
+
+            if (groupIds.length === 0) {
+                console.log("SERVER-DEBUG: No messages found to update.");
+                return sendResponse(res, 200, "No messages found to update.");
+            }
+
+            // SQL query to mark the messages as read by appending the currentUserId to the readedBy array
+            const query = `
+                UPDATE messages 
+                SET readedBy = JSON_ARRAY_APPEND(readedBy, '$', ?)
+                WHERE id IN (?) AND NOT JSON_CONTAINS(readedBy, ?);
+            `;
+
+            connection.query(query, [currentUserId, groupIds, currentUserId.toString()], (err, updateResult) => {
+                if (err) {
+                    console.error("SERVER-ERROR: Error updating messages:", err);
+                    return sendResponse(res, 500, "Error updating messages.");
+                }
+
+                console.log("SERVER-DEBUG: Messages marked as read:", updateResult);
+
+                // SQL query to update isItRead for messages where all participants have marked the message as read
+                const query1 = `
+                    UPDATE messages 
+                    SET isItRead = 1 
+                    WHERE JSON_LENGTH(readedBy) = (SELECT JSON_LENGTH(participantsId) FROM chat_groups WHERE id = ?) - 1;
+                `;
+
+                connection.query(query1, [selectedUserId], (err, updateRead) => {
+                    if (err) {
+                        console.error("SERVER-ERROR: Error updating messages:", err);
+                        return sendResponse(res, 500, "Error updating messages.");
+                    }
+
+                    console.log("SERVER-DEBUG: Messages fully marked as read:", updateRead);
+
+                    // SQL query to select the IDs of messages that have been fully read by all participants
+                    const selectQuery = 'SELECT id FROM messages WHERE receiver = ? AND isItGroup = 1 AND isItRead = 1';
+                    connection.query(selectQuery, [selectedUserId], (selectErr, selectResult) => {
+                        if (selectErr) {
+                            console.error("SERVER-ERROR: Error selecting messages:", selectErr);
+                            return sendResponse(res, 500, "An error occurred while selecting messages.");
+                        }
+
+                        const messageIds = selectResult.map(row => row.id);
+
+                        // Log the result for debugging
+                        console.log("SERVER-DEBUG: Messages read by all participants:", messageIds);
+
+                        // Send the list of message IDs as a response
+                        return sendResponse(res, 200, "Messages read by all participants fetched successfully.", messageIds);
+                    });
+                });
+            });
         });
     });
 
