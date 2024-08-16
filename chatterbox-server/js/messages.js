@@ -160,5 +160,70 @@ module.exports = (connection) => {
         });
     });
 
+    // Route to update a message's text, date, and hour
+    router.put('/updateMessage', (req, res) => {
+        console.log("SERVER-DEBUG: router '/updateMessage' handler.");
+
+        // Check if the Content-Type is application/json
+        if (!req.is('application/json')) {
+            console.error("SERVER-ERROR: Invalid or missing Content-Type. Expected 'application/json'.");
+            return sendResponse(res, 400, "Bad Request: Content-Type must be application/json.");
+        }
+
+        // Extract message details from the request body
+        const msgId = req.query.id;
+        const msg = req.body; 
+        const msgText = msg.text;
+        const date = msg.date;
+        const hour = msg.hour;
+
+        // Log the extracted parameters
+        console.log("SERVER-DEBUG: Request parameters and body:");
+        console.log("SERVER-DEBUG: msg_id <- " + msgId);
+        console.log("SERVER-DEBUG: msg_text <- " + msgText);
+        console.log("SERVER-DEBUG: msg_date <- " + date);
+        console.log("SERVER-DEBUG: msg_hour <- " + hour);
+
+        // Validate that the msgId is provided and is a positive integer
+        if (!msgId || isNaN(msgId) || parseInt(msgId) <= 0 || !Number.isInteger(Number(msgId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'id'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'id' is required and must be a positive integer.");
+        }
+
+        // Validate required fields in the body
+        if (!msgText || !date || !hour) {
+            console.error("SERVER-ERROR: Missing required fields 'text', 'date', or 'hour'.");
+            return sendResponse(res, 400, "Bad Request: 'text', 'date', and 'hour' are required.");
+        }
+
+        // Define the SQL query to update the message's text, date, and hour
+        const query = `UPDATE messages SET text = ?, date = ?, hour = ? WHERE id = ?`;
+
+        // Execute the SQL query with the message details and id
+        connection.query(query, [msgText, date, hour, parseInt(msgId)], (error, results) => {
+            if (error) {
+                console.error("SERVER-ERROR: Error executing the query:", error);
+                return sendResponse(res, 500, "An error occurred while updating the message.");
+            }
+
+            // Check if the update query affected any rows in the database
+            if (results.affectedRows === 0) {
+                return sendResponse(res, 404, "Message not found.");
+            }
+
+            // Log successful update
+            console.log("SERVER-DEBUG: Message updated successfully.");
+
+            // If the update was successful, send a response with the updated text
+            return sendResponse(res, 200, "Message updated successfully", {
+                id: msgId,
+                text: msgText,
+                date: date,
+                hour: hour
+            });
+        });
+    });
+
+
     return router;
 };
