@@ -461,5 +461,55 @@ module.exports = (connection) => {
         });
     });
 
+    // Route to mark messages as read between the current user and selected user
+    router.post('/markMessagesAsRead', (req, res) => {
+        console.log("SERVER-DEBUG: router '/markMessagesAsRead' handler.");
+
+        // Check if the Content-Type is application/json
+        if (!req.is('application/json')) {
+            console.error("SERVER-ERROR: Invalid or missing Content-Type. Expected 'application/json'.");
+            return sendResponse(res, 400, "Bad Request: Content-Type must be application/json.");
+        }
+
+        // Extract currentUserId and selectedUserId from the request body
+        const { currentUserId, selectedUserId } = req.body;
+
+        // Log the extracted parameters for debugging
+        console.log("SERVER-DEBUG: current_user_id <- " + currentUserId);
+        console.log("SERVER-DEBUG: selected_user_id <- " + selectedUserId);
+
+        // Validate that currentUserId and selectedUserId are positive integers
+        if (!currentUserId || isNaN(currentUserId) || parseInt(currentUserId) <= 0 || !Number.isInteger(Number(currentUserId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'currentUserId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'currentUserId' is required and must be a positive integer.");
+        }
+
+        if (!selectedUserId || isNaN(selectedUserId) || parseInt(selectedUserId) <= 0 || !Number.isInteger(Number(selectedUserId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'selectedUserId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'selectedUserId' is required and must be a positive integer.");
+        }
+
+        // Define the SQL query to mark messages as read
+        const query = `
+            UPDATE messages 
+            SET isItRead = 1 
+            WHERE receiver = ? AND sender = ? AND isItGroup = 0
+        `;
+
+        // Execute the SQL query to mark the messages as read
+        connection.query(query, [parseInt(currentUserId), parseInt(selectedUserId)], (err, updateResult) => {
+            if (err) {
+                console.error("SERVER-ERROR: Error updating messages:", err);
+                return sendResponse(res, 500, "Error updating messages.");
+            }
+
+            // Log the update result for debugging
+            console.log("SERVER-DEBUG: Messages marked as read:", updateResult);
+
+            // Send the success response
+            return sendResponse(res, 200, "Messages marked as read.");
+        });
+    });
+
     return router;
 };
