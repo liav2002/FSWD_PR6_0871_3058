@@ -1,15 +1,17 @@
+const fs = require('fs');
 const mysql = require('mysql2');
+const path = require('path');
 const express = require('express');
 const app = express();
 app.use(express.json());
 
+// Read the database configuration from config.json
+const configFilePath = path.join(__dirname, '..', 'config.json');
+const configData = fs.readFileSync(configFilePath, 'utf-8');
+const dbConfig = JSON.parse(configData);
+
 // Database connection configuration
-const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "LiavFSWDev02@",
-    database: "ChatterBoxDB"
-});
+const connection = mysql.createConnection(dbConfig);
 
 // Establish database connection
 connection.connect((err) => {
