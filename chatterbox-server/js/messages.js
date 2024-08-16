@@ -404,7 +404,62 @@ module.exports = (connection) => {
         });
     });
 
+    // Route to get unread group receiver IDs for the current user
+    router.get('/getUnreadSenderIDsGroup', (req, res) => {
+        console.log("SERVER-DEBUG: router '/getUnreadSenderIDsGroup' handler.");
 
+        // Extract the currentUserId from the query parameters
+        const currentUserId = req.query.currentUserId;
+
+        // Log the extracted parameter for debugging
+        console.log("SERVER-DEBUG: current_user_id <- " + currentUserId);
+
+        // Validate that currentUserId is a positive integer
+        if (!currentUserId || isNaN(currentUserId) || parseInt(currentUserId) <= 0 || !Number.isInteger(Number(currentUserId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'currentUserId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'currentUserId' is required and must be a positive integer.");
+        }
+
+        // First, check if the user exists in the users table
+        const userCheckQuery = `SELECT id FROM users WHERE id = ?`;
+
+        connection.query(userCheckQuery, [parseInt(currentUserId)], (userError, userResults) => {
+            if (userError) {
+                console.error("SERVER-ERROR: Error checking if user exists:", userError);
+                return sendResponse(res, 500, "An error occurred while checking user existence.");
+            }
+
+            if (userResults.length === 0) {
+                console.log("SERVER-DEBUG: No user found with the provided 'currentUserId'.");
+                return sendResponse(res, 404, "User not found.");
+            }
+
+            // Define the SQL query to fetch distinct unread group receiver IDs for the current user
+            const query = `
+                SELECT DISTINCT receiver 
+                FROM messages 
+                WHERE isItGroup = 1 AND sender != ? 
+                AND NOT JSON_CONTAINS(readedBy, ?)
+            `;
+
+            // Execute the SQL query with the currentUserId for both sender and readedBy checks
+            connection.query(query, [parseInt(currentUserId), currentUserId.toString()], (error, results) => {
+                if (error) {
+                    console.error("SERVER-ERROR: Error fetching unread group receiver IDs:", error);
+                    return sendResponse(res, 500, "An error occurred while fetching unread group receiver IDs.");
+                }
+
+                // Map the results to extract receiver IDs and convert them to integers
+                const receiverIDs = results.map(result => parseInt(result.receiver));
+
+                // Log the result for debugging
+                console.log("SERVER-DEBUG: Unread group receiver IDs:", receiverIDs);
+
+                // Send the response with the list of receiver IDs
+                return sendResponse(res, 200, "Unread group receiver IDs fetched successfully.", receiverIDs);
+            });
+        });
+    });
 
     return router;
 };
