@@ -83,5 +83,45 @@ module.exports = (connection) => {
         });
     });
 
+    // GET group info
+    router.get('/GroupInfo', (req, res) => {
+        console.log("SERVER-DEBUG: router '/GroupInfo' handler.");
+
+        // Extract the GroupId from the query parameters and log it
+        const groupId = req.query.GroupId;
+        console.log("SERVER-DEBUG: group_id <- " + groupId);
+
+        // Validate that the groupId is provided and is a positive integer
+        if (!groupId || isNaN(groupId) || parseInt(groupId) <= 0 || !Number.isInteger(Number(groupId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'GroupId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'GroupId' is required and must be a positive integer.");
+        }
+
+        // Create an SQL query with a prepared parameter to get group info
+        const query = 'SELECT * FROM chat_groups WHERE id = ?';
+
+        // Execute the SQL query with the groupId as a parameter
+        connection.query(query, [parseInt(groupId)], (err, results) => {
+            if (err) {
+                // If an error occurs during query execution, log the error and send a response
+                console.error("SERVER-ERROR: Error in request execution", err);
+                return sendResponse(res, 500, 'An error occurred while retrieving group details.');
+            }
+
+            // Check if the group exists
+            if (results.length === 0) {
+                console.log("SERVER-DEBUG: No group found with the provided 'GroupId'.");
+                return sendResponse(res, 404, 'Group not found.');
+            }
+
+            // Log the retrieved group details for debugging purposes
+            const group = results[0];
+            console.log("SERVER-DEBUG: group info:", group);
+
+            // Send the group information in the response
+            return sendResponse(res, 200, 'Group details retrieved successfully.', group);
+        });
+    });
+
     return router;
 };
