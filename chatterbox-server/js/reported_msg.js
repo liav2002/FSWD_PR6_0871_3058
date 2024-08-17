@@ -271,5 +271,44 @@ module.exports = (connection) => {
         });
     });
 
+    // DELETE a reported message
+    router.delete('/id', (req, res) => {
+        console.log("SERVER-DEBUG: router '/id' handler.");
+
+        const msgId = req.query.id;  
+
+        // Log the request parameters
+        console.log("SERVER-DEBUG: request parameters:");
+        console.log("SERVER-DEBUG: msgId <- ", msgId);
+
+        // Validate that msgId is provided and is a positive integer
+        if (!msgId || isNaN(msgId) || parseInt(msgId) <= 0 || !Number.isInteger(Number(msgId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'msgId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'msgId' is required and must be a positive integer.");
+        }
+
+        // Define the SQL query to delete a reported message with the given msgId
+        const query = `DELETE FROM reported_msg WHERE msgId = ?`;
+
+        // Execute the SQL query with the msgId as a parameter
+        connection.query(query, [parseInt(msgId)], (error, results) => {
+            if (error) {
+                // If an error occurs during the query execution, log the error and send a response with an error message
+                console.error('SERVER-ERROR: Error in request execution', error);
+                return sendResponse(res, 500, 'An error occurred while deleting the reported message.');
+            }
+
+            // Check if any rows were affected by the delete operation
+            if (results.affectedRows === 0) {
+                // If no rows were affected, send a response with an error message
+                return sendResponse(res, 404, 'Reported message not found.');
+            }
+
+            // If a row was affected (reported message deleted), send a response with the deleted msgId
+            console.log("SERVER-DEBUG: Reported message deleted successfully, msgId:", msgId);
+            return sendResponse(res, 200, 'Reported message deleted successfully.', { msgId: parseInt(msgId) });
+        });
+    });
+
     return router;
 };
