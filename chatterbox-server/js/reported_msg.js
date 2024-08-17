@@ -99,11 +99,11 @@ module.exports = (connection) => {
         });
     });
 
-    // GET all flagged messages (checked = true)
+    // GET all reported messages (checked = true)
     router.get('/getAllReportedMsg', (req, res) => {
         console.log("SERVER-DEBUG: router '/getAllReportedMsg' handler.");
 
-        // SQL query to retrieve all flagged (reported) messages
+        // SQL query to retrieve all reported (reported) messages
         const query = `SELECT * FROM reported_msg`;
 
         connection.query(query, (err, reportedRows) => {
@@ -112,17 +112,67 @@ module.exports = (connection) => {
                 return sendResponse(res, 500, "An error occurred while retrieving reported messages.");
             }
 
-            // Check if no flagged messages are found
+            // Check if no reported messages are found
             if (reportedRows.length === 0) {
                 console.log("SERVER-DEBUG: No reported messages found.");
                 return sendResponse(res, 404, "No reported messages found.");
             }
 
-            // Log the flagged messages for debugging purposes
+            // Log the reported messages for debugging purposes
             console.log("SERVER-DEBUG: Reported messages retrieved:", reportedRows);
 
-            // Return the flagged messages in the response
+            // Return the reported messages in the response
             return sendResponse(res, 200, "Reported messages retrieved successfully.", reportedRows);
+        });
+    });
+
+    // POST to mark a message as checked and update the reported status
+    router.post('/markMessageChecked/:messageId', (req, res) => {
+        console.log("SERVER-DEBUG: router '/markMessageChecked' handler.");
+        
+        const messageId = req.params.messageId;
+
+        // Log the message ID for debugging purposes
+        console.log("SERVER-DEBUG: messageId <- " + messageId);
+
+        // Validate that messageId is a positive integer
+        if (!messageId || isNaN(messageId) || parseInt(messageId) <= 0 || !Number.isInteger(Number(messageId))) {
+            console.error("SERVER-ERROR: Invalid 'messageId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'messageId' must be a positive integer.");
+        }
+
+        // Query to update the 'checked' variable in the 'reported_msg' table
+        const updateReportedMsgQuery = 'UPDATE reported_msg SET checked = true WHERE msgId = ?';
+        connection.query(updateReportedMsgQuery, [parseInt(messageId)], (updateErr, updateResult) => {
+            if (updateErr) {
+                console.error("SERVER-ERROR: Error updating the 'checked' status:", updateErr);
+                return sendResponse(res, 500, "An error occurred while updating the 'checked' status.");
+            }
+
+            // Check if any rows were affected
+            if (updateResult.affectedRows === 0) {
+                console.log("SERVER-DEBUG: No reported message found with the specified 'messageId'.");
+                return sendResponse(res, 404, "Reported message not found.");
+            }
+
+            // Query to update the 'reported' status in the 'messages' table
+            const updateMessageQuery = 'UPDATE messages SET reported = false WHERE id = ?';
+            connection.query(updateMessageQuery, [parseInt(messageId)], (updateMessageErr, updateMessageResult) => {
+                if (updateMessageErr) {
+                    console.error("SERVER-ERROR: Error updating the 'reported' status in 'messages':", updateMessageErr);
+                    return sendResponse(res, 500, "An error occurred while updating the 'reported' status in the messages.");
+                }
+
+                // Check if any rows were affected
+                if (updateMessageResult.affectedRows === 0) {
+                    console.log("SERVER-DEBUG: No message found with the specified 'messageId'.");
+                    return sendResponse(res, 404, "Message not found.");
+                }
+
+                // Successfully updated both tables
+                console.log("SERVER-DEBUG: Message 'checked' and 'reported' status updated successfully.");
+                return sendResponse(res, 200, "Message checked and reported status updated successfully.");
+            });
         });
     });
 
