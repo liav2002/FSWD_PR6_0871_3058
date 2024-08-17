@@ -99,5 +99,32 @@ module.exports = (connection) => {
         });
     });
 
+    // GET all flagged messages (checked = true)
+    router.get('/getAllReportedMsg', (req, res) => {
+        console.log("SERVER-DEBUG: router '/getAllReportedMsg' handler.");
+
+        // SQL query to retrieve all flagged (reported) messages
+        const query = `SELECT * FROM reported_msg`;
+
+        connection.query(query, (err, reportedRows) => {
+            if (err) {
+                console.error("SERVER-ERROR: Error executing the query:", err);
+                return sendResponse(res, 500, "An error occurred while retrieving reported messages.");
+            }
+
+            // Check if no flagged messages are found
+            if (reportedRows.length === 0) {
+                console.log("SERVER-DEBUG: No reported messages found.");
+                return sendResponse(res, 404, "No reported messages found.");
+            }
+
+            // Log the flagged messages for debugging purposes
+            console.log("SERVER-DEBUG: Reported messages retrieved:", reportedRows);
+
+            // Return the flagged messages in the response
+            return sendResponse(res, 200, "Reported messages retrieved successfully.", reportedRows);
+        });
+    });
+
     return router;
 };
