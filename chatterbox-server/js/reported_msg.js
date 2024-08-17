@@ -67,35 +67,80 @@ module.exports = (connection) => {
             return sendResponse(res, 400, "Bad Request: 'msgId', 'sender', and 'receiver' must be positive integers.");
         }
 
-        // SQL query to insert the new reported message into the reported_msg table
-        const insertQuery = `
-        INSERT INTO reported_msg (msgId, sender, receiver, text, date, hour, image, isItGroup, checked, deleted) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
-        // Execute the SQL query with the sanitized reported message data
-        connection.query(insertQuery, [
-            sanitizedReportedMsg.msgId,
-            sanitizedReportedMsg.sender,
-            sanitizedReportedMsg.receiver,
-            sanitizedReportedMsg.text,
-            sanitizedReportedMsg.date,
-            sanitizedReportedMsg.hour,
-            sanitizedReportedMsg.image,
-            sanitizedReportedMsg.isItGroup,
-            sanitizedReportedMsg.checked,
-            sanitizedReportedMsg.deleted
-        ], (insertErr, results) => {
-            if (insertErr) {
-                console.error('SERVER-ERROR: Error in request execution', insertErr);
-                return sendResponse(res, 500, 'An error occurred while adding the new reported message.');
+        // Step 1: Check if the message ID exists in the messages table
+        const checkMessageQuery = 'SELECT id FROM messages WHERE id = ?';
+        connection.query(checkMessageQuery, [sanitizedReportedMsg.msgId], (checkErr, checkResults) => {
+            if (checkErr) {
+                console.error('SERVER-ERROR: Error in request execution', checkErr);
+                return sendResponse(res, 500, 'An error occurred while checking the message ID.');
             }
 
-            const newReportedMsgId = results.insertId; // Get the ID of the newly inserted reported message
+            if (checkResults.length === 0) {
+                console.error("SERVER-ERROR: Message ID does not exist in the messages table.");
+                return sendResponse(res, 404, 'Message ID does not exist.');
+            }
 
-            // Log the successful insertion and return the ID of the new reported message
-            console.log("SERVER-DEBUG: New reported message added with ID:", newReportedMsgId);
-            return sendResponse(res, 201, 'Reported message added successfully.', { id: newReportedMsgId });
+            // Step 2: Begin transaction to ensure atomicity
+            connection.beginTransaction(err => {
+                if (err) {
+                    console.error("SERVER-ERROR: Transaction error", err);
+                    return sendResponse(res, 500, 'An error occurred while starting the transaction.');
+                }
+
+                // Step 3: Insert the new reported message into the reported_msg table
+                const insertQuery = `
+                INSERT INTO reported_msg (msgId, sender, receiver, text, date, hour, image, isItGroup, checked, deleted) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                connection.query(insertQuery, [
+                    sanitizedReportedMsg.msgId,
+                    sanitizedReportedMsg.sender,
+                    sanitizedReportedMsg.receiver,
+                    sanitizedReportedMsg.text,
+                    sanitizedReportedMsg.date,
+                    sanitizedReportedMsg.hour,
+                    sanitizedReportedMsg.image,
+                    sanitizedReportedMsg.isItGroup,
+                    sanitizedReportedMsg.checked,
+                    sanitizedReportedMsg.deleted
+                ], (insertErr, results) => {
+                    if (insertErr) {
+                        console.error('SERVER-ERROR: Error in request execution', insertErr);
+                        return connection.rollback(() => {
+                            sendResponse(res, 500, 'An error occurred while adding the new reported message.');
+                        });
+                    }
+
+                    const newReportedMsgId = results.insertId; // Get the ID of the newly inserted reported message
+
+                    // Step 4: Update the `reported` field in the `messages` table for the reported message
+                    const updateMessageQuery = `UPDATE messages SET reported = true WHERE id = ?`;
+
+                    connection.query(updateMessageQuery, [sanitizedReportedMsg.msgId], (updateErr, updateResults) => {
+                        if (updateErr) {
+                            console.error('SERVER-ERROR: Error updating the messages table', updateErr);
+                            return connection.rollback(() => {
+                                sendResponse(res, 500, 'An error occurred while updating the message as reported.');
+                            });
+                        }
+
+                        // Step 5: Commit the transaction
+                        connection.commit(commitErr => {
+                            if (commitErr) {
+                                console.error('SERVER-ERROR: Transaction commit error', commitErr);
+                                return connection.rollback(() => {
+                                    sendResponse(res, 500, 'An error occurred while committing the transaction.');
+                                });
+                            }
+
+                            // Step 6: Log the successful insertion and return the ID of the new reported message
+                            console.log("SERVER-DEBUG: New reported message added with ID:", newReportedMsgId);
+                            return sendResponse(res, 201, 'Reported message added and message updated successfully.', { id: newReportedMsgId });
+                        });
+                    });
+                });
+            });
         });
     });
 
@@ -172,6 +217,56 @@ module.exports = (connection) => {
                 // Successfully updated both tables
                 console.log("SERVER-DEBUG: Message 'checked' and 'reported' status updated successfully.");
                 return sendResponse(res, 200, "Message checked and reported status updated successfully.");
+            });
+        });
+    });
+
+    // POST to mark a reported message as deleted and remove it from the messages table
+    router.post('/deleteReportedMessage/:messageId', (req, res) => {
+        console.log("SERVER-DEBUG: router '/deleteReportedMessage' handler.");
+        
+        const messageId = req.params.messageId;
+
+        // Log the message ID for debugging purposes
+        console.log("SERVER-DEBUG: messageId <- " + messageId);
+
+        // Validate that messageId is a positive integer
+        if (!messageId || isNaN(messageId) || parseInt(messageId) <= 0 || !Number.isInteger(Number(messageId))) {
+            console.error("SERVER-ERROR: Invalid 'messageId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'messageId' must be a positive integer.");
+        }
+
+        // Query to update the 'checked' and 'deleted' fields in the 'reported_msg' table
+        const updateReportedMsgQuery = 'UPDATE reported_msg SET checked = true, deleted = true WHERE msgId = ?';
+        connection.query(updateReportedMsgQuery, [parseInt(messageId)], (updateErr, updateResult) => {
+            if (updateErr) {
+                console.error("SERVER-ERROR: Error updating the reported message:", updateErr);
+                return sendResponse(res, 500, "An error occurred while updating the reported message.");
+            }
+
+            // Check if any rows were affected
+            if (updateResult.affectedRows === 0) {
+                console.log("SERVER-DEBUG: No reported message found with the specified 'messageId'.");
+                return sendResponse(res, 404, "Reported message not found.");
+            }
+
+            // Query to delete the message from the 'messages' table
+            const deleteMessageQuery = 'DELETE FROM messages WHERE id = ?';
+            connection.query(deleteMessageQuery, [parseInt(messageId)], (deleteErr, deleteResult) => {
+                if (deleteErr) {
+                    console.error("SERVER-ERROR: Error deleting the message from 'messages':", deleteErr);
+                    return sendResponse(res, 500, "An error occurred while deleting the message from the messages table.");
+                }
+
+                // Check if any rows were affected by the delete operation
+                if (deleteResult.affectedRows === 0) {
+                    console.log("SERVER-DEBUG: No message found with the specified 'messageId'.");
+                    return sendResponse(res, 404, "Message not found.");
+                }
+
+                // Successfully marked the reported message as deleted and removed it from the messages table
+                console.log("SERVER-DEBUG: Reported message marked as deleted and message removed successfully.");
+                return sendResponse(res, 200, "Reported message marked as deleted and message removed successfully.");
             });
         });
     });
