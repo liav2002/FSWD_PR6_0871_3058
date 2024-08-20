@@ -45,12 +45,16 @@ const handleChange = ({target}) => {
     method: 'GET',
   };
 
-          fetch(`users/user?phone=${phone}&password=${password}`, requestOptions)
+          fetch(`users/loginUser?phone=${phone}&password=${password}`, requestOptions)
           .then(res=>{
             console.log(`Status: ${res.status}`);
             console.log('Response headers:', res.headers);
             if (res.ok) {
-                return res.json();
+              console.log("im here")
+              console.log(res)
+              console.log("im here222")
+              console.log(res.json())
+                return res;
               }  else if(res.status=== 404){
                 console.error(`Request failed with status code ${res.status}`);
                 alert('Phone or password is wrong');
@@ -66,6 +70,8 @@ const handleChange = ({target}) => {
         })
         .then(user=>{
             alert('You are logged in');
+            console.log("im here 2")
+            console.log(JSON.stringify(user)) // ?????????????????????????????
             localStorage.setItem('currentUser', JSON.stringify(user));
             if(user.name==="Admin"){
               navigate(`/admin`);
