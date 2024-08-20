@@ -5,7 +5,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
 import { motion} from 'framer-motion'
 import axios from 'axios';
-const url = 'http://localhost:5000';
+const url = 'http://localhost:5002';
 
 
 
@@ -20,7 +20,7 @@ function LoginMenuItem(props) {
 
   function login() {
 
-    axios.post(`${url}/login-check`,
+    axios.post(`${url}/users/loginUser`,
       {
         username: usernameCheck,
         password: passwordCheck

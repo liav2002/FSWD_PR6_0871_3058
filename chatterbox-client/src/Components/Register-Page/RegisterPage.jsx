@@ -3,7 +3,6 @@ import EmailQuery from './EmailQuery'
 import { useState } from 'react'
 import UsernameQuery from './UsernameQuery';
 import PasswordQuery from './PasswordQuery';
-import BirthDateQuery from './BirthDateQuery';
 import { useNavigate } from 'react-router-dom';
 import VerifyAccount from './VerifyAccount';
 import Stepper from '@mui/material/Stepper';
@@ -20,18 +19,18 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [doMail, setDoMail] = useState(true);
-  const [birthdate, setBirthdate] = useState(null);
+  const [Phone, setPhone] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
   const [canContinue, setCanContinue] = useState(false)
   let navigate = useNavigate();
-  const stepperSteps = ['Username', 'Password', 'Birthdate', 'Email'];//summerize at the end
+  const stepperSteps = ['Username', 'Password', 'Phone', 'Email'];//summerize at the end
 
 
   const handleNext = () => {
     setActiveStep(activeStep + 1);
   };
 
-  const url = 'http://localhost:5000';
+  const url = 'http://localhost:5002'; //server
 
   function submitInfo() {
     const userinfo = {
@@ -39,7 +38,7 @@ function RegisterPage() {
       password: password,
       email: email,
       doMail: doMail,
-      birthDate: birthdate
+      Phone: Phone
     }
     console.log(userinfo)
     axios.post(`${url}/new-user`,userinfo)
@@ -57,7 +56,7 @@ function RegisterPage() {
     <Greetings handleNext={handleNext} key={0}/>,
     <UsernameQuery username={newUsername} setUsername={setNewUsername} setCanContinue={setCanContinue} key={1} />,
     <PasswordQuery password={password} setPassword={setPassword} setCanContinue={setCanContinue} key={2}/>,
-    <BirthDateQuery birthdate={birthdate} setBirthdate={setBirthdate} setCanContinue={setCanContinue} key={3}/>,
+    //
     <EmailQuery email={email} setEmail={setEmail} setDoMail={setDoMail} doMail={doMail} setCanContinue={setCanContinue} key={4} />,
     <VerifyAccount email={email} username={newUsername} submitInfo={submitInfo} key={5}/>,
     <Summerize key={6} />
