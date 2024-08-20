@@ -1,0 +1,195 @@
+/* body {
+  background-color: lightgreen;
+  margin: 0; /* Réinitialise les marges par défaut du body *
+  padding: 0; /* Réinitialise les espaces internes par défaut du body 
+  font-family: Arial, sans-serif; /* Choisissez une police de caractères appropriée 
+} */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  
+}
+
+.admin-container {
+  display: flex;
+  /* margin: 20px; */
+  min-height: 100vh;
+}
+
+.message-image {
+  /* max-width: 100%; Ajuste la largeur de l'image au conteneur */
+  width: 60px;
+    height: 60px;
+}
+
+.menu {
+  width: 200px;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border: none;
+  background-color: #ddd;
+  color: #333;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.menu button:hover {
+  background-color: #ccc;
+}
+
+.menu button.active {
+  background-color: #555;
+  color: white;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+}
+
+.section-content {
+  display: none;
+  margin-top: 20px;
+}
+
+.section-content.active {
+  display: block;
+}
+
+
+/* content 3 */
+/* Style for buttons */
+.content-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.content-buttons button {
+  padding: 8px 15px;
+  border: none;
+  background-color: #555;
+  color: white;
+  cursor: pointer;
+}
+
+.content-buttons button:hover {
+  background-color: #444;
+}
+
+/* Style for message lists */
+.message-list {
+  margin-top: 20px;
+}
+
+.message-list h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.message-list li {
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  margin-bottom: 10px;
+  list-style: none;
+}
+
+.message-list p {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* Style for different sections */
+.show-section {
+  display: block;
+}
+
+.hide-section {
+  display: none;
+}
+
+
+/* content 1 and 2 */
+/* Style for user list */
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-list li {
+  margin-bottom: 10px;
+}
+
+.user-list button {
+  padding: 8px 15px;
+  background-color: #555;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.user-list button:hover {
+  background-color: #444;
+}
+
+/* Style for flagged message list */
+.flagged-message-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.flagged-message-list li {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.flagged-message-list p {
+  margin: 0;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.flagged-message-list button {
+  padding: 6px 12px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.flagged-message-list button.keep-button {
+  background-color: #2ecc71;
+}
+
+.flagged-message-list button:hover {
+  background-color: #c0392b;
+}
+
+.flagged-message-list button.keep-button:hover {
+  background-color: #27ae60;
+}

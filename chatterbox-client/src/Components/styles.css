@@ -1,0 +1,440 @@
+/*style for home*/
+
+/* Styles for mobile devices */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column; /* Stack les éléments verticalement */
+  }
+
+  .left-div, .right-div {
+    width: 100%; /* Utiliser toute la largeur disponible */
+    height: auto;
+    padding: 10px; /* Réduire l'espace entre les éléments */
+  }
+
+  .right-div {
+    width: 100%; /* Utiliser toute la largeur disponible */
+    box-sizing: border-box; /* Inclure les bordures et les marges dans la largeur */
+    padding: 10px; /* Ajouter un peu d'espace autour du contenu */
+    overflow-y: scroll; /* Ajouter une barre de défilement verticale si le contenu dépasse */
+  }
+  
+  .ul_list_contact {
+    padding: 0; /* Réduire l'espace autour de la liste de contacts */
+  }
+
+  .contact_container {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+
+  }
+
+  .img_contact {
+    width: 40px; /* Réduire la taille de l'image de contact */
+    height: 40px;
+    margin-right: 10px;
+  }
+
+  /* Ajouter d'autres styles pour le reste des éléments */
+}
+
+.left-div {
+  /* display: flex; */
+  justify-content: space-between;
+  /* align-items: center; */
+  padding: 20px;
+}
+
+.log_out_icon {
+  cursor: pointer;
+  margin-right: 10px; /* Ajoute une marge à droite de l'icône */
+
+}
+
+.new-group-button {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-left: 10px; /* Ajoute une marge à gauche du bouton */
+ 
+
+}
+
+
+.new-group-button:hover {
+  background-color: #444;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+/* Reset default styles and set height to 100% */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+/* Style for WhatsApp web layout */
+.whatsapp-web {
+  display: flex;
+  height: 100%;
+  background-color: #f0f0f0;
+}
+
+.sidebar {
+  flex: 1;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.chat-area {
+  flex: 3;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.img_msg{
+    width: 100px;
+    height: 100px;
+    border-style: solid;
+    border-radius: 25px;
+
+}
+
+.readed_img{
+    width: 15px;
+    height: 15px;
+}
+
+.selected_image_newMsg{
+    width: 100px;
+    height: 100px;
+    border-style: solid;
+    border-radius: 25px;
+
+}
+
+.container {
+    display: flex;
+  }
+  
+  .left-div {
+    flex-basis: 30%;
+    background-color: lightblue;
+    min-height: 100vh;
+  }
+  
+  .right-div {
+    flex-basis: 70%;
+    background-color: lightgreen;
+    min-height: 100vh;
+
+  }
+
+  
+  
+  
+
+  .ul_list_contact{
+    margin: 0;
+    margin: 15px;
+    padding: 0;
+  }
+  .contact_list{
+    list-style-type: none;
+    margin-left: 0px;
+  }
+
+  .log_out_icon{
+    width: 20px;
+    height: 20px;
+  }
+  /* tjs dans Home design des msg*/
+  /* Ajoutez ces styles pour .sender-right */
+.sender-right {
+    text-align: right;
+    margin-right: 10px;
+    margin-left: 100px;
+    border-radius: 25px;
+    padding-right: 10px;
+    position: relative; /* Ajoutez cette ligne pour positionner la flèche correctement */
+  }
+  
+  /* Ajoutez ces styles pour .sender-left */
+  .sender-left {
+    text-align: left;
+    margin-left: 100px; /* Modifiez cette valeur pour décaler la bulle à gauche */
+    margin-right: 10px;
+    border-radius: 25px;
+    padding-left: 10px;
+    position: relative; /* Ajoutez cette ligne pour positionner la flèche correctement */
+  }
+  
+  /* Ajoutez ces styles pour .msg_list */
+  /* .msg_list {
+    list-style-type: none;
+    margin-bottom: 10px;
+  } */
+  
+  /* .sender-right {
+    text-align: right;
+   margin-right: 10px;
+   margin-left: 100px;
+    /* border-style: solid; */
+    /* border-radius: 25px;
+    padding-right: 10px;
+   
+  } */ 
+  /* .sender-left {
+    text-align: left;
+    margin-left: 10px;
+    margin-right: 100px;
+    /* border-style: solid; */
+    /* border-radius: 25px;
+    padding-left: 10px;
+    
+  } */
+  .msg_list{
+    list-style-type: none;
+    /* margin-bottom: 20px;
+    margin-top: 20px; */
+    display: flex;
+    align-items: center;
+    
+  }
+
+
+
+  .messages-container {
+    max-height: calc(100vh - 150px);
+  
+    width: 100%;
+    overflow-y: auto; /* Défilement vertical */
+    overflow-x: hidden; /* Supprime le défilement horizontal */
+   margin: 0px;
+  }
+  
+  .speech-wrapper{
+   padding: 30px 40px; 
+  .bubble{
+    width: 60%;
+    height: auto;
+    display: block;
+    background: #f5f5f5;
+    border-radius: 4px;
+    /* box-shadow: 2px 8px 5px #000; */
+    position: relative;
+    /* margin: 0 0 25px;  */
+    margin-left: 20px;
+    align-items: start;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    
+    &.alt{
+      /* margin: 0 0 0 60px; */
+      /* margin: 0 15px 0 auto; */
+      margin: auto;
+      align-items:end;
+      margin-right: 20px;
+      margin-top: 50px;
+      margin-bottom: 50px;
+    }
+    .txt{
+      padding: 8px 55px 8px 14px;
+      .name{
+        font-weight: 600;
+        font-size: 12px;
+        margin: 0 0 4px;
+        /* color: #3498db; */
+        span{
+          font-weight: normal;
+          color: #b3b3b3;
+        }
+        /* &.alt{
+          color: #2ecc71;
+        } */
+      }
+      /* .message{
+        font-size: 12px;
+        margin: 0;
+        color: #2b2b2b;
+      }
+      .timestamp{
+        font-size: 11px;
+        position: absolute;
+        bottom: 8px;
+        right: 10px;
+        text-transform: uppercase; color: #999
+      } */
+    }
+    .bubble-arrow {
+      position: absolute;
+      width: 0;
+      bottom:42px;
+      left: -16px;
+      height: 0;
+      &.alt{
+        right: -2px;      
+        bottom: 40px;
+        left: auto;
+      }
+    }
+    .bubble-arrow:after {
+      content: "";
+      position: absolute;
+      border: 0 solid transparent;
+      border-top: 9px solid #f5f5f5;
+      border-radius: 0 20px 0;
+      width: 15px;
+      height: 30px;
+      transform: rotate(145deg);
+    }
+    .bubble-arrow.alt:after {
+      transform: rotate(45deg) scaleY(-1);
+    }
+  }
+}
+
+.flagged_icon{
+    width: 15px;
+    height: 15px;
+}
+
+.participants_name{
+    color: gray;
+}
+
+/*style for add NewGroup page*/
+
+.add_user_to_group_list{
+    list-style-type: none;
+}
+
+
+.remove_add_user_icon{
+    width: 20px;
+    height: 20px;
+   
+   
+    
+}
+.img_contact{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.contact_container{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.container-group {
+    display: flex;
+  }
+
+.left-div-group {
+    flex-basis: 30%;
+    background-color: lightblue;
+    min-height: 100vh;
+  }
+  
+  .right-div-group {
+    flex-basis: 70%;
+    background-color: lightgreen;
+    min-height: 100vh;
+  }
+
+  /*style of ContactProfile page*/
+
+   .img_contact_display_info{
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+   }
+   /* .contact_info_div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  } */
+
+  .info_user_txt{
+    justify-content: center;
+  } 
+
+  .main_content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  
+  .contact_info_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .contact_info_title {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .user_info_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  
+  .user_info {
+    display: flex;
+    flex-direction: column; /* Afficher les éléments en colonne */
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .user_details {
+    display: flex;
+    flex-direction: column; /* Afficher les éléments en colonne */
+    align-items: center;
+  }
+  
+  
+  .user_status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .info_title {
+    font-weight: bold;
+  }
+  
+  .info_content {
+    margin-top: 10px;
+  }
+  
+  .returnToHome{
+    width: 40px;
+    height: 40px;
+  }
+
+  .greenIcon{
+    width: 15px;
+    height: 15px;
+  }

@@ -1,0 +1,82 @@
+/* Styles for the main container */
+.main_content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Set the height of the container to full viewport height */
+  background-color: #f0f0f0;
+}
+
+/* Styles for the contact info div */
+.contact_info_div {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 60%;
+}
+
+.contact_info_title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.user_info_container {
+  display: flex;
+}
+
+.user_info {
+  display: flex;
+  align-items: center;
+}
+
+.img_contact_display_info {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+}
+
+.user_details {
+  display: flex;
+  flex-direction: column;
+}
+
+.info_user_txt {
+  font-size: 16px;
+  margin: 0;
+}
+
+.user_status {
+  flex: 1;
+}
+
+.info_title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.info_content {
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+/* Styles for the participants buttons */
+.user_status button {
+  padding: 8px 15px;
+  background-color: #555;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.user_status button:hover {
+  background-color: #444;
+}
