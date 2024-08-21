@@ -1,19 +1,15 @@
 import React from "react"
 import { Link, useNavigate } from "react-router-dom"
-
 import "./signInOut.css";
-
 import { useState } from "react";
 
 const validPhone = /^$|^\d{0,10}$/;
-
 const url = 'http://localhost:5002';
 
 export default function Login() {
 
   const [inputs, setInputs] = useState({});
   const navigate = useNavigate();
-
 
 
   const handleChange = ({ target }) => {
@@ -26,11 +22,9 @@ export default function Login() {
     if (isValid) {
       setInputs(values => ({ ...values, [name]: value }))
     }
-
   }
 
 
-  //submit
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log(inputs);
@@ -39,45 +33,43 @@ export default function Login() {
     console.log(phone);
 
     const requestOptions = {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     };
 
     fetch(url + `/users/loginUser?phone=${phone}&password=${password}`, requestOptions)
-        .then(res => {
-            console.log(`Status: ${res.status}`);
-            console.log('Response headers:', res.headers);
-            if (res.ok) {
-                return res.json(); // Parse the response as JSON and return it
-            } else if (res.status === 404) {
-                console.error(`Request failed with status code ${res.status}`);
-                alert('Phone or password is wrong');
-                setInputs(values => ({ ...values, 'password': "" }));
-                throw new Error('Phone or password is wrong');
-            } else {
-                console.error(`Request failed with status code ${res.status}`);
-                alert("User not found");
-                throw new Error('User not found');
-            }
-        })
-        .then(user => {
-            alert('You are logged in');
-            console.log("User data:", JSON.stringify(user));
-            localStorage.setItem('currentUser', JSON.stringify(user.data));
-            if (user.name === "Admin") {
-                navigate(`/admin`);
-            } else {
-                navigate(`/${user.phone}`);
-            }
-        })
-        .catch(error => {
-            console.error('An error occurred:', error);
-        });
-};
-
-
+      .then(res => {
+        console.log(`Status: ${res.status}`);
+        console.log('Response headers:', res.headers);
+        if (res.ok) {
+          return res.json();
+        } else if (res.status === 404) {
+          console.error(`Request failed with status code ${res.status}`);
+          alert('Phone or password is wrong');
+          setInputs(values => ({ ...values, 'password': "" }));
+          throw new Error('Phone or password is wrong');
+        } else {
+          console.error(`Request failed with status code ${res.status}`);
+          alert("User not found");
+          throw new Error('User not found');
+        }
+      })
+      .then(user => {
+        alert('You are logged in');
+        console.log("User data:", JSON.stringify(user));
+        localStorage.setItem('currentUser', JSON.stringify(user.data));
+        if (user.name === "Admin") {
+          navigate(`/admin`);
+        } else {
+          navigate(`/${user.phone}`);
+        }
+      })
+      .catch(error => {
+        console.error('An error occurred:', error);
+      });
+  };
 
 
   return (
@@ -87,7 +79,7 @@ export default function Login() {
         <input
           className="inputTypeIn"
           id="phoneInput"
-          type="tel" // Changer "text" par "tel" pour le numéro de téléphone
+          type="tel" 
           name="phone"
           value={inputs.phone || ""}
           onChange={handleChange}
@@ -98,7 +90,6 @@ export default function Login() {
         <input
           id="passwordInput"
           className="inputTypeIn"
-          // maxLength={4} 
           type="password"
           name="password"
           value={inputs.password || ""}
@@ -112,6 +103,5 @@ export default function Login() {
         REGISTER
       </Link>
     </div>
-
   )
 }

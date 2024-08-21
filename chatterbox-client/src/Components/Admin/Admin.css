@@ -1,27 +1,19 @@
-/* body {
-  background-color: lightgreen;
-  margin: 0; /* Réinitialise les marges par défaut du body *
-  padding: 0; /* Réinitialise les espaces internes par défaut du body 
-  font-family: Arial, sans-serif; /* Choisissez une police de caractères appropriée 
-} */
-
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
-  
+
 }
 
 .admin-container {
   display: flex;
-  /* margin: 20px; */
   min-height: 100vh;
 }
 
 .message-image {
-  /* max-width: 100%; Ajuste la largeur de l'image au conteneur */
   width: 60px;
-    height: 60px;
+  height: 60px;
 }
 
 .menu {
@@ -74,8 +66,6 @@ html, body {
 }
 
 
-/* content 3 */
-/* Style for buttons */
 .content-buttons {
   display: flex;
   gap: 10px;
@@ -94,7 +84,6 @@ html, body {
   background-color: #444;
 }
 
-/* Style for message lists */
 .message-list {
   margin-top: 20px;
 }
@@ -117,7 +106,6 @@ html, body {
   font-size: 16px;
 }
 
-/* Style for different sections */
 .show-section {
   display: block;
 }
@@ -126,9 +114,6 @@ html, body {
   display: none;
 }
 
-
-/* content 1 and 2 */
-/* Style for user list */
 .user-list {
   list-style: none;
   padding: 0;
@@ -152,7 +137,6 @@ html, body {
   background-color: #444;
 }
 
-/* Style for flagged message list */
 .flagged-message-list {
   list-style: none;
   padding: 0;

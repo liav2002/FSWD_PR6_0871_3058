@@ -6,12 +6,12 @@ import Cookies from "universal-cookie";
 const url = 'http://localhost:5002';
 
 export default function Admin() {
-  const [selectedChoice, setSelectedChoice] = useState("contacts"); 
+  const [selectedChoice, setSelectedChoice] = useState("contacts");
   const [users, setUsers] = useState([]);
-  const [Flagged_msg, setFlagged_msg] = useState([]); 
+  const [Flagged_msg, setFlagged_msg] = useState([]);
   const [Flagged_msgChecked, setFlagged_msgChecked] = useState([]);
-  const [msg_kept, setMsg_kept] = useState([]); 
-  const [deleted_msg, setDeleted_msg] = useState([]); 
+  const [msg_kept, setMsg_kept] = useState([]);
+  const [deleted_msg, setDeleted_msg] = useState([]);
   const [showAllCheckedMsg, setShowAllCheckedMsg] = useState(false);
   const [showKept, setShowKept] = useState(false);
   const [showDeleted, setShowDeleted] = useState(false);
@@ -40,9 +40,9 @@ export default function Admin() {
         const response = await fetch(url + `/users/AllUsers`, {
           method: 'GET',
           headers: {
-              'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
           },
-      });
+        });
         if (response.ok) {
           const usersData = await response.json();
           setUsers(usersData);
@@ -63,9 +63,9 @@ export default function Admin() {
         const response = await fetch(url + `/flagged_msg/getAllFlaggedMsg`, {
           method: 'GET',
           headers: {
-              'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
           },
-      });
+        });
         if (response.ok) {
           flagged_msgData = await response.json();
 
@@ -116,7 +116,7 @@ export default function Admin() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-      },
+        },
       });
 
       if (response.ok) {
@@ -139,7 +139,7 @@ export default function Admin() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-      },
+        },
       });
 
       if (response.ok) {
@@ -193,6 +193,8 @@ export default function Admin() {
     setShowKept(false);
     setShowDeleted(false);
   };
+
+
   const handleShowKeptMessagesClick = () => {
     console.log("messages gardes", msg_kept);
 
@@ -200,6 +202,8 @@ export default function Admin() {
     setShowKept(true);
     setShowDeleted(false);
   };
+
+
   const handleShowDeletedMessagesClick = () => {
     console.log("deleted", deleted_msg);
 
@@ -207,6 +211,7 @@ export default function Admin() {
     setShowKept(false);
     setShowDeleted(true);
   };
+
 
   const Content3 = () => (
     <div>
@@ -264,12 +269,17 @@ export default function Admin() {
     </div>
   );
 
+
   const LogOut = async () => {
-    const currentTime = new Date().toLocaleString();
-    const cookies = new Cookies();
-    cookies.set(JSON.stringify(currentUser.email), currentTime, { path: '/' });
-    navigate(`/`)
+    if (currentUser) {
+      const currentTime = new Date().toLocaleString();
+      const cookies = new Cookies();
+      cookies.set(JSON.stringify(currentUser.email), currentTime, { path: '/' });
+      localStorage.removeItem("currentUser");
+    }
+    navigate("/", { replace: true });
   }
+
 
   return (
     <div className="admin-container">

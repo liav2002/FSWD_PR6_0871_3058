@@ -1,63 +1,62 @@
 .login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f4f4f4;
-  }
-  
-  .login-form {
-    width: 400px;
-    background-color: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  h1 {
-    font-size: 36px;
-    margin-bottom: 20px;
-  }
-  
-  .inputTypeIn {
-    width: 100%;
-    padding: 10px;
-    margin: 0 auto 10px auto; /* Ajoutez cette ligne pour centrer horizontalement */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  #passwordInput {
-    margin: 0 auto 20px auto; /* Ajoutez cette ligne pour centrer horizontalement */
-  }
-  
-  
-  #submitButton {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 16px;
-    margin: 0 auto; /* Pour centrer horizontalement */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
 
-  }
-  
-  #submitButton:hover {
-    background-color: #0056b3;
-  }
-  
-  .loginLink {
-    margin-top: 10px;
-    text-decoration: none;
-    color: #007bff;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  
-  .loginLink:hover {
-    text-decoration: underline;
-  }
-  
+.login-form {
+  width: 400px;
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.inputTypeIn {
+  width: 100%;
+  padding: 10px;
+  margin: 0 auto 10px auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#passwordInput {
+  margin: 0 auto 20px auto;
+}
+
+
+#submitButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 16px;
+  margin: 0 auto;
+
+}
+
+#submitButton:hover {
+  background-color: #0056b3;
+}
+
+.loginLink {
+  margin-top: 10px;
+  text-decoration: none;
+  color: #007bff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
