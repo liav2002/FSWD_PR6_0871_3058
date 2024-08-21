@@ -4,7 +4,7 @@ import './App.css';
 import ErrorPage from './Components/Error-Page/ErrorPage';
 import Login from './Components/Login-Register/Login';
 import Register from './Components/Login-Register/Register';
-import Home from './Components/Home';
+import Home from './Components/Home/Home';
 import ContactProfil from './Components/Profile/ContactProfil';
 import GroupProfil from './Components/Profile/GroupProfil';
 import YourProfil from './Components/Profile/YourProfil';

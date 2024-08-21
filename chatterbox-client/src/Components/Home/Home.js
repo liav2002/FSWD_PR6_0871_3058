@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./styles.css";
-import ErrorPage from './Error-Page/ErrorPage';
 import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
 const url = 'http://localhost:5002';
