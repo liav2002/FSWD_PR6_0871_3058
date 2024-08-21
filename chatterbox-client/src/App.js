@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate  } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import './App.css';
 
 import ErrorPage from './Components/Error-Page/ErrorPage';
@@ -16,16 +16,16 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login/>} />
-            <Route path="/register" element={<Register/>} />
-            <Route path="/:phone" element={<Home/>} />
-            <Route path="contact_profil/:id" element={<ContactProfil/>}/>
-            <Route path="group_profil/:id" element={<GroupProfil/>}/>
-            <Route path="your_profil" element={<YourProfil/>}/>
-            <Route path="new_group" element={<NewGroup/>} />
-            <Route path="/admin" element={<Admin/>} />
-            <Route path=':page' element={<ErrorPage />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/:phone" element={<Home />} />
+          <Route path="contact_profil/:id" element={<ContactProfil />} />
+          <Route path="group_profil/:id" element={<GroupProfil />} />
+          <Route path="your_profil" element={<YourProfil />} />
+          <Route path="new_group" element={<NewGroup />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path=':page' element={<ErrorPage />} />
         </Routes>
       </Router>
     </div>
