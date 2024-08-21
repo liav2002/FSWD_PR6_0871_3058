@@ -2,11 +2,9 @@ import React, { useState, useEffect,useRef } from "react";
 import "./styles.css";
 import { useNavigate } from "react-router-dom";
 import Cookies  from "universal-cookie";
+const url = 'http://localhost:5002';
 
-//import Image from "./images/readed.png"
-//import fetch from 'node-fetch'; // Importez la bibliothèque fetch ou utilisez une autre bibliothèque de requêtes HTTP
 
-//import readedImage from "./images/readed1.jpg";
 export default function Home() {
     const [users, setUsers] = useState([]);
     const [usersWithUnread, setUsersWithUnread] = useState([]);
@@ -14,7 +12,6 @@ export default function Home() {
     const [messages, setMessages] = useState([]);
     const [showWindow, setShowWindow] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const currentUser = JSON.parse(localStorage["currentUser"]);
     const [newMessage, setNewMessage] = useState("");
     const [selectedImage, setSelectedImage] = useState("");
     const [DisplayMenu, setDisplayMenu] = useState(false);
@@ -26,6 +23,10 @@ export default function Home() {
     const [searchValue, setSearchValue] = useState("");
     const [participantsList, setParticipantsList]=useState([]);
 
+    const currentUser = localStorage.getItem("currentUser") 
+    ? JSON.parse(localStorage.getItem("currentUser")) 
+    : null;
+
     const navigate = useNavigate();
     // const audio = new Audio("audio/msg_bell.wav");
     const cookies = new Cookies();
@@ -35,21 +36,21 @@ export default function Home() {
     const handleSearchChange = (event) => {
       setSearchValue(event.target.value);
     };
-    
-    const filteredUsers = users.filter((user) =>
-     "phone" in user ?
-    user.name && user.name.toLowerCase().includes(searchValue.toLowerCase()):(user.title&&user.title.toLowerCase().includes(searchValue.toLowerCase()))
-    );
 
+    const filteredUsers = Array.isArray(users) ? users.filter((user) =>
+      "phone" in user ?
+      user.name && user.name.toLowerCase().includes(searchValue.toLowerCase())
+      : (user.title && user.title.toLowerCase().includes(searchValue.toLowerCase()))
+    ) : [];
     
-    //console.log("imggg", readedImage)
+
 
     const handleUserClick = async (user) => {
         setSelectedUser(user);
         
         try {
           const response = await fetch(
-            `/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${user.id}`
+            url + `/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${user.id}`
           );
           console.log(`Status: ${response.status}`);
           console.log('Response headers:', response.headers);
@@ -81,7 +82,7 @@ export default function Home() {
         const selectedUserId=SelectedUser.id;
         if("phone" in SelectedUser){
         try {
-          const response = await fetch('/messages/markMessagesAsRead', {
+          const response = await fetch(url + '/messages/markMessagesAsRead', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -110,7 +111,7 @@ export default function Home() {
         }
       }else{
         try {
-          const response = await fetch('/messages/markMessagesGroupAsRead', {
+          const response = await fetch(url + '/messages/markMessagesGroupAsRead', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -161,7 +162,7 @@ export default function Home() {
         setSelectedUser(group);
         try {
           const response = await fetch(
-            `/messages/messagesWithCurrentGroup?groupId=${groupId}`
+            url + `/messages/messagesWithCurrentGroup?groupId=${groupId}`
           );
           console.log(`Status: ${response.status}`);
           console.log('Response headers:', response.headers);
@@ -282,7 +283,7 @@ export default function Home() {
     
       try {
         // Send a POST request to the server to add the new message
-        const response = await fetch("/messages/addMessage", {
+        const response = await fetch(url + "/messages/addMessage", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -315,7 +316,7 @@ export default function Home() {
 
     const fetchUsers = async () => {
         try {
-          const response = await fetch(`/users/AllUsersAndGroups?currentUser=${encodeURIComponent(localStorage["currentUser"])}`); // Appeler la route GET que vous avez créée
+          const response = await fetch(url + `/users/AllUsersAndGroups?currentUserID=${currentUser.id}`); // Appeler la route GET que vous avez créée
           if (response.ok) {
             const usersData = await response.json();
             setUsers(usersData); // Mettre à jour la variable d'état 'users' avec les utilisateurs récupérés
@@ -330,7 +331,7 @@ export default function Home() {
       const fetchUnreadMessges = async () => {
         
           try {
-            const response = await fetch(`/messages/getUnreadSenderIDs?currentUserId=${currentUser.id}`); // Appeler la route GET que vous avez créée
+            const response = await fetch(url + `/messages/getUnreadSenderIDs?currentUserId=${currentUser.id}`); // Appeler la route GET que vous avez créée
             if (response.ok) {
               const sendersId = await response.json();
               setUsersWithUnread(sendersId); // Mettre à jour la variable d'état 'users' avec les utilisateurs récupérés
@@ -345,7 +346,7 @@ export default function Home() {
       
       // for groups messages unread
       try {
-        const response = await fetch(`/messages/getUnreadSenderIDsGroup?currentUserId=${currentUser.id}`); // Appeler la route GET que vous avez créée
+        const response = await fetch(url + `/messages/getUnreadSenderIDsGroup?currentUserId=${currentUser.id}`); // Appeler la route GET que vous avez créée
         if (response.ok) {
           const sendersIdGroup = await response.json();
           setGroupsWithUnread(sendersIdGroup); // Mettre à jour la variable d'état 'users' avec les utilisateurs récupérés
@@ -366,7 +367,7 @@ export default function Home() {
 
     const handleDeleteMessage=async(msgId)=>{
       try {
-        const response = await fetch(`/messages/id?id=${msgId}`, {
+        const response = await fetch(url + `/messages/id?id=${msgId}`, {
           method: "DELETE",
         });
         if (!response.ok) {
@@ -387,7 +388,7 @@ export default function Home() {
       setMessageToEditId(msgId)
       try {
         const response = await fetch(
-          `/messages/modified?id=${msgId}&modified=${true}`,
+          url + `/messages/modified?id=${msgId}&modified=${true}`,
           {
             method: "PUT",
             headers: {
@@ -441,7 +442,7 @@ export default function Home() {
         };
     
         // Send a PUT request to the server to update the message
-        const response = await fetch(`/messages/text?id=${msgId}`, {
+        const response = await fetch(url + `/messages/text?id=${msgId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -503,7 +504,7 @@ export default function Home() {
       console.log(newFlaggedMessage);
       try {
         // Send a POST request to the server to add the new message
-        const response = await fetch("/flagged_msg/addFlaggedMessage", {
+        const response = await fetch(url + "/flagged_msg/addFlaggedMessage", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -529,7 +530,7 @@ export default function Home() {
 
       try {
         const response = await fetch(
-          `/messages/flagged?id=${msg.id}&flagged=${true}`,
+          url + `/messages/flagged?id=${msg.id}&flagged=${true}`,
           {
             method: "PUT",
             headers: {
@@ -561,7 +562,7 @@ export default function Home() {
 
     const RemoveReport=async(msgId)=>{
       try {
-        const response = await fetch(`/flagged_msg/id?id=${msgId}`, {
+        const response = await fetch(url + `/flagged_msg/id?id=${msgId}`, {
           method: "DELETE",
         });
         if (!response.ok) {
@@ -579,7 +580,7 @@ export default function Home() {
 
       try {
         const response = await fetch(
-          `/messages/flagged?id=${msgId}&flagged=${false}`,
+          url + `/messages/flagged?id=${msgId}&flagged=${false}`,
           {
             method: "PUT",
             headers: {
@@ -628,10 +629,13 @@ export default function Home() {
       navigate(`/your_profil`)
     }
     const LogOut=async()=>{
+      if (currentUser) {
       const currentTime=new Date().toLocaleString();
       const cookies = new Cookies();
       cookies.set(JSON.stringify(currentUser.email), currentTime, { path: '/' });
-      navigate(`/`)
+      localStorage.removeItem("currentUser"); 
+      }
+      navigate("/", { replace: true });
     }
   
     const fetchParticipantsInfos = async (selectedGroup) => {
@@ -702,172 +706,213 @@ export default function Home() {
     };
       
 
-      return (
+    return (
       <div className="container">
-          <div className="left-div">
-         <div>
-         <span>
-            <img
-              src="https://icon-library.com/images/logout-icon-png/logout-icon-png-20.jpg"
-              onClick={() => LogOut()}
-              className="log_out_icon"
-            />
-          </span>
-          <button onClick={() => AddNewGroup()} className="new-group-button">
-            New Group
-          </button>
-         
-           <div className="contact_container" onClick={() => DisplayYourInfos()}>
-                    <span><img src={currentUser.profil} className="img_contact"></img></span>
-                        <span >{currentUser.name}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <p>Last connexion: </p>
-                  {cookies.get(JSON.stringify(currentUser.email)) != null ? (
-                    <span>
-                      <p>{cookies.get(JSON.stringify(currentUser.email))}</p>
-                    </span>
-                  ) : null}
-                </div>
-
-         </div>
-         <input
+        <div className="left-div">
+          <div>
+            <span>
+              <img
+                src="https://icon-library.com/images/logout-icon-png/logout-icon-png-20.jpg"
+                onClick={() => LogOut()}
+                className="log_out_icon"
+                alt="Logout"
+              />
+            </span>
+            <button onClick={() => AddNewGroup()} className="new-group-button">
+              New Group
+            </button>
+    
+            {currentUser ? (
+              <div className="contact_container" onClick={() => DisplayYourInfos()}>
+                <span>
+                  <img src={currentUser.profil} className="img_contact" alt="Profile" />
+                </span>
+                <span>{currentUser.name}</span>
+              </div>
+            ) : (
+              <div className="contact_container">
+                <span>
+                  <img
+                    src="https://via.placeholder.com/150"
+                    className="img_contact"
+                    alt="Placeholder Profile"
+                  />
+                </span>
+                <span>Guest</span>
+              </div>
+            )}
+    
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p>Last connection: </p>
+              {currentUser && cookies.get(JSON.stringify(currentUser.email)) != null ? (
+                <span>
+                  <p>{cookies.get(JSON.stringify(currentUser.email))}</p>
+                </span>
+              ) : null}
+            </div>
+          </div>
+    
+          <input
             type="text"
             placeholder="Search..."
             value={searchValue}
             onChange={handleSearchChange}
             className="search-bar"
-        />
-
+          />
+    
           <ul className="ul_list_contact">
             {userList}
-          {/* {filteredUsers.map((user) => (
-         
-            "phone" in user ? (
-              <li key={user.id} className="contact_list">
-              
-                <div className="contact_container" onClick={() => handleUserClick(user)}>
-                    <span><img src={user.profil} className="img_contact"></img></span>
-                        <span >{user.name}</span>
-                        {usersWithUnread.includes(user.id)?<span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span>:""}
-                    </div>
-              </li>
-            ) : (
-              <li key={user.id} className="contact_list">
-               
-                <div className="contact_container" onClick={() => handleGroupClick(user)}>
-                    <span><img src={user.profil} className="img_contact"></img></span>
-                        <span >{user.title}</span>
-                    </div>
-              </li>
-            )
-          
-          ))} */}
-        </ul>
+            {/* Uncomment and modify this section according to your needs */}
+            {/* {filteredUsers.map((user) => (
+              "phone" in user ? (
+                <li key={user.id} className="contact_list">
+                  <div className="contact_container" onClick={() => handleUserClick(user)}>
+                    <span><img src={user.profil} className="img_contact" alt="User Profile" /></span>
+                    <span>{user.name}</span>
+                    {usersWithUnread.includes(user.id) ? (
+                      <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon" alt="Unread Icon" /></span>
+                    ) : ""}
+                  </div>
+                </li>
+              ) : (
+                <li key={user.id} className="contact_list">
+                  <div className="contact_container" onClick={() => handleGroupClick(user)}>
+                    <span><img src={user.profil} className="img_contact" alt="Group Profile" /></span>
+                    <span>{user.title}</span>
+                  </div>
+                </li>
+              )
+            ))} */}
+          </ul>
         </div>
-         <div className="right-div speech-wrapper"> 
-
-          {/* Condition pour afficher la fenêtre vide */}
+    
+        <div className="right-div speech-wrapper">
           {showWindow && (
             <div>
-              <div>
-              {/* <p>{selectedUser.name}</p> */} 
-              <div className="contact_container" onClick={() => DisplayProfilContact()}>{/* a droite c'est bubble alt=> moi */}
-                    <span><img src={selectedUser.profil} className="img_contact"></img></span>
-                        {"phone" in selectedUser ? <span >{selectedUser.name}</span>:<span>{selectedUser.title}</span>}
-                    </div>
+              <div className="contact_container" onClick={() => DisplayProfilContact()}>
+                {selectedUser && (
+                  <>
+                    <span>
+                      <img
+                        src={selectedUser.profil}
+                        className="img_contact"
+                        alt="Selected User Profile"
+                      />
+                    </span>
+                    <span>
+                      {"phone" in selectedUser ? selectedUser.name : selectedUser.title}
+                    </span>
+                  </>
+                )}
               </div>
-      <div className="messages-container">
-        
-        {messages.map((msg) => (
-        <li
-          key={msg.id}
-          className={`${msg.sender == currentUser.id ? "sender-right bubble alt" : "sender-left bubble"} msg_list `}
-          onClick={() => handleMessageClick(msg.id)}
-        >
-
-           {/* Afficher le champ d'édition si le message est en cours d'édition */}
-           {msg.id === MessagesToEditId ? (
-            <div>
-             <form onSubmit={(event) => handleSubmitEdit(event, msg.id)}>
-             <textarea
-               value={editedMessage}
-               onChange={(event) => setEditedMessage(event.target.value)}
-             />
-             <button type="submit" >Save</button>
-           </form>
-           <div className={`${msg.sender == currentUser.id ? "bubble-arrow alt" : "bubble-arrow"}`}></div>
-           </div>
-          ) : (
-            // Sinon, afficher le texte du message
-            <>
-                {/* {msg.isItGroup && msg.sender !=currentUser.id ?<span><p>{userListIdName.find(user => user.id === msg.sender)?.name}</p></span>:null}   */}
-                {msg.isItGroup ? (
-          <p className="participants_name">
-              {participantsList.find(user => user.id == msg.sender)?.name }
-          </p>
-      ) : null}
-
-
-          
-
-          {msg.text !== "" ? <p>{msg.text}</p> : ""}
-          {msg.image !== "" ? <img src={msg.image} className="img_msg" alt="Message image" /> : ""}
-          <p>{new Date(msg.date).toLocaleDateString()}</p>
-          {/* <p>{msg.hour.slice(0, 5)}:{msg.hour.slice(6).padStart(2, "0")}</p> */}
-           <p>{msg.hour}</p>
-          {msg.isItRead ? (
-            <img src="http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"  className="readed_img" alt="Read" />
-          ) : (
-            <img src="https://clipart-library.com/new_gallery/7-71944_green-tick-transparent-transparent-tick.png" className="readed_img" alt="Not read" />
-          )}
-           {/* <div class="bubble-arrow"></div> */}
-           {msg.sender!=currentUser.id&&msg.flagged ?<img src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png" className="flagged_icon" onClick={()=>RemoveReport(msg.id)}/>:null}
-           {msg.sender==currentUser.id && msg.modified ?<p>Modified</p>:null}
-           <div className={`${msg.sender == currentUser.id ? "bubble-arrow alt" : "bubble-arrow"}`}></div>
-          </>
-          )}
-
-          {/* Afficher le menu de boutons */}
-          {DisplayMenu && SelectedMessageId === msg.id && (
-            <div className="message-menu">
-              <button onClick={() => handleDeleteMessage(msg.id)}>Delete</button>
-             {msg.image==""&& msg.sender==currentUser.id ? <button onClick={() => handleEditMessage(msg.id, msg.text)}>Modify</button>:null}
-             { msg.sender!=currentUser.id && msg.flagged== false ? <button onClick={() => handleReportMessage(msg)}>Report</button>:null}
-            </div>
-          )}
-        </li>
-        
-      ))}
-      
-      </div>
-            {selectedUser && (
-              <form onSubmit={handleSubmitNewMessage}>
-                <audio ref={audioRef} src="http://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a" />
-
-                <textarea
-                  value={newMessage}
-                  onChange={handleNewMessageChange}
-                  placeholder="Write a new message..."
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-                  {/* Afficher l'image choisie */}
+    
+              <div className="messages-container">
+                {messages.map((msg) => (
+                  <li
+                    key={msg.id}
+                    className={`${
+                      msg.sender === currentUser?.id
+                        ? "sender-right bubble alt"
+                        : "sender-left bubble"
+                    } msg_list `}
+                    onClick={() => handleMessageClick(msg.id)}
+                  >
+                    {msg.id === MessagesToEditId ? (
+                      <div>
+                        <form onSubmit={(event) => handleSubmitEdit(event, msg.id)}>
+                          <textarea
+                            value={editedMessage}
+                            onChange={(event) => setEditedMessage(event.target.value)}
+                          />
+                          <button type="submit">Save</button>
+                        </form>
+                        <div
+                          className={`${
+                            msg.sender === currentUser?.id ? "bubble-arrow alt" : "bubble-arrow"
+                          }`}
+                        ></div>
+                      </div>
+                    ) : (
+                      <>
+                        {msg.isItGroup ? (
+                          <p className="participants_name">
+                            {participantsList.find((user) => user.id === msg.sender)?.name}
+                          </p>
+                        ) : null}
+                        {msg.text && <p>{msg.text}</p>}
+                        {msg.image && <img src={msg.image} className="img_msg" alt="Message image" />}
+                        <p>{new Date(msg.date).toLocaleDateString()}</p>
+                        <p>{msg.hour}</p>
+                        {msg.isItRead ? (
+                          <img
+                            src="http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"
+                            className="readed_img"
+                            alt="Read"
+                          />
+                        ) : (
+                          <img
+                            src="https://clipart-library.com/new_gallery/7-71944_green-tick-transparent-transparent-tick.png"
+                            className="readed_img"
+                            alt="Not read"
+                          />
+                        )}
+                        {msg.sender !== currentUser?.id && msg.flagged ? (
+                          <img
+                            src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
+                            className="flagged_icon"
+                            onClick={() => RemoveReport(msg.id)}
+                            alt="Flagged"
+                          />
+                        ) : null}
+                        {msg.sender === currentUser?.id && msg.modified ? <p>Modified</p> : null}
+                        <div
+                          className={`${
+                            msg.sender === currentUser?.id ? "bubble-arrow alt" : "bubble-arrow"
+                          }`}
+                        ></div>
+                      </>
+                    )}
+                    {DisplayMenu && SelectedMessageId === msg.id && (
+                      <div className="message-menu">
+                        <button onClick={() => handleDeleteMessage(msg.id)}>Delete</button>
+                        {msg.image === "" && msg.sender === currentUser?.id ? (
+                          <button onClick={() => handleEditMessage(msg.id, msg.text)}>Modify</button>
+                        ) : null}
+                        {msg.sender !== currentUser?.id && !msg.flagged ? (
+                          <button onClick={() => handleReportMessage(msg)}>Report</button>
+                        ) : null}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </div>
+    
+              {selectedUser && (
+                <form onSubmit={handleSubmitNewMessage}>
+                  <audio
+                    ref={audioRef}
+                    src="http://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a"
+                  />
+                  <textarea
+                    value={newMessage}
+                    onChange={handleNewMessageChange}
+                    placeholder="Write a new message..."
+                  />
+                  <input type="file" accept="image/*" onChange={handleImageChange} />
                   {selectedImage && (
                     <img src={selectedImage} alt="Selected Image" className="selected_image_newMsg" />
                   )}
-                <button type="submit" onClick={playAudio} >Send</button>
-              
-              </form>
-            )}
+                  <button type="submit" onClick={playAudio}>
+                    Send
+                  </button>
+                </form>
+              )}
             </div>
           )}
         </div>
-    </div>
-      );
+      </div>
+    );
+    
     }
       
   
