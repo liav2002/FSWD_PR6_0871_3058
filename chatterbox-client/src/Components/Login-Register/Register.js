@@ -37,7 +37,7 @@ export default function Register() {
     console.log(inputs);
 
     try {
-      const response = await fetch(url + `users/registerUser`, {
+      const response = await fetch(url + `/users/registerUser`, {
         method: "POST",
         body: data,
         headers: {
@@ -48,16 +48,16 @@ export default function Register() {
       console.log(`Status: ${response.status}`);
       console.log("Response headers:", response.headers);
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
 
         alert("Welcome! You were registered successfully.");
         const res = await response.json();
         console.log("client", res);
-        localStorage.setItem('currentUser', JSON.stringify(res));
+        localStorage.setItem('currentUser', JSON.stringify(res.data));
         const currentTime = new Date().toLocaleString();
         const cookies = new Cookies();
         cookies.set('user_connection', currentTime, { path: '/' });
-        navigate(`/${res.phone}`);
+        navigate(`/${res.data.phone}`);
 
       } else {
         console.error(`Request failed with status code ${response.status}`);

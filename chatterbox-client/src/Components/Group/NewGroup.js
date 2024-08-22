@@ -40,7 +40,7 @@ export default function NewGroup() {
   const profilePictureOptions = [
     {
       id: 'option1',
-      value: 'https://transformconsultinggroup.com/wp-content/uploads/2021/04/Build-Capacity-Icon.png',
+      value: 'https://images.pexels.com/photos/3680219/pexels-photo-3680219.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
       label: 'Première photo',
     },
     {
