@@ -63,7 +63,7 @@ export default function Login() {
         if (user.name === "Admin") {
           navigate(`/admin`);
         } else {
-          navigate(`/${user.phone}`);
+          navigate(`/${user.data.phone}`);
         }
       })
       .catch(error => {
