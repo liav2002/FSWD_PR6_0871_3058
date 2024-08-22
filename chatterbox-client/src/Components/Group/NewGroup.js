@@ -82,17 +82,16 @@ export default function NewGroup() {
     event.preventDefault();
     setUsersAddedId([...UsersAddedId, currentUser.id]);
     const participantsIdString = JSON.stringify([...UsersAddedId, currentUser.id]);
-    inputs["participantsId"] = participantsIdString;
+    inputs["participantsId"] = JSON.parse(participantsIdString);
     // inputs["participantsId"] = JSON.stringify(UsersAdded);
     inputs["adminId"] = currentUser.id;
-    console.log(inputs);
 
     const data = JSON.stringify(inputs);
-    //console.log(data);
-    // console.log(inputs);
+    console.log(data);
+    console.log(inputs);
 
     try {
-      const response = await fetch(url + "groups/AddGroup", {
+      const response = await fetch(url + "/groups/AddGroup", {
         method: "POST",
         body: data,
         headers: {
@@ -104,7 +103,7 @@ export default function NewGroup() {
       console.log("Response headers:", response.headers);
 
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
 
         alert("group created successfully.");
         const res = await response.json();
