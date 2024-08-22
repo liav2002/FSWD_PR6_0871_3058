@@ -833,7 +833,7 @@ export default function Home() {
                           <img
                             src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
                             className="flagged_icon"
-                            onClick={() => RemoveReport(msg.id)}
+                            onClick={() => null}//() => RemoveReport(msg.id)}
                             alt="Flagged"
                           />
                         ) : null}
@@ -851,7 +851,7 @@ export default function Home() {
                           <button onClick={() => handleEditMessage(msg.id, msg.text)}>Modify</button>
                         ) : null}
                         {msg.sender !== currentUser?.id && !msg.flagged ? (
-                          <button onClick={() => handleReportMessage(msg)}>Report</button>
+                          <button onClick={null}>Report</button> //{() => handleReportMessage(msg)}
                         ) : null}
                       </div>
                     )}
