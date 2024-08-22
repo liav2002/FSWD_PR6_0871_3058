@@ -7,6 +7,7 @@ const url = 'http://localhost:5002';
 
 export default function Home() {
   const [users, setUsers] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [usersWithUnread, setUsersWithUnread] = useState([]);
   const [groupsWithUnread, setGroupsWithUnread] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -62,7 +63,7 @@ export default function Home() {
       if (response.ok) {
         const messagesData = await response.json();
         console.log('Messages:', messagesData);
-        setMessages(messagesData);
+        setMessages(messagesData.data);
         if (messagesData.length > 0) {
           markMessagesAsRead(currentUser, user);
         }
@@ -284,9 +285,8 @@ export default function Home() {
         });
         if (response.ok) {
           const usersData = await response.json();
-          console.log(usersData);
-          console.log("1234567876543212345678987654323456789")
           setUsers(usersData.data.users);
+          setGroups(usersData.data.groups)
         } else {
           console.error(`Request failed with status code ${response.status}`);
         }
@@ -326,8 +326,9 @@ export default function Home() {
           },
         });
         if (response.ok) {
+          console.log("fdsgjvfjsdvfdsjvfdshvfdshvf")
           const sendersIdGroup = await response.json();
-          setGroupsWithUnread(sendersIdGroup);
+          setGroupsWithUnread(sendersIdGroup.data);
           console.log(sendersIdGroup);
         } else {
           console.error(`Request failed with status code ${response.status}`);
@@ -663,12 +664,11 @@ export default function Home() {
   }, []);
 
   let uniqueKey = 0;
-
   const userList = filteredUsers.map((user) => {
     uniqueKey++;
 
     return (
-      "phone" in user ? (
+      <div>
         <li key={uniqueKey} className="contact_list">
           <div className="contact_container" onClick={() => handleUserClick(user)}>
             <span><img src={user.profil} className="img_contact"></img></span>
@@ -676,17 +676,24 @@ export default function Home() {
             {usersWithUnread.includes(user.id) ? <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span> : ""}
           </div>
         </li>
-      ) : (
-        <li key={uniqueKey} className="contact_list">
-          <div className="contact_container" onClick={() => handleGroupClick(user)}>
-            <span><img src={user.profil} className="img_contact"></img></span>
-            <span >{user.title}</span>
-            {groupsWithUnread.includes(user.id) ? <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span> : ""}
-          </div>
-        </li>
+        </div>
       )
-    );
   });
+
+  uniqueKey = 0;
+  console.log("dfhkvgfhkvdf8888", groups)
+  const groupList = groups.map((group)=>{
+    uniqueKey++;
+    return(
+    <li key={uniqueKey} className="contact_list">
+          <div className="contact_container" onClick={() => handleGroupClick(group)}>
+            <span><img src={group.profil} className="img_contact"></img></span>
+            <span >{group.title}</span>
+            {console.log("djsgasjdgadghasjdghhasgd")}
+            {groupsWithUnread.includes(group.id) ? <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span> : ""}
+          </div>
+        </li>)
+  })
 
 
   const playAudio = () => {
@@ -739,29 +746,19 @@ export default function Home() {
 
           <ul className="ul_list_contact">
             {userList}
+            {groupList }
             {console.log('userList')}
             {console.log(userList)}
-            {/* Uncomment and modify this section according to your needs */}
-            {filteredUsers.map((user) => (
-              "phone" in user ? (
-                <li key={user.id} className="contact_list">
-                  <div className="contact_container" onClick={() => handleUserClick(user)}>
-                    <span><img src={user.profil} className="img_contact" alt="User Profile" /></span>
-                    <span>{user.name}</span>
-                    {usersWithUnread.includes(user.id) ? (
-                      <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon" alt="Unread Icon" /></span>
-                    ) : ""}
-                  </div>
-                </li>
-              ) : (
-                <li key={user.id} className="contact_list">
+            {/* Uncomment and modify this section according to your needs 
+            
+                            <li key={user.id} className="contact_list">
                   <div className="contact_container" onClick={() => handleGroupClick(user)}>
                     <span><img src={user.profil} className="img_contact" alt="Group Profile" /></span>
                     <span>{user.title}</span>
                   </div>
                 </li>
-              )
-            ))}
+            
+            */}
           </ul>
         </div>
 
