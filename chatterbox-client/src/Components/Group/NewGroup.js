@@ -15,16 +15,19 @@ export default function NewGroup() {
 
 
   const fetchUsers = async () => {
+    
     try {
-      const response = await fetch(url + `/users/AllUsers?currentUser=${currentUser}`, {
+      const response = await fetch(url + `/users/AllUsers?currentUserID=${currentUser.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
       if (response.ok) {
+        
         const usersData = await response.json();
-        setUsers(usersData);
+        console.log(usersData.data)
+        setUsers(usersData.data);
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }

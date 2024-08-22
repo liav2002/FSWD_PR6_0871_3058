@@ -28,7 +28,6 @@ export default function Home() {
     : null;
 
   const navigate = useNavigate();
-  // const audio = new Audio("audio/msg_bell.wav");
   const cookies = new Cookies();
   const audioRef = useRef(null);
 
@@ -50,7 +49,12 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        url + `/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${user.id}`
+        url + `/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${user.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
       );
       console.log(`Status: ${response.status}`);
       console.log('Response headers:', response.headers);
@@ -125,14 +129,6 @@ export default function Home() {
         if (response.ok) {
           const data = await response.json();
           if (data.length > 0) {
-            //           setMessages(prevState => {
-            //     // Loop over your list
-            //     return prevState.map((item) => {
-            //         // Check for the item with the specified id and update it
-            //         return item.receiver == selectedUserId && item.isItGroup==true ? {...item, isItRead: true} : item
-            //     })
-            // })
-            //const messageIds = data.map(row => row.id);
             setMessages(prevState => {
               // Loop over your list
               return prevState.map((item) => {
@@ -142,9 +138,6 @@ export default function Home() {
             });
 
           }
-          //console.log('Messages marked as read');
-
-
         } else {
           console.error(`Request failed with status code ${response.status}`);
         }
@@ -156,13 +149,17 @@ export default function Home() {
   };
 
 
-
   const handleGroupClick = async (group) => {
     const groupId = group.id;
     setSelectedUser(group);
     try {
       const response = await fetch(
-        url + `/messages/messagesWithCurrentGroup?groupId=${groupId}`
+        url + `/messages/messagesWithCurrentGroup?groupId=${groupId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
       );
       console.log(`Status: ${response.status}`);
       console.log('Response headers:', response.headers);
@@ -198,14 +195,13 @@ export default function Home() {
   const handleImageChange = (event) => {
     const selectedImg = event.target.files[0];
     const imageURL = URL.createObjectURL(selectedImg);
-    setSelectedImage(imageURL); // a voir l'URL ne marche pas si on redemarre le client
-
+    setSelectedImage(imageURL);
   };
 
 
   const handleSubmitNewMessage = async (event) => {
     event.preventDefault();
-    console.log("lien de l'image", selectedImage)
+    console.log("image", selectedImage)
 
     const actualDate = new Date();
     const hours = actualDate.getHours();
@@ -216,8 +212,6 @@ export default function Home() {
     const month = String(actualDate.getMonth() + 1).padStart(2, '0');
     const day = String(actualDate.getDate()).padStart(2, '0');
 
-    // Former la date au format 'YYYY-MM-DD'
-
     // verifiy if the selectedUser is a group
     let Isgroup = false;
     if ("adminId" in selectedUser) {
@@ -226,9 +220,6 @@ export default function Home() {
     else {
       Isgroup = false;
     }
-
-
-
 
     // Create a new message object with the necessary data
     const newMessageData = {
@@ -279,20 +270,21 @@ export default function Home() {
     } catch (error) {
       console.error("An error occurred while adding the new message:", error);
     }
-    // if (audioRef.current) {
-    //   audioRef.current.play();
-    // }
-    // audio.play();
   };
 
 
   const fetchUsers = async () => {
     if (currentUser) {
       try {
-        const response = await fetch(url + `/users/AllUsersAndGroups?currentUserID=${currentUser.id}`); // Appeler la route GET que vous avez créée
+        const response = await fetch(url + `/users/AllUsersAndGroups?currentUserID=${currentUser.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (response.ok) {
           const usersData = await response.json();
-          setUsers(usersData); // Mettre à jour la variable d'état 'users' avec les utilisateurs récupérés
+          setUsers(usersData);
         } else {
           console.error(`Request failed with status code ${response.status}`);
         }
@@ -302,13 +294,19 @@ export default function Home() {
     }
   };
 
+
   const fetchUnreadMessges = async () => {
     if (currentUser) {
       try {
-        const response = await fetch(url + `/messages/getUnreadSenderIDs?currentUserId=${currentUser.id}`); // Appeler la route GET que vous avez créée
+        const response = await fetch(url + `/messages/getUnreadSenderIDs?currentUserId=${currentUser.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (response.ok) {
           const sendersId = await response.json();
-          setUsersWithUnread(sendersId); // Mettre à jour la variable d'état 'users' avec les utilisateurs récupérés
+          setUsersWithUnread(sendersId);
           console.log(sendersId);
         } else {
           console.error(`Request failed with status code ${response.status}`);
@@ -317,14 +315,17 @@ export default function Home() {
         console.error('An error occurred:', error);
       }
 
-
-
       // for groups messages unread
       try {
-        const response = await fetch(url + `/messages/getUnreadSenderIDsGroup?currentUserId=${currentUser.id}`); // Appeler la route GET que vous avez créée
+        const response = await fetch(url + `/messages/getUnreadSenderIDsGroup?currentUserId=${currentUser.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (response.ok) {
           const sendersIdGroup = await response.json();
-          setGroupsWithUnread(sendersIdGroup); // Mettre à jour la variable d'état 'users' avec les utilisateurs récupérés
+          setGroupsWithUnread(sendersIdGroup);
           console.log(sendersIdGroup);
         } else {
           console.error(`Request failed with status code ${response.status}`);
@@ -335,15 +336,20 @@ export default function Home() {
     }
   };
 
+
   const handleMessageClick = async (msgId) => {
     setSelectedMessageId(msgId);
     setDisplayMenu(!DisplayMenu);
   }
 
+
   const handleDeleteMessage = async (msgId) => {
     try {
-      const response = await fetch(url + `/messages/id?id=${msgId}`, {
+      const response = await fetch(url + `/messages/deleteMessage?id=${msgId}`, {
         method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       if (!response.ok) {
         throw new Error("Request failed for deleting message");
@@ -358,12 +364,14 @@ export default function Home() {
       console.error("Error:", error);
     }
   }
+
+
   const handleEditMessage = async (msgId, msgText) => {
     setEditedMessage(msgText);
     setMessageToEditId(msgId)
     try {
       const response = await fetch(
-        url + `/messages/modified?id=${msgId}&modified=${true}`,
+        url + `/messages/modifiedMessage?id=${msgId}&modified=${true}`,
         {
           method: "PUT",
           headers: {
@@ -416,7 +424,7 @@ export default function Home() {
       };
 
       // Send a PUT request to the server to update the message
-      const response = await fetch(url + `/messages/text?id=${msgId}`, {
+      const response = await fetch(url + `/messages/updateMessage?id=${msgId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -478,33 +486,31 @@ export default function Home() {
     console.log(newFlaggedMessage);
     try {
       // Send a POST request to the server to add the new message
-      const response = await fetch(url + "/flagged_msg/addFlaggedMessage", {
+      const response = await fetch(url + "/messages/reportMessage", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newFlaggedMessage),
       });
-      console.log("response: msg ajoute", response)
       if (response.ok) {
         // If the server successfully added the message, update the messages list
         //const responseData = await response.json();
         const NewFlaggedMsgId = await response.json();
         newFlaggedMessage["id"] = NewFlaggedMsgId;
-        setFlaggedMessage([...FlaggedMessages, newFlaggedMessage]) // a voir si on en a besoin
+        setFlaggedMessage([...FlaggedMessages, newFlaggedMessage])
 
       } else {
 
         console.error("Failed to add the new flagged message.");
       }
-      // }
     } catch (error) {
       console.error("An error occurred while adding the new flagged message:", error);
     }
 
     try {
       const response = await fetch(
-        url + `/messages/flagged?id=${msg.id}&flagged=${true}`,
+        url + `/messages/flagged?id=${msg.id}&flagged=${true}`, /////////////////////////////////////////////////
         {
           method: "PUT",
           headers: {
@@ -534,10 +540,14 @@ export default function Home() {
     }
   }
 
+
   const RemoveReport = async (msgId) => {
-    try {
-      const response = await fetch(url + `/flagged_msg/id?id=${msgId}`, {
+    try { 
+      const response = await fetch(url + `/messages/id?id=${msgId}`, { ///////////////////
         method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+      },
       });
       if (!response.ok) {
         throw new Error("Request failed for deleting flagged message");
@@ -554,7 +564,7 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        url + `/messages/flagged?id=${msgId}&flagged=${false}`,
+        url + `/messages/flagged?id=${msgId}&flagged=${false}`, ///////////////////////////
         {
           method: "PUT",
           headers: {
@@ -585,23 +595,35 @@ export default function Home() {
 
   }
 
-  const AddNewGroup = async () => {
-    navigate(`/new_group`);
 
+  const AddNewGroup = async () => {
+    if (currentUser) {
+      navigate(`/new_group`);
+    }
+    else {
+      navigate('/')
+    }
   }
+
+
   const DisplayProfilContact = async () => {
-    //navigate(`/new_group`); 
     if ("phone" in selectedUser) {
       navigate(`/contact_profil/${selectedUser.id}`)
     } else {
       navigate(`/group_profil/${selectedUser.id}`)
     }
-
-
   }
+
+
   const DisplayYourInfos = async () => {
-    navigate(`/your_profil`)
+    if (currentUser) {
+      navigate(`/your_profil`)
+    } else {
+      navigate('/')
+    }
   }
+
+
   const LogOut = async () => {
     if (currentUser) {
       const currentTime = new Date().toLocaleString();
@@ -612,6 +634,7 @@ export default function Home() {
     navigate("/", { replace: true });
   }
 
+
   const fetchParticipantsInfos = async (selectedGroup) => {
 
     console.log("list participants", selectedGroup.participantsId);
@@ -619,26 +642,17 @@ export default function Home() {
       const participantResponse = await fetch(`/users/UserInfo?UserId=${participantId}`);
       if (participantResponse.ok) {
         const participantData = await participantResponse.json();
-        return participantData; // Renvoie les informations du participant
+        return participantData;
       } else {
         console.error(`Request for participant with ID ${participantId} failed with status code ${participantResponse.status}`);
         return null;
       }
     });
 
-    // Attendre que toutes les requêtes de récupération d'informations soient terminées
     const participantsInfo = await Promise.all(participantsInfoPromises);
-
-    // Filtrer les participantsInfo pour éliminer les entrées null
     const filteredParticipantsInfo = participantsInfo.filter(info => info !== null);
-
-    setParticipantsList(filteredParticipantsInfo); // Mettre à jour la variable d'état 'participantsList' avec les informations des participants
-
+    setParticipantsList(filteredParticipantsInfo);
   }
-
-
-
-
 
 
   useEffect(() => {
@@ -646,10 +660,10 @@ export default function Home() {
     fetchUnreadMessges();
   }, []);
 
-  let uniqueKey = 0; // Initialisez la variable uniqueKey à 0
+  let uniqueKey = 0;
 
   const userList = filteredUsers.map((user) => {
-    uniqueKey++; // Incrémentez uniqueKey à chaque itération
+    uniqueKey++;
 
     return (
       "phone" in user ? (
@@ -772,8 +786,8 @@ export default function Home() {
                   <li
                     key={msg.id}
                     className={`${msg.sender === currentUser?.id
-                        ? "sender-right bubble alt"
-                        : "sender-left bubble"
+                      ? "sender-right bubble alt"
+                      : "sender-left bubble"
                       } msg_list `}
                     onClick={() => handleMessageClick(msg.id)}
                   >
@@ -872,13 +886,11 @@ export default function Home() {
     );
   }
   else {
-    return(
-    <div>
-    <h1 className='header404'><b>404</b></h1>
-    <div className='body'>oops! something went wrong.</div>
-  </div>);
+    return (
+      <div>
+        <h1 className='header404'><b>404</b></h1>
+        <div className='body'>oops! something went wrong.</div>
+      </div>);
   }
 
 }
-
-
