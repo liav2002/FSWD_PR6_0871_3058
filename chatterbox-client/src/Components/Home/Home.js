@@ -284,7 +284,9 @@ export default function Home() {
         });
         if (response.ok) {
           const usersData = await response.json();
-          setUsers(usersData);
+          console.log(usersData);
+          console.log("1234567876543212345678987654323456789")
+          setUsers(usersData.data.users);
         } else {
           console.error(`Request failed with status code ${response.status}`);
         }
@@ -304,9 +306,9 @@ export default function Home() {
             'Content-Type': 'application/json',
           },
         });
-        if (response.ok) {
+        if (response.status === 200) {
           const sendersId = await response.json();
-          setUsersWithUnread(sendersId);
+          setUsersWithUnread(sendersId.data);
           console.log(sendersId);
         } else {
           console.error(`Request failed with status code ${response.status}`);
@@ -737,8 +739,10 @@ export default function Home() {
 
           <ul className="ul_list_contact">
             {userList}
+            {console.log('userList')}
+            {console.log(userList)}
             {/* Uncomment and modify this section according to your needs */}
-            {/* {filteredUsers.map((user) => (
+            {filteredUsers.map((user) => (
               "phone" in user ? (
                 <li key={user.id} className="contact_list">
                   <div className="contact_container" onClick={() => handleUserClick(user)}>
@@ -757,7 +761,7 @@ export default function Home() {
                   </div>
                 </li>
               )
-            ))} */}
+            ))}
           </ul>
         </div>
 

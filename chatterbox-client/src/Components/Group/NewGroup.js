@@ -87,7 +87,6 @@ export default function NewGroup() {
     inputs["adminId"] = currentUser.id;
 
     const data = JSON.stringify(inputs);
-    console.log(data);
     console.log(inputs);
 
     try {
@@ -108,7 +107,7 @@ export default function NewGroup() {
         alert("group created successfully.");
         const res = await response.json();
         console.log("client", res);
-        navigate(`/:${currentUser.phone}`);
+        navigate(`/${currentUser.phone}`);
 
       } else {
         console.error(`Request failed with status code ${response.status}`);
