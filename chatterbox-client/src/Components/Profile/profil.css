@@ -1,13 +1,11 @@
-/* Styles for the main container */
 .main_content {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Set the height of the container to full viewport height */
+  height: 100vh;
   background-color: #f0f0f0;
 }
 
-/* Styles for the contact info div */
 .contact_info_div {
   background-color: white;
   padding: 20px;
@@ -64,7 +62,6 @@
   margin: 5px 0;
 }
 
-/* Styles for the participants buttons */
 .user_status button {
   padding: 8px 15px;
   background-color: #555;

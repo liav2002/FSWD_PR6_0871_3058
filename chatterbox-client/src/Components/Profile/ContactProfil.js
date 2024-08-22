@@ -1,50 +1,55 @@
 import React from "react"
-import { useNavigate } from "react-router-dom"
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom"
+import { useState, useEffect } from "react";
 
-import { useState ,useEffect } from "react";
-
-
-
+const url = 'http://localhost:5002';
 
 export default function ContactProfil() {
-    const [selectedUser, setSelectedUser] = useState(null);
-    const currentUser = JSON.parse(localStorage["currentUser"]);
-    const { id } = useParams();
-    const navigate = useNavigate();
+  const [selectedUser, setSelectedUser] = useState(null);
+  const currentUser = JSON.parse(localStorage["currentUser"]);
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-    const fetchContactInfos = async () => {
-        try {
-            const response = await fetch(`/users/UserInfo?UserId=${id}`); // Appeler la route GET que vous avez créée
-            if (response.ok) {
-              const usersData = await response.json();
-              setSelectedUser(usersData) // Mettre à jour la variable d'état 'users' avec les utilisateurs récupérés
-          } else {
-              console.error(`Request failed with status code ${response.status}`);
-            }
-          } catch (error) {
-            console.error('An error occurred:', error);
-          }
-
+  const fetchContactInfos = async () => {
+    try {
+      const response = await fetch(url + `/users/UserInfo?UserId=${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        const usersData = await response.json();
+        setSelectedUser(usersData)
+      } else {
+        console.error(`Request failed with status code ${response.status}`);
+      }
+    } catch (error) {
+      console.error('An error occurred:', error);
     }
 
-    const ReturnToHome = async () => {
-      if(currentUser.name==="Admin"){
+  }
+
+  const ReturnToHome = async () => {
+    if (currentUser) {
+      if (currentUser.name === "Admin") {
         navigate(`/admin`);
       }
-      else{
+      else {
         navigate(`/${currentUser.phone}`);
       }
     }
-  
+  }
+
   useEffect(() => {
     fetchContactInfos();
   }, []);
-    return(
-        
-        <div>
-           <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={()=>ReturnToHome()} className="returnToHome"></img>
-        <div className="main_content">
+
+
+  return (
+    <div>
+      <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="returnToHome"></img>
+      <div className="main_content">
         <div className="contact_info_div">
           <p className="contact_info_title">Contact information:</p>
           {selectedUser != null ? (
@@ -55,7 +60,7 @@ export default function ContactProfil() {
                 </div>
                 <div className="user_details">
                   <p className="info_user_txt">{selectedUser.name}</p>
-                  <br/>
+                  <br />
                   <p className="info_user_txt">{selectedUser.phone}</p>
                 </div>
               </div>
@@ -68,8 +73,6 @@ export default function ContactProfil() {
           ) : null}
         </div>
       </div>
-      </div>
-      
-
-    );
+    </div>
+  );
 }
