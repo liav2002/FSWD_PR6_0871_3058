@@ -162,13 +162,15 @@ export default function Home() {
         },
       }
       );
+      console.log("handleGroupClick");
       console.log(`Status: ${response.status}`);
       console.log('Response headers:', response.headers);
 
       if (response.ok) {
         const messagesData = await response.json();
-        console.log('Messages:', messagesData);
-        setMessages(messagesData);
+        console.log('MessagesData:', messagesData);
+        setMessages(messagesData.data);
+        console.log("messages field is:", messages);
         if (messagesData.length > 0) {
           markMessagesAsRead(currentUser, group);
         }
