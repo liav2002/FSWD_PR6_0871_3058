@@ -681,7 +681,6 @@ export default function Home() {
   });
 
   uniqueKey = 0;
-  console.log("dfhkvgfhkvdf8888", groups)
   const groupList = groups.map((group)=>{
     uniqueKey++;
     return(
