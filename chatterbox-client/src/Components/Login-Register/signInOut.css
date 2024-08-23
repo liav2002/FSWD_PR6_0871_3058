@@ -96,12 +96,16 @@ h1 {
 /* Profile picture selection styling */
 .profile-picture-container {
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   margin: 20px 0;
+  overflow-x: auto; /* Add horizontal scrollbar */
+  white-space: nowrap; /* Prevent wrapping */
 }
 
 .profile-picture-option {
   text-align: center;
+  flex: 0 0 auto; /* Ensure the images don't shrink or grow */
+  margin-right: 10px; /* Add some space between the images */
 }
 
 .profile-picture-img {
@@ -111,6 +115,15 @@ h1 {
   border: 2px solid #ddd;
   cursor: pointer;
   transition: border-color 0.3s ease;
+}
+
+/* Highlight the selected profile picture */
+input[type="radio"]:checked + .profile-picture-img {
+  border-color: #007bff;
+}
+
+input[type="radio"] {
+  display: none;
 }
 
 /* Highlight the selected profile picture */

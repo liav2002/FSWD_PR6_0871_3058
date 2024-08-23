@@ -704,7 +704,7 @@ export default function Home() {
 
   if (currentUser) {
     return (
-      <div className="container">
+      <div className="home-container">
         <div className="left-div">
           <div>
             <span>
@@ -746,34 +746,18 @@ export default function Home() {
 
           <ul className="ul_list_contact">
             {userList}
-            {groupList }
-            {console.log('userList')}
-            {console.log(userList)}
-            {/* Uncomment and modify this section according to your needs 
-            
-                            <li key={user.id} className="contact_list">
-                  <div className="contact_container" onClick={() => handleGroupClick(user)}>
-                    <span><img src={user.profil} className="img_contact" alt="Group Profile" /></span>
-                    <span>{user.title}</span>
-                  </div>
-                </li>
-            
-            */}
+            {groupList}
           </ul>
         </div>
 
-        <div className="right-div speech-wrapper">
+        <div className="right-div">
           {showWindow && (
-            <div>
+            <div className="chat-container">
               <div className="contact_container" onClick={() => DisplayProfilContact()}>
                 {selectedUser && (
                   <>
                     <span>
-                      <img
-                        src={selectedUser.profil}
-                        className="img_contact"
-                        alt="Selected User Profile"
-                      />
+                      <img src={selectedUser.profil} className="img_contact" alt="Selected User Profile" />
                     </span>
                     <span>
                       {"phone" in selectedUser ? selectedUser.name : selectedUser.title}
@@ -784,76 +768,50 @@ export default function Home() {
 
               <div className="messages-container">
                 {Array.isArray(messages) && messages.map((msg) => (
-                  <li
+                  <div
                     key={msg.id}
-                    className={`${msg.sender === currentUser?.id
-                      ? "sender-right bubble alt"
-                      : "sender-left bubble"
-                    } msg_list `}
-                    onClick={() => handleMessageClick(msg.id)}
+                    className={`${parseInt(msg.sender) === parseInt(currentUser.id) ? "my-message" : "other-message"}`}
                   >
-                    {msg.id === MessagesToEditId ? (
-                      <div>
-                        <form onSubmit={(event) => handleSubmitEdit(event, msg.id)}>
-                          <textarea
-                            value={editedMessage}
-                            onChange={(event) => setEditedMessage(event.target.value)}
-                          />
-                          <button type="submit">Save</button>
-                        </form>
-                        <div
-                          className={`${msg.sender === currentUser?.id ? "bubble-arrow alt" : "bubble-arrow"}`}
-                        ></div>
-                      </div>
-                    ) : (
-                      <>
-                        {msg.isItGroup && (
-                          <p className="participants_name">
-                            {participantsList.find((user) => user.id === msg.sender)?.name}
-                          </p>
-                        )}
-                        {msg.text && <p>{msg.text}</p>}
-                        {msg.image && <img src={msg.image} className="img_msg" alt="Message image" />}
-                        <p>{new Date(msg.date).toLocaleDateString()}</p>
-                        <p>{msg.hour}</p>
-                        {msg.isItRead ? (
-                          <img
-                            src="http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"
-                            className="readed_img"
-                            alt="Read"
-                          />
-                        ) : (
-                          <img
-                            src="https://clipart-library.com/new_gallery/7-71944_green-tick-transparent-transparent-tick.png"
-                            className="readed_img"
-                            alt="Not read"
-                          />
-                        )}
-                        {msg.sender !== currentUser?.id && msg.flagged && (
-                          <img
-                            src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
-                            className="flagged_icon"
-                            alt="Flagged"
-                          />
-                        )}
-                        {msg.sender === currentUser?.id && msg.modified && <p>Modified</p>}
-                        <div className={`${msg.sender === currentUser?.id ? "bubble-arrow alt" : "bubble-arrow"}`}></div>
-                      </>
+                    {/* Display the participant's name for group messages */}
+                    {msg.isItGroup && (
+                      <p className="participants_name">
+                        {participantsList.find((user) => user.id === msg.sender)?.name}
+                      </p>
                     )}
-                    {DisplayMenu && SelectedMessageId === msg.id && (
-                      <div className="message-menu">
-                        <button onClick={() => handleDeleteMessage(msg.id)}>Delete</button>
-                        {msg.image === "" && msg.sender === currentUser?.id && (
-                          <button onClick={() => handleEditMessage(msg.id, msg.text)}>Modify</button>
-                        )}
-                      </div>
+
+                    {/* Display the message text */}
+                    {msg.text && <p className="message-text">{msg.text}</p>}
+
+                    {/* Display the image if present */}
+                    {msg.image && <img src={msg.image} className="img_msg" alt="Message image" />}
+
+                    {/* Display the date and hour */}
+                    <p className="message-date">{new Date(msg.date).toLocaleDateString()} {msg.hour}</p>
+
+                    {/* Display read confirmation */}
+                    <img
+                      src={msg.isItRead ? "https://clipart-library.com/new_gallery/7-71944_green-tick-transparent-transparent-tick.png" : "http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"}
+                      className="read-confirm"
+                      alt={msg.isItRead ? "Read" : "Not read"}
+                    />
+
+                    {/* If flagged */}
+                    {msg.sender !== currentUser?.id && msg.flagged && (
+                      <img
+                        src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
+                        className="flagged_icon"
+                        alt="Flagged"
+                      />
                     )}
-                  </li>
+
+                    {/* If modified */}
+                    {msg.sender === currentUser?.id && msg.modified && <p>Modified</p>}
+                  </div>
                 ))}
               </div>
 
               {selectedUser && (
-                <form onSubmit={handleSubmitNewMessage}>
+                <form onSubmit={handleSubmitNewMessage} className="chat-input-form">
                   <audio
                     ref={audioRef}
                     src="http://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a"
@@ -876,6 +834,7 @@ export default function Home() {
           )}
         </div>
       </div>
+
     );
   }
   else {
