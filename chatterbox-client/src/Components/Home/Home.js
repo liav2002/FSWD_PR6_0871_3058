@@ -167,6 +167,7 @@ export default function Home() {
 
       if (response.ok) {
         const messagesData = await response.json();
+        console.log("\n\n\n\n" ,"hibffhfdgbhdsffdvfdvfd");
         console.log('Messages:', messagesData);
         setMessages(messagesData);
         if (messagesData.length > 0) {
