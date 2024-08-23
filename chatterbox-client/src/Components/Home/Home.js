@@ -788,7 +788,7 @@ export default function Home() {
                   return (
                     <div key={msg.id} className={messageClass}>
                       {/* Display the participant's name for group messages only if it's not the current user's message */}
-                      {!isMyMessage && msg.isItGroup && (
+                      {!isMyMessage && msg.isItGroup === 1 && (
                         <p className="participants_name">
                           {participantsList.find((user) => Number(user.id) === Number(msg.sender))?.name || "Unknown Participant"}
                         </p>
@@ -811,7 +811,7 @@ export default function Home() {
                       />
 
                       {/* If flagged */}
-                      {!isMyMessage && msg.flagged && (
+                      {!isMyMessage && msg.flagged === 1 && (
                         <img
                           src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
                           className="flagged_icon"
@@ -820,7 +820,7 @@ export default function Home() {
                       )}
 
                       {/* If modified */}
-                      {isMyMessage && msg.modified && <p>Modified</p>}
+                      {isMyMessage && msg.modified === 1 && <p>Modified</p>} 
                     </div>
                   );
                 })}
