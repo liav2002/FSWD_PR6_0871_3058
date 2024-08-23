@@ -39,8 +39,7 @@ html, body {
 
 /* Centered Chat Area */
 .chat-container {
-  width: 100%;
-  max-width: 800px;
+  width: 800px;
   background-color: white;
   display: flex;
   flex-direction: column;
@@ -133,23 +132,24 @@ img {
 .my-message {
   background-color: #007bff;
   color: white;
-  padding: 10px;
+  padding: 20px 10px; /* Increase padding to allow space for participant name */
   border-radius: 10px;
   max-width: 60%;
   margin-left: auto;
-  margin-bottom: 20px;
+  margin-bottom: 30px; /* Extra space to accommodate participant's name */
   position: relative;
   word-wrap: break-word;
+  text-align: right; /* Ensure the message text is right-aligned */
 }
 
 .other-message {
   background-color: #e9ecef;
   color: black;
-  padding: 10px;
+  padding: 20px 10px; /* Increase padding to allow space for participant name */
   border-radius: 10px;
   max-width: 60%;
   margin-right: auto;
-  margin-bottom: 20px;
+  margin-bottom: 30px; /* Extra space to accommodate participant's name */
   position: relative;
   word-wrap: break-word;
 }
@@ -157,12 +157,12 @@ img {
 .message-text {
   font-weight: bold;
   font-size: 16px;
-  margin-bottom: 5px;
+  margin-bottom: 20px;
 }
 
 .message-date {
   font-size: 12px;
-  color: #6c757d;
+  color: #000000;
   position: absolute;
   bottom: 5px;
   left: 10px;
@@ -186,9 +186,12 @@ img {
 
 /* Participant Name (Group Chats) */
 .participants_name {
-  color: gray;
+  color: rgb(0, 0, 0);
+  font-weight: bold;
   font-size: 12px;
   margin-bottom: 5px;
+  position: relative; /* Keep it relative to its parent container */
+  text-align: left;
 }
 
 /* Modified Indicator */

@@ -639,23 +639,37 @@ export default function Home() {
 
 
   const fetchParticipantsInfos = async (selectedGroup) => {
+    console.log("Fetching participants for group:", selectedGroup);
 
-    console.log("list participants", selectedGroup.participantsId);
-    const participantsInfoPromises = (selectedGroup.participantsId).map(async (participantId) => {
-      const participantResponse = await fetch(`/users/UserInfo?UserId=${participantId}`);
-      if (participantResponse.ok) {
-        const participantData = await participantResponse.json();
-        return participantData;
-      } else {
-        console.error(`Request for participant with ID ${participantId} failed with status code ${participantResponse.status}`);
-        return null;
-      }
-    });
+    try {
+        // Make the API call to get participants details using the new endpoint
+        const response = await fetch(url + `/groups/GroupParticipants?GroupId=${selectedGroup.id}`);
+        
+        if (response.ok) {
+            const result = await response.json();
 
-    const participantsInfo = await Promise.all(participantsInfoPromises);
-    const filteredParticipantsInfo = participantsInfo.filter(info => info !== null);
-    setParticipantsList(filteredParticipantsInfo);
-  }
+            // Assuming the API returns a `data` field containing an array of participants
+            const participants = result.data;
+
+            // Log the retrieved participants for debugging
+            console.log("Participants retrieved from API:", participants);
+
+            // Set the participants list with the array of { name, id } objects
+            const participantsList = participants.map(participant => ({
+                id: participant.id,
+                name: participant.name
+            }));
+
+            // Set the participants list to the state
+            setParticipantsList(participantsList);
+            console.log("Participants list set:", participantsList);
+        } else {
+            console.error(`Failed to fetch participants. Status code: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('An error occurred while fetching participants:', error);
+    }
+  };
 
 
   useEffect(() => {
@@ -767,48 +781,51 @@ export default function Home() {
               </div>
 
               <div className="messages-container">
-                {Array.isArray(messages) && messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`${parseInt(msg.sender) === parseInt(currentUser.id) ? "my-message" : "other-message"}`}
-                  >
-                    {/* Display the participant's name for group messages */}
-                    {msg.isItGroup && (
-                      <p className="participants_name">
-                        {participantsList.find((user) => user.id === msg.sender)?.name}
-                      </p>
-                    )}
+                {Array.isArray(messages) && messages.map((msg) => {
+                  const isMyMessage = parseInt(msg.sender) === parseInt(currentUser.id);
+                  const messageClass = isMyMessage ? "my-message" : "other-message";
 
-                    {/* Display the message text */}
-                    {msg.text && <p className="message-text">{msg.text}</p>}
+                  return (
+                    <div key={msg.id} className={messageClass}>
+                      {/* Display the participant's name for group messages only if it's not the current user's message */}
+                      {!isMyMessage && msg.isItGroup && (
+                        <p className="participants_name">
+                          {participantsList.find((user) => Number(user.id) === Number(msg.sender))?.name || "Unknown Participant"}
+                        </p>
+                      )}
 
-                    {/* Display the image if present */}
-                    {msg.image && <img src={msg.image} className="img_msg" alt="Message image" />}
+                      {/* Display the message text */}
+                      {msg.text && <p className="message-text">{msg.text}</p>}
 
-                    {/* Display the date and hour */}
-                    <p className="message-date">{new Date(msg.date).toLocaleDateString()} {msg.hour}</p>
+                      {/* Display the image if present */}
+                      {msg.image && <img src={msg.image} className="img_msg" alt="Message image" />}
 
-                    {/* Display read confirmation */}
-                    <img
-                      src={msg.isItRead ? "https://clipart-library.com/new_gallery/7-71944_green-tick-transparent-transparent-tick.png" : "http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"}
-                      className="read-confirm"
-                      alt={msg.isItRead ? "Read" : "Not read"}
-                    />
+                      {/* Display the date and hour */}
+                      <p className="message-date">{new Date(msg.date).toLocaleDateString()} {msg.hour}</p>
 
-                    {/* If flagged */}
-                    {msg.sender !== currentUser?.id && msg.flagged && (
+                      {/* Display read confirmation */}
                       <img
-                        src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
-                        className="flagged_icon"
-                        alt="Flagged"
+                        src={msg.isItRead ? "https://clipart-library.com/new_gallery/7-71944_green-tick-transparent-transparent-tick.png" : "http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"}
+                        className="read-confirm"
+                        alt={msg.isItRead ? "Read" : "Not read"}
                       />
-                    )}
 
-                    {/* If modified */}
-                    {msg.sender === currentUser?.id && msg.modified && <p>Modified</p>}
-                  </div>
-                ))}
+                      {/* If flagged */}
+                      {!isMyMessage && msg.flagged && (
+                        <img
+                          src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
+                          className="flagged_icon"
+                          alt="Flagged"
+                        />
+                      )}
+
+                      {/* If modified */}
+                      {isMyMessage && msg.modified && <p>Modified</p>}
+                    </div>
+                  );
+                })}
               </div>
+
 
               {selectedUser && (
                 <form onSubmit={handleSubmitNewMessage} className="chat-input-form">
