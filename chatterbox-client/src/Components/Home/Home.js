@@ -167,6 +167,7 @@ export default function Home() {
 
       if (response.ok) {
         const messagesData = await response.json();
+        console.log("\n\n\n\n" ,"hibffhfdgbhdsffdvfdvfd");
         console.log('Messages:', messagesData);
         setMessages(messagesData.data);
         if (messagesData.length > 0) {
@@ -782,13 +783,13 @@ export default function Home() {
               </div>
 
               <div className="messages-container">
-                {messages.map((msg) => (
+                {Array.isArray(messages) && messages.map((msg) => (
                   <li
                     key={msg.id}
                     className={`${msg.sender === currentUser?.id
                       ? "sender-right bubble alt"
                       : "sender-left bubble"
-                      } msg_list `}
+                    } msg_list `}
                     onClick={() => handleMessageClick(msg.id)}
                   >
                     {msg.id === MessagesToEditId ? (
@@ -801,17 +802,16 @@ export default function Home() {
                           <button type="submit">Save</button>
                         </form>
                         <div
-                          className={`${msg.sender === currentUser?.id ? "bubble-arrow alt" : "bubble-arrow"
-                            }`}
+                          className={`${msg.sender === currentUser?.id ? "bubble-arrow alt" : "bubble-arrow"}`}
                         ></div>
                       </div>
                     ) : (
                       <>
-                        {msg.isItGroup ? (
+                        {msg.isItGroup && (
                           <p className="participants_name">
                             {participantsList.find((user) => user.id === msg.sender)?.name}
                           </p>
-                        ) : null}
+                        )}
                         {msg.text && <p>{msg.text}</p>}
                         {msg.image && <img src={msg.image} className="img_msg" alt="Message image" />}
                         <p>{new Date(msg.date).toLocaleDateString()}</p>
@@ -829,30 +829,23 @@ export default function Home() {
                             alt="Not read"
                           />
                         )}
-                        {msg.sender !== currentUser?.id && msg.flagged ? (
+                        {msg.sender !== currentUser?.id && msg.flagged && (
                           <img
                             src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
                             className="flagged_icon"
-                            onClick={() => null}//() => RemoveReport(msg.id)}
                             alt="Flagged"
                           />
-                        ) : null}
-                        {msg.sender === currentUser?.id && msg.modified ? <p>Modified</p> : null}
-                        <div
-                          className={`${msg.sender === currentUser?.id ? "bubble-arrow alt" : "bubble-arrow"
-                            }`}
-                        ></div>
+                        )}
+                        {msg.sender === currentUser?.id && msg.modified && <p>Modified</p>}
+                        <div className={`${msg.sender === currentUser?.id ? "bubble-arrow alt" : "bubble-arrow"}`}></div>
                       </>
                     )}
                     {DisplayMenu && SelectedMessageId === msg.id && (
                       <div className="message-menu">
                         <button onClick={() => handleDeleteMessage(msg.id)}>Delete</button>
-                        {msg.image === "" && msg.sender === currentUser?.id ? (
+                        {msg.image === "" && msg.sender === currentUser?.id && (
                           <button onClick={() => handleEditMessage(msg.id, msg.text)}>Modify</button>
-                        ) : null}
-                        {msg.sender !== currentUser?.id && !msg.flagged ? (
-                          <button onClick={null}>Report</button> //{() => handleReportMessage(msg)}
-                        ) : null}
+                        )}
                       </div>
                     )}
                   </li>
