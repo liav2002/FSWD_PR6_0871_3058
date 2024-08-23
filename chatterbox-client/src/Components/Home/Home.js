@@ -168,7 +168,7 @@ export default function Home() {
       if (response.ok) {
         const messagesData = await response.json();
         console.log('Messages:', messagesData);
-        setMessages(messagesData);
+        setMessages(messagesData.data);
         if (messagesData.length > 0) {
           markMessagesAsRead(currentUser, group);
         }
