@@ -1,41 +1,27 @@
-import React from "react"
-import { useNavigate } from "react-router-dom"
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Cookies from "universal-cookie";
+import "./signInOut.css";  // Ensure to use the same css file to keep consistency
 
 const url = 'http://localhost:5002';
 
 export default function Register() {
-
   const [inputs, setInputs] = useState({});
   const navigate = useNavigate();
 
-  
   const handleChange = ({ target }) => {
     const { name, value } = target;
     let newValue = value;
-
-    if (name === 'password') {
-
-    } else if (name === 'phone') {
-
-    } else if (name === 'status' && value.trim() === '') {
-
+    if (name === 'status' && value.trim() === '') {
       newValue = 'available';
     }
-
     setInputs((values) => ({ ...values, [name]: newValue }));
   };
 
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(inputs);
-
     const data = JSON.stringify(inputs);
-    console.log(data);
-    console.log(inputs);
-
     try {
       const response = await fetch(url + `/users/registerUser`, {
         method: "POST",
@@ -45,29 +31,27 @@ export default function Register() {
         },
       });
 
-      console.log(`Status: ${response.status}`);
-      console.log("Response headers:", response.headers);
-
       if (response.status === 200 || response.status === 201) {
-
         alert("Welcome! You were registered successfully.");
         const res = await response.json();
-        console.log("client", res);
         localStorage.setItem('currentUser', JSON.stringify(res.data));
         const currentTime = new Date().toLocaleString();
         const cookies = new Cookies();
         cookies.set('user_connection', currentTime, { path: '/' });
         navigate(`/${res.data.phone}`);
-
-      } else {
-        console.error(`Request failed with status code ${response.status}`);
-        alert("Phone is already in use");
+      }
+      else if (response.status === 400 ) {
+        const res = await response.json();
+        console.log(res.message);
+        alert(res.message);
+      }
+      else {
+        alert("Bad Request with response code: " + response.status);
       }
     } catch (error) {
       console.error("An error occurred:", error);
     }
   };
-
 
   const profilePictureOptions = [
     {
@@ -76,7 +60,7 @@ export default function Register() {
     },
     {
       value: 'https://i.pinimg.com/564x/26/ea/62/26ea622c0a0260942f7830db79d3a82a.jpg',
-      label: 'Sec photo',
+      label: 'Second photo',
     },
     {
       value: 'https://img.freepik.com/photos-gratuite/vue-verticale-du-celebre-rocher-plage-santa-giulia_268835-3741.jpg?w=2000',
@@ -84,92 +68,90 @@ export default function Register() {
     },
     {
       value: 'https://cdn.futura-sciences.com/buildsv6/images/wide1920/0/0/d/00dd1479a5_108485_chat-domestique.jpg',
-      label: 'Foruth photo',
+      label: 'Fourth photo',
     },
-
-
-
   ];
-
 
   return (
     <div className="login-container">
-      <h1>WELCOME</h1>
-      <form onSubmit={handleSubmit} className="login-form">
-        <input
-          id="nameInput"
-          className="inputTypeIn"
-          type="text"
-          name="name"
-          value={inputs.name || ""}
-          onChange={handleChange}
-          placeholder="Enter your name:"
-          required
-        />
-        <input
-          id="passwordInput"
-          className="inputTypeIn"
-          type="password"
-          name="password"
-          value={inputs.password || ""}
-          onChange={handleChange}
-          placeholder="Enter your password:"
-          required
-        />
-        <input
-          id="phoneInput"
-          className="inputTypeIn"
-          type="tel"
-          name="phone"
-          value={inputs.phone || ""}
-          onChange={handleChange}
-          placeholder="Enter your phone:"
-          pattern="[0-9]{3}[0-9]{3}[0-9]{4}"
-          required
-        />
-        <input
-          id="emailInput"
-          className="inputTypeIn"
-          type="email"
-          name="email"
-          value={inputs.email || ""}
-          onChange={handleChange}
-          placeholder="Enter your email:"
-          required
-        />
+      <div className="login-box">
+        <h1>REGISTER</h1>
+        <form onSubmit={handleSubmit} className="login-form">
+          <input
+            id="nameInput"
+            className="inputTypeIn"
+            type="text"
+            name="name"
+            value={inputs.name || ""}
+            onChange={handleChange}
+            placeholder="Name"
+            required
+          />
+          <input
+            id="passwordInput"
+            className="inputTypeIn"
+            type="password"
+            name="password"
+            value={inputs.password || ""}
+            onChange={handleChange}
+            placeholder="Password"
+            required
+          />
+          <input
+            id="phoneInput"
+            className="inputTypeIn"
+            type="tel"
+            name="phone"
+            value={inputs.phone || ""}
+            onChange={handleChange}
+            placeholder="Phone"
+            pattern="[0-9]{3}[0-9]{3}[0-9]{4}"
+            required
+          />
+          <input
+            id="emailInput"
+            className="inputTypeIn"
+            type="email"
+            name="email"
+            value={inputs.email || ""}
+            onChange={handleChange}
+            placeholder="Email"
+            required
+          />
+          
+          {/* Profile picture selection */}
+          <div className="profile-picture-container">
+            {profilePictureOptions.map((option) => (
+              <label key={option.value} className="profile-picture-option">
+                <input
+                  type="radio"
+                  name="profilePictureOption"
+                  value={option.value}
+                  checked={inputs.profilePictureOption === option.value}
+                  onChange={handleChange}
+                  required
+                />
+                <img src={option.value} alt={option.label} className="profile-picture-img" />
+              </label>
+            ))}
+          </div>
 
-        <div className="profile-picture-container">
-          {profilePictureOptions.map((option) => (
-            <label key={option.value} className="profile-picture-option">
-              <input
-                type="radio"
-                name="profilePictureOption"
-                value={option.value}
-                checked={inputs.profilePictureOption === option.value}
-                onChange={handleChange}
-                required
-              />
-              <img src={option.value} alt={option.label} className="profile-picture-img" style={{ width: '100px', height: '100px' }} />
-            </label>
-          ))}
-        </div>
+          <input
+            id="statusInput"
+            className="inputTypeIn"
+            type="text"
+            name="status"
+            value={inputs.status || ""}
+            onChange={handleChange}
+            placeholder="Status"
+            required
+          />
 
-        <input
-          id="statusInput"
-          className="inputTypeIn"
-          type="text"
-          name="status"
-          value={inputs.status || ""}
-          onChange={handleChange}
-          placeholder="Enter your status:"
-          required
-        />
-
-        <input id="registerButton" type="submit" name="submit" value="REGISTER" />
-      </form>
+          <button id="registerButton" type="submit">
+            REGISTER
+          </button>
+        </form>
+      </div>
     </div>
-
-  )
+  );
 }
-
-//id, name, username, email, address, phone, website, company

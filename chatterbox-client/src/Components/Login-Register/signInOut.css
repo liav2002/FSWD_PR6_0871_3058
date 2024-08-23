@@ -1,62 +1,156 @@
+/* General reset for margins, paddings, and box-sizing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #e9f5ff; /* Light background for contrast */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Container for both login and register */
 .login-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   height: 100vh;
-  background-color: #f4f4f4;
+  background-color: #e9f5ff;
 }
 
-.login-form {
-  width: 400px;
+/* The central login/register box */
+.login-box {
   background-color: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
 }
 
+/* Shared Heading for Login/Register */
 h1 {
-  font-size: 36px;
-  margin-bottom: 20px;
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #333;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
 }
 
+/* Shared input styling */
 .inputTypeIn {
   width: 100%;
-  padding: 10px;
-  margin: 0 auto 10px auto;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease-in-out;
 }
 
-#passwordInput {
-  margin: 0 auto 20px auto;
+.inputTypeIn:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
+/* Submit button styling (different for login and register) */
+#submitButton, 
+#registerButton {
+  padding: 12px;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
 
+/* Specific styling for login button */
 #submitButton {
   background-color: #007bff;
   color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 16px;
-  margin: 0 auto;
-
 }
 
 #submitButton:hover {
   background-color: #0056b3;
 }
 
-.loginLink {
-  margin-top: 10px;
-  text-decoration: none;
-  color: #007bff;
-  font-size: 14px;
-  cursor: pointer;
+/* Specific styling for register button */
+#registerButton {
+  background-color: #28a745;
+  color: white;
 }
 
-.loginLink:hover {
+#registerButton:hover {
+  background-color: #218838;
+}
+
+/* Profile picture selection styling */
+.profile-picture-container {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+}
+
+.profile-picture-option {
+  text-align: center;
+}
+
+.profile-picture-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+/* Highlight the selected profile picture */
+input[type="radio"]:checked + .profile-picture-img {
+  border-color: #007bff;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+/* Link styling for both login and register */
+.loginLink {
+  margin-top: 20px;
+  display: inline-block;
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.loginLink .link-text {
+  font-weight: bold;
+  color: #0056b3;
+}
+
+.loginLink:hover .link-text {
   text-decoration: underline;
+}
+
+/* Error Page Styling */
+.header404 {
+  font-size: 80px;
+  color: #ff4a4a;
+  margin-top: 50px;
+  text-align: center;
+}
+
+.body {
+  font-size: 24px;
+  color: #333;
+  text-align: center;
 }
