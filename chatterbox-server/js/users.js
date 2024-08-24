@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
 const bcrypt = require('bcrypt');
+const path = require('path');
+
+const adminUsers = [1];
 
 // Utility function to send a consistent JSON response
 function sendResponse(res, status, message, data = null) {
@@ -398,6 +402,48 @@ module.exports = (connection) => {
 
                 return sendResponse(res, 200, 'Users and groups retrieved successfully', combinedData);
             });
+        });
+    });
+
+    // Route to check if a user is an admin
+    router.get('/isAdmin', (req, res) => {
+        console.log("SERVER-DEBUG: router '/isAdmin' handler.");
+
+        // Extract the currentUserID from the query parameters and log it
+        const currentUserID = req.query.currentUserID;
+        console.log("SERVER-DEBUG: currentUserID <- " + currentUserID);
+
+        // Validate that the currentUserID is provided and is a positive integer
+        if (!currentUserID || isNaN(currentUserID) || parseInt(currentUserID) <= 0 || !Number.isInteger(Number(currentUserID))) {
+            console.error("SERVER-ERROR: Invalid or missing 'currentUserID'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'currentUserID' is required and must be a positive integer.");
+        }
+
+        // Path to the JSON file that stores the admin user IDs
+        const jsonFilePath = path.join(__dirname, '../data/admins.json');
+
+        // Read the JSON file asynchronously
+        fs.readFile(jsonFilePath, 'utf8', (err, data) => {
+            if (err) {
+                console.error("SERVER-ERROR: Failed to read 'admins.json'", err);
+                return sendResponse(res, 500, 'Internal Server Error: Could not read admin users file.');
+            }
+
+            // Parse the JSON data
+            let adminUsers;
+            try {
+                adminUsers = JSON.parse(data).adminUsers;
+            } catch (jsonErr) {
+                console.error("SERVER-ERROR: Error parsing 'admins.json'", jsonErr);
+                return sendResponse(res, 500, 'Internal Server Error: Could not parse admin users file.');
+            }
+
+            // Check if the user is an admin
+            const isAdmin = adminUsers.includes(parseInt(currentUserID)) ? 1 : 0;
+
+            // Log the result and send the response
+            console.log("SERVER-DEBUG: User isAdmin status:", isAdmin);
+            return sendResponse(res, 200, 'Admin status checked successfully.', { isAdmin });
         });
     });
 
