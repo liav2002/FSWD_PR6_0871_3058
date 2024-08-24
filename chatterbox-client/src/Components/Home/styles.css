@@ -304,7 +304,7 @@ img {
 .option-button {
   padding: 5px 10px;
   border: none;
-  background-color: #007bff;
+  background-color: #657485;
   color: white;
   border-radius: 5px;
   cursor: pointer;
@@ -313,7 +313,7 @@ img {
 }
 
 .option-button:hover {
-  background-color: #0056b3;
+  background-color: #505b67;
 }
 
 /* Edit Message Input */

@@ -484,130 +484,130 @@ export default function Home() {
   };
 
 
-  // const handleReportMessage = async (msg) => {
-  //   const newFlaggedMessage = {
-  //     msgId: msg.id,
-  //     checked: false,
-  //     sender: msg.sender,
-  //     receiver: msg.receiver,
-  //     text: msg.text,
-  //     date: new Date(msg.date).toISOString().slice(0, 19).replace('T', ' '), // Format the date
-  //     hour: msg.hour,
-  //     image: msg.image,
-  //     isItGroup: msg.isItGroup,
-  //     deleted: false
-  //   };
-  //   console.log(newFlaggedMessage);
-  //   try {
-  //     // Send a POST request to the server to add the new message
-  //     const response = await fetch(url + "/messages/reportMessage", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(newFlaggedMessage),
-  //     });
-  //     if (response.ok) {
-  //       // If the server successfully added the message, update the messages list
-  //       //const responseData = await response.json();
-  //       const NewFlaggedMsgId = await response.json();
-  //       newFlaggedMessage["id"] = NewFlaggedMsgId;
-  //       setFlaggedMessage([...FlaggedMessages, newFlaggedMessage])
+  const handleReportMessage = async (msg) => {
+    const newFlaggedMessage = {
+      msgId: msg.id,
+      checked: false,
+      sender: msg.sender,
+      receiver: msg.receiver,
+      text: msg.text,
+      date: new Date(msg.date).toISOString().slice(0, 19).replace('T', ' '), // Format the date
+      hour: msg.hour,
+      image: msg.image,
+      isItGroup: msg.isItGroup,
+      deleted: false
+    };
+    console.log(newFlaggedMessage);
+    try {
+      // Send a POST request to the server to add the new message
+      const response = await fetch(url + "/messages/reportMessage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newFlaggedMessage),
+      });
+      if (response.ok) {
+        // If the server successfully added the message, update the messages list
+        //const responseData = await response.json();
+        const NewFlaggedMsgId = await response.json();
+        newFlaggedMessage["id"] = NewFlaggedMsgId;
+        setFlaggedMessage([...FlaggedMessages, newFlaggedMessage])
 
-  //     } else {
+      } else {
 
-  //       console.error("Failed to add the new flagged message.");
-  //     }
-  //   } catch (error) {
-  //     console.error("An error occurred while adding the new flagged message:", error);
-  //   }
+        console.error("Failed to add the new flagged message.");
+      }
+    } catch (error) {
+      console.error("An error occurred while adding the new flagged message:", error);
+    }
 
-  //   try {
-  //     const response = await fetch(
-  //       url + `/messages/flagged?id=${msg.id}&flagged=${true}`, //lior
-  //       {
-  //         method: "PUT",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error("Request failed for updating messages");
-  //     }
-  //     const contentType = response.headers.get("Content-Type");
-  //     if (contentType && contentType.includes("application/json")) {
-  //       const data = await response.json();
-  //       console.log(data);
-  //       setMessages(prevState => {
-  //         // Loop over your list
-  //         return prevState.map((item) => {
-  //           // Check for the item with the specified id and update it
-  //           return item.id === msg.id ? { ...item, flagged: data } : item
-  //         })
-  //       })
-  //     }
-
-
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // }
+    try {
+      const response = await fetch(
+        url + `/messages/flagged?id=${msg.id}&flagged=${true}`, //lior
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Request failed for updating messages");
+      }
+      const contentType = response.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log(data);
+        setMessages(prevState => {
+          // Loop over your list
+          return prevState.map((item) => {
+            // Check for the item with the specified id and update it
+            return item.id === msg.id ? { ...item, flagged: data } : item
+          })
+        })
+      }
 
 
-  // const RemoveReport = async (msgId) => {
-  //   try { 
-  //     const response = await fetch(url + `/messages/id?id=${msgId}`, { //lior
-  //       method: "DELETE",
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //     },
-  //     });
-  //     if (!response.ok) {
-  //       throw new Error("Request failed for deleting flagged message");
-  //     }
-  //     const data = await response.json();
-  //     console.log(data);
-  //     setFlaggedMessage((prevMsg) => {
-  //       return prevMsg.filter((flagged_msg) => flagged_msg.id !== msgId);
-  //     });
-
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-
-  //   try {
-  //     const response = await fetch(
-  //       url + `/messages/flagged?id=${msgId}&flagged=${false}`, //lior
-  //       {
-  //         method: "PUT",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error("Request failed for updating messages");
-  //     }
-  //     const contentType = response.headers.get("Content-Type");
-  //     if (contentType && contentType.includes("application/json")) {
-  //       const data = await response.json();
-  //       console.log(data);
-  //       setMessages(prevState => {
-  //         // Loop over your list
-  //         return prevState.map((item) => {
-  //           // Check for the item with the specified id and update it
-  //           return item.id === msgId ? { ...item, flagged: data } : item
-  //         })
-  //       })
-  //     }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
 
 
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
+  const RemoveReport = async (msgId) => {
+    try { 
+      const response = await fetch(url + `/messages/id?id=${msgId}`, { //lior
+        method: "DELETE",
+        headers: {
+          'Content-Type': 'application/json',
+      },
+      });
+      if (!response.ok) {
+        throw new Error("Request failed for deleting flagged message");
+      }
+      const data = await response.json();
+      console.log(data);
+      setFlaggedMessage((prevMsg) => {
+        return prevMsg.filter((flagged_msg) => flagged_msg.id !== msgId);
+      });
 
-  // }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+
+    try {
+      const response = await fetch(
+        url + `/messages/flagged?id=${msgId}&flagged=${false}`, //lior
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Request failed for updating messages");
+      }
+      const contentType = response.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log(data);
+        setMessages(prevState => {
+          // Loop over your list
+          return prevState.map((item) => {
+            // Check for the item with the specified id and update it
+            return item.id === msgId ? { ...item, flagged: data } : item
+          })
+        })
+      }
+
+
+    } catch (error) {
+      console.error("Error:", error);
+    }
+
+  }
 
 
   const AddNewGroup = async () => {
@@ -855,7 +855,7 @@ export default function Home() {
                         />
                       )}
 
-                      {/* Show options if the message is yours and it's not in edit mode */}
+                      {/* Show options for your own message */}
                       {isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (
                         <div className="message-options">
                           <button className="option-button" onClick={() => handleEditMessage(msg.id, msg.text)}>Edit</button>
@@ -863,9 +863,22 @@ export default function Home() {
                         </div>
                       )}
 
+                      {/* Show Report/Unreport options for other user's message */}
+                      {!isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (
+                        <div className="message-options">
+                          {msg.flagged === 1 ? (
+                            <button className="option-button" onClick={() => RemoveReport(msg.id)}>Unreport</button>
+                          ) : (
+                            <button className="option-button" onClick={() => handleReportMessage(msg)}>Report</button>
+                          )}
+                        </div>
+                      )}
+
                       {/* Display "Modified" label if the message has been modified */}
                       {msg.modified === 1 && (
-                        <p className="modified-indicator">This message was edited</p>
+                        <p className="modified-indicator">
+                          {isMyMessage ? "This message was edited" : "This message was edited by the sender"}
+                        </p>
                       )}
                     </div>
                   );
