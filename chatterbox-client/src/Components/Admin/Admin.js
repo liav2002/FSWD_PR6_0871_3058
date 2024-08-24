@@ -113,7 +113,7 @@ export default function Admin() {
 
   const handleKeepClick = async (reported_msg) => {
     try {
-      const response = await fetch(url + `/reports/markMessageChecked/${reported_msg.id}`, {
+      const response = await fetch(url + `/reports/markMessageChecked/${reported_msg.msgId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ export default function Admin() {
 
   const handleDeleteClick = async (reported_msg) => {
     try {
-      const response = await fetch(url + `/reports/deleteReportedMessage/${reported_msg.id}`, {
+      const response = await fetch(url + `/reports/deleteReportedMessage/${reported_msg.msgId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
