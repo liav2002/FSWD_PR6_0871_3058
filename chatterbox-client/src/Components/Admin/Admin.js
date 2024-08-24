@@ -180,21 +180,32 @@ export default function Admin() {
 
   const Content2 = () => (
     <div className="admin-reported-message-list">
-      {Reported_msg.map((reported_msg) => (
-        <li key={reported_msg.id} className="admin-reported-item">
-          {reported_msg.text && (
-            <p className="admin-reported-text">{reported_msg.text}</p>
-          )}
+      {Reported_msg.map((reported_msg) => {
+        // Find the sender and receiver from the users array
+        const sender = users.find(user => user.id === reported_msg.sender);
+        const receiver = users.find(user => user.id === reported_msg.receiver);
 
-          {reported_msg.image && (
-            <img src={reported_msg.image} alt="Reported Message Image" className="admin-message-image" />
-          )}
-          <div className="admin-reported-actions">
-            <button className="admin-keep-button" onClick={() => handleKeepClick(reported_msg)}>Keep</button>
-            <button className="admin-delete-button" onClick={() => handleDeleteClick(reported_msg)}>Delete</button>
-          </div>
-        </li>
-      ))}
+        return (
+          <li key={reported_msg.id} className="admin-reported-item">
+            {reported_msg.text && (
+              <p className="admin-reported-text">{reported_msg.text}</p>
+            )}
+
+            {reported_msg.image && (
+              <img src={reported_msg.image} alt="Reported Message Image" className="admin-message-image" />
+            )}
+
+            <p className="admin-reported-sender-receiver">
+              Sent by: {sender ? sender.name : 'Unknown'} to {receiver ? receiver.name : 'Unknown'}
+            </p>
+
+            <div className="admin-reported-actions">
+              <button className="admin-keep-button" onClick={() => handleKeepClick(reported_msg)}>Keep</button>
+              <button className="admin-delete-button" onClick={() => handleDeleteClick(reported_msg)}>Delete</button>
+            </div>
+          </li>
+        );
+      })}
     </div>
   );
 
@@ -233,53 +244,76 @@ export default function Admin() {
         <button className="admin-button" onClick={() => handleShowKeptMessagesClick()}>Show Kept Messages</button>
         <button className="admin-button" onClick={() => handleShowDeletedMessagesClick()}>Show Deleted Messages</button>
       </div>
-
+  
       <div className={`admin-message-list ${showAllCheckedMsg ? 'show-section' : 'hide-section'}`}>
         <h3 className="admin-list-title">Messages Checked</h3>
-        {Reported_msgChecked.map((kept_msg) => (
-          <li key={kept_msg.id} className="admin-message-item">
-            {kept_msg.text && (
-              <p className="admin-message-text">{kept_msg.text}</p>
-            )}
-
-            {kept_msg.image && (
-              <img src={kept_msg.image} alt="Reported Message Image" className="admin-message-image" />
-            )}
-          </li>
-        ))}
+        {Reported_msgChecked.map((kept_msg) => {
+          const sender = users.find(user => user.id === kept_msg.sender);
+          const receiver = users.find(user => user.id === kept_msg.receiver);
+  
+          return (
+            <li key={kept_msg.id} className="admin-message-item">
+              {kept_msg.text && (
+                <p className="admin-message-text">{kept_msg.text}</p>
+              )}
+              {kept_msg.image && (
+                <img src={kept_msg.image} alt="Reported Message Image" className="admin-message-image" />
+              )}
+              <p className="admin-message-sender">
+                Sent by: {sender?.name || "Unknown"} to {receiver?.name || "Unknown"}
+              </p>
+            </li>
+          );
+        })}
       </div>
-
+  
       <div className={`admin-message-list ${showKept ? 'show-section' : 'hide-section'}`}>
         <h3 className="admin-list-title">Kept Messages</h3>
-        {msg_kept.map((kept_msg) => (
-          <li key={kept_msg.id} className="admin-message-item">
-            {kept_msg.text && (
-              <p className="admin-message-text">{kept_msg.text}</p>
-            )}
-
-            {kept_msg.image && (
-              <img src={kept_msg.image} alt="Reported Message Image" className="admin-message-image" />
-            )}
-          </li>
-        ))}
+        {msg_kept.map((kept_msg) => {
+          const sender = users.find(user => user.id === kept_msg.sender);
+          const receiver = users.find(user => user.id === kept_msg.receiver);
+  
+          return (
+            <li key={kept_msg.id} className="admin-message-item">
+              {kept_msg.text && (
+                <p className="admin-message-text">{kept_msg.text}</p>
+              )}
+              {kept_msg.image && (
+                <img src={kept_msg.image} alt="Reported Message Image" className="admin-message-image" />
+              )}
+              <p className="admin-message-sender">
+                Sent by: {sender?.name || "Unknown"} to {receiver?.name || "Unknown"}
+              </p>
+            </li>
+          );
+        })}
       </div>
-
+  
       <div className={`admin-message-list ${showDeleted ? 'show-section' : 'hide-section'}`}>
         <h3 className="admin-list-title">Deleted Messages</h3>
-        {deleted_msg.map((deleted_msg) => (
-          <li key={deleted_msg.id} className="admin-message-item">
-            {deleted_msg.text && (
-              <p className="admin-message-text">{deleted_msg.text}</p>
-            )}
-
-            {deleted_msg.image && (
-              <img src={deleted_msg.image} alt="Reported Message Image" className="admin-message-image" />
-            )}
-          </li>
-        ))}
+        {deleted_msg.map((deleted_msg) => {
+          const sender = users.find(user => user.id === deleted_msg.sender);
+          const receiver = users.find(user => user.id === deleted_msg.receiver);
+  
+          return (
+            <li key={deleted_msg.id} className="admin-message-item">
+              {deleted_msg.text && (
+                <p className="admin-message-text">{deleted_msg.text}</p>
+              )}
+              {deleted_msg.image && (
+                <img src={deleted_msg.image} alt="Reported Message Image" className="admin-message-image" />
+              )}
+              <p className="admin-message-sender">
+                Sent by: {sender?.name || "Unknown"} to {receiver?.name || "Unknown"}
+              </p>
+            </li>
+          );
+        })}
       </div>
     </div>
   );
+  
+  
 
 
   return (
