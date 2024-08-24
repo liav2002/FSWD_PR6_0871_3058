@@ -59,12 +59,14 @@ export default function GroupProfil() {
 
   return (
     <div className="group-profile-container">
-      <img
-        src="https://img.icons8.com/?size=512&id=6483&format=png"
-        onClick={ReturnToHome}
-        className="return-to-home"
-        alt="Return to Home"
-      />
+      <div className="return-to-home-wrapper">
+        <img
+          src="https://img.icons8.com/?size=512&id=6483&format=png"
+          onClick={ReturnToHome}
+          className="return-to-home"
+          alt="Return to Home"
+        />
+      </div>
       <div className="group-profile-main">
         <div className="group-profile-content">
           <p className="group-profile-title">Group Information</p>

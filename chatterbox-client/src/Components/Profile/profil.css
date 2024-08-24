@@ -1,27 +1,42 @@
-/* General styles */
-.return-to-home {
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  position: absolute;
-  top: 20px;
-  left: 20px;
-}
-
-/* Your Profile Specific Styles */
-.your-profile-container {
+/* General styles for centering the profile containers */
+.your-profile-container,
+.contact-profile-container,
+.group-profile-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   background-color: #f0f0f0;
+  position: relative;
+  padding: 20px; /* Add padding for better centering */
 }
 
+/* Return to home button specific to each profile */
+.your-profile-container .return-to-home,
+.contact-profile-container .return-to-home,
+.group-profile-container .return-to-home {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;  /* Adjust positioning */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+}
+
+/* Your Profile Specific Styles */
+
+/* Increase the width of the white area */
 .your-profile-main {
   background-color: white;
-  padding: 20px;
+  padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 100%;
+  max-width: 500px;  /* Increased width */
+  text-align: center;
 }
 
 .your-profile-content {
@@ -47,17 +62,29 @@
   margin-right: 20px;
 }
 
-.your-profile-details input {
+.your-profile-image-container input {
+  margin-top: 10px;
+}
+
+.your-profile-details input,
+.your-profile-select {
   display: block;
   margin: 10px 0;
-  padding: 8px;
-  width: 100%;
+  padding: 12px;  /* Increase padding for larger input boxes */
+  width: 100%;    /* Increase width to fill the container */
+  max-width: 350px; /* Set a max-width */
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
-.your-profile-content button {
-  padding: 10px 20px;
+.your-profile-select {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.your-profile-save-btn {
+  padding: 12px 24px;
   background-color: #007bff;
   color: white;
   border: none;
@@ -66,24 +93,20 @@
   margin-top: 15px;
 }
 
-.your-profile-content button:hover {
+.your-profile-save-btn:hover {
   background-color: #0056b3;
 }
 
 /* Contact Profile Specific Styles */
-.contact-profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0f0f0;
-}
-
 .contact-profile-main {
   background-color: white;
-  padding: 20px;
+  padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
 }
 
 .contact-profile-content {
@@ -108,19 +131,15 @@
 }
 
 /* Group Profile Specific Styles */
-.group-profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0f0f0;
-}
-
 .group-profile-main {
   background-color: white;
-  padding: 20px;
+  padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
 }
 
 .group-profile-content {
