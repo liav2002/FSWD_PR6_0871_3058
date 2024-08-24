@@ -160,5 +160,59 @@ module.exports = (connection) => {
         });
     });
 
+    // GET participants' names of a group
+    router.get('/GroupParticipants', (req, res) => {
+        console.log("SERVER-DEBUG: router '/GroupParticipants' handler.");
+
+        // Extract the GroupId from the query parameters and log it
+        const groupId = req.query.GroupId;
+        console.log("SERVER-DEBUG: group_id <- " + groupId);
+
+        // Validate that the groupId is provided and is a positive integer
+        if (!groupId || isNaN(groupId) || parseInt(groupId) <= 0 || !Number.isInteger(Number(groupId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'GroupId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'GroupId' is required and must be a positive integer.");
+        }
+
+        // Retrieve the participantsId array from the chat_groups table
+        const query = 'SELECT participantsId FROM chat_groups WHERE id = ?';
+
+        connection.query(query, [parseInt(groupId)], (err, results) => {
+            if (err) {
+                console.error("SERVER-ERROR: Error in request execution", err);
+                return sendResponse(res, 500, 'An error occurred while retrieving participants.');
+            }
+
+            // Check if the group exists
+            if (results.length === 0) {
+                console.log("SERVER-DEBUG: No group found with the provided 'GroupId'.");
+                return sendResponse(res, 404, 'Group not found.');
+            }
+
+            // Log the raw participantsId for debugging purposes
+            const participantsIds = results[0].participantsId;
+            console.log("SERVER-DEBUG: Raw participantsId from DB:", participantsIds);
+
+            // Ensure participantsIds is an array
+            if (!Array.isArray(participantsIds)) {
+                console.error("SERVER-ERROR: participantsId is not a valid array.");
+                return sendResponse(res, 500, "Invalid participantsId format.");
+            }
+
+            // Retrieve participant details
+            const participantQuery = 'SELECT id, name FROM users WHERE id IN (?)';
+
+            connection.query(participantQuery, [participantsIds], (err, participants) => {
+                if (err) {
+                    console.error("SERVER-ERROR: Error in retrieving participants", err);
+                    return sendResponse(res, 500, 'An error occurred while retrieving participant details.');
+                }
+
+                console.log("SERVER-DEBUG: Participants details:", participants);
+                return sendResponse(res, 200, 'Participants retrieved successfully.', participants);
+            });
+        });
+    });
+
     return router;
 };

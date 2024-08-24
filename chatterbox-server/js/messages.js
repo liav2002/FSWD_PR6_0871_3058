@@ -49,10 +49,7 @@ module.exports = (connection) => {
                 return sendResponse(res, 500, "Error retrieving messages.");
             }
 
-            if (rows.length === 0) {
-                console.log("SERVER-DEBUG: No messages found between the users.");
-                return sendResponse(res, 404, "No messages found between the users.");
-            }
+          
 
             console.log("SERVER-DEBUG: Messages retrieved successfully:", rows);
             return sendResponse(res, 200, "Messages retrieved successfully", rows);

@@ -71,7 +71,7 @@ module.exports = (connection) => {
                     name: user.name,
                     phone: user.phone,
                     email: user.email,
-                    profile: user.profil,
+                    profil: user.profil,
                     status: user.status
                 };
 

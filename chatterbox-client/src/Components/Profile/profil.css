@@ -1,0 +1,201 @@
+/* General styles for centering the profile containers */
+.your-profile-container,
+.contact-profile-container,
+.group-profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+  position: relative;
+  padding: 20px; /* Add padding for better centering */
+}
+
+/* Return to home button specific to each profile */
+.your-profile-container .return-to-home,
+.contact-profile-container .return-to-home,
+.group-profile-container .return-to-home {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;  /* Adjust positioning */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+}
+
+/* Your Profile Specific Styles */
+
+/* Increase the width of the white area */
+.your-profile-main {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 100%;
+  max-width: 500px;  /* Increased width */
+  text-align: center;
+}
+
+.your-profile-content {
+  text-align: center;
+}
+
+.your-profile-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.your-profile-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.your-profile-image-container img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.your-profile-image-container input {
+  margin-top: 10px;
+}
+
+.your-profile-details input,
+.your-profile-select {
+  display: block;
+  margin: 10px 0;
+  padding: 12px;  /* Increase padding for larger input boxes */
+  width: 100%;    /* Increase width to fill the container */
+  max-width: 350px; /* Set a max-width */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.your-profile-select {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.your-profile-save-btn {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.your-profile-save-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Contact Profile Specific Styles */
+.contact-profile-main {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.contact-profile-content {
+  text-align: center;
+}
+
+.contact-profile-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.contact-profile-info img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+}
+
+.contact-profile-info p {
+  margin: 5px 0;
+}
+
+/* Group Profile Specific Styles */
+.group-profile-main {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.group-profile-content {
+  text-align: center;
+}
+
+.group-profile-main-title {
+  font-size: 24px; /* Larger font size */
+  font-weight: 700; /* Extra bold */
+  color: #333; /* Darker color */
+  margin-bottom: 10px;
+  text-transform: uppercase; /* Make title uppercase */
+}
+
+.group-profile-title {
+  font-size: 16px; /* Larger font size */
+  font-weight: 700; /* Extra bold */
+  color: #333; /* Darker color */
+  margin-bottom: 10px;
+  text-transform: uppercase; /* Make title uppercase */
+}
+
+.group-profile-description {
+  font-size: 18px; /* Increased font size for description */
+  font-family: 'Georgia', serif; /* Elegant serif font for description */
+  color: #666; /* Light gray for description text */
+  margin-bottom: 20px;
+  line-height: 1.6; /* Add some spacing between lines */
+  text-align: center;
+}
+
+.group-profile-info img {
+  width: 100px; /* Increase the size of the image */
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+}
+
+/* Participants list styling */
+.group-profile-info ul {
+  list-style-type: none;
+  padding: 0;
+  max-height: 100px; /* Limit the height */
+  overflow-y: auto; /* Add vertical scrollbar when needed */
+}
+
+.group-profile-info ul li {
+  margin: 5px 0;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #f0f0f0; /* Add a background color to participants */
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.group-profile-info ul li:hover {
+  background-color: #e0e0e0;
+}
+

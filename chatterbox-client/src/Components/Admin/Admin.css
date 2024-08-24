@@ -1,0 +1,277 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-menu {
+  width: 220px;
+  background-color: #333;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.admin-menu-button {
+  display: block;
+  width: 100%;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border: none;
+  background-color: #444;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.admin-menu-button:hover {
+  background-color: #555;
+}
+
+.admin-menu-button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.admin-return-home-icon {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 30px;
+  cursor: pointer;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+}
+
+.admin-user-list,
+.admin-reported-message-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-user-item,
+.admin-reported-item {
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.admin-user-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.admin-user-button:hover {
+  background-color: #0056b3;
+}
+
+/* Admin Reported Message Styling */
+.admin-message-text {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.admin-message-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.admin-reported-sender-receiver {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+/* Center the buttons below the content */
+.admin-reported-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.admin-keep-button,
+.admin-delete-button {
+  padding: 10px 20px;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.admin-keep-button {
+  background-color: #28a745;
+}
+
+.admin-keep-button:hover {
+  background-color: #218838;
+}
+
+.admin-delete-button {
+  background-color: #dc3545;
+}
+
+.admin-delete-button:hover {
+  background-color: #c82333;
+}
+
+.admin-content-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.admin-button:hover {
+  background-color: #0056b3;
+}
+
+/* Message List (Content3) */
+.admin-message-list {
+  margin-top: 20px;
+}
+
+.admin-list-title {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
+}
+
+.admin-message-item {
+  list-style: none;
+  padding: 20px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+}
+
+.admin-message-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.show-section {
+  display: block;
+}
+
+.hide-section {
+  display: none;
+}
+
+/* Contacts Section */
+.admin-contacts-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+  background-color: #f9f9f9;
+  height: 80vh;
+  overflow-y: auto;
+}
+
+.admin-contacts-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-contacts-section::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.admin-contacts-section::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+.admin-contact-item {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-contact-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.admin-contact-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.admin-contact-details {
+  flex: 1;
+}
+
+.admin-contact-name {
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.admin-contact-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.admin-contact-button:hover {
+  background-color: #0056b3;
+}
