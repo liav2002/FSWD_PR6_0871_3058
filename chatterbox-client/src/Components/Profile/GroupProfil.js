@@ -1,5 +1,5 @@
-import React from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./profil.css";
 
@@ -14,7 +14,7 @@ export default function GroupProfil() {
 
   const fetchGroupInfos = async () => {
     try {
-      const response = await fetch(url + `/groups/GroupInfo?GroupId=${id}`, {
+      const response = await fetch(`${url}/groups/GroupInfo?GroupId=${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -22,86 +22,65 @@ export default function GroupProfil() {
       });
       if (response.ok) {
         const groupData = await response.json();
-        setSelectedGroup(groupData)
+        setSelectedGroup(groupData);
         fetchParticipantsInfos(groupData);
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
     }
+  };
 
-  }
-
-  const fetchParticipantsInfos = async (selectedGroup) => {
-    console.log("list participants", selectedGroup.participantsId);
-    const participantsInfoPromises = (selectedGroup.participantsId).map(async (participantId) => {
-      const participantResponse = await fetch(url + `/users/UserInfo?UserId=${participantId}`, {
+  const fetchParticipantsInfos = async (group) => {
+    const participantsInfoPromises = group.participantsId.map(async (participantId) => {
+      const participantResponse = await fetch(`${url}/users/UserInfo?UserId=${participantId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (participantResponse.ok) {
-        const participantData = await participantResponse.json();
-        return participantData;
+        return await participantResponse.json();
       } else {
-        console.error(`Request for participant with ID ${participantId} failed with status code ${participantResponse.status}`);
+        console.error(`Failed for participant ID: ${participantId}`);
         return null;
       }
     });
     const participantsInfo = await Promise.all(participantsInfoPromises);
-    const filteredParticipantsInfo = participantsInfo.filter(info => info !== null);
-    setParticipantsList(filteredParticipantsInfo);
-  }
+    setParticipantsList(participantsInfo.filter((info) => info !== null));
+  };
 
-
-  const ReturnToHome = async () => {
-    if (currentUser) {
-      if (currentUser.name === "Admin") {
-        navigate(`/admin`);
-      }
-      else {
-        navigate(`/${currentUser.phone}`);
-      }
-    }
-  }
+  const ReturnToHome = () => navigate(`/${currentUser.phone}`);
 
   useEffect(() => {
     fetchGroupInfos();
   }, []);
 
-  const handleUserClick = async (user) => {
-    navigate(`/contact_profil/${user.id}`)
-  }
-
   return (
-    <div>
-      <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="returnToHome"></img>
-      <div className="main_content">
-        <div className="contact_info_div">
-
-          <p className="contact_info_title">Group information:</p>
-          {selectedGroup != null ? (
-            <div className="user_info_container">
-              <div className="user_info">
-                <div>
-                  <img src={selectedGroup.profil} className="img_contact_display_info" alt="Group Profile" />
-                </div>
-                <div className="user_details">
-                  <p className="info_user_txt">{selectedGroup.title}</p>
-                </div>
-              </div>
-              <div className="user_status">
-                <p className="info_title">Description:</p>
-                <span className="info_content">{selectedGroup.description}</span>
-                <p className="info_title">Participants:</p>
+    <div className="group-profile-container">
+      <img
+        src="https://img.icons8.com/?size=512&id=6483&format=png"
+        onClick={ReturnToHome}
+        className="return-to-home"
+        alt="Return to Home"
+      />
+      <div className="group-profile-main">
+        <div className="group-profile-content">
+          <p className="group-profile-title">Group Information</p>
+          {selectedGroup && (
+            <div className="group-profile-info">
+              <img src={selectedGroup.profil} alt="Group Profile" />
+              <p>{selectedGroup.title}</p>
+              <p>{selectedGroup.description}</p>
+              <p>Participants:</p>
+              <ul>
                 {participantsList.map((user) => (
-                  <button onClick={() => handleUserClick(user)}>{user.name}</button>
+                  <li key={user.id}>{user.name}</li>
                 ))}
-              </div>
+              </ul>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
