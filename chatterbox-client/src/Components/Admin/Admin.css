@@ -3,7 +3,7 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-
+  font-family: Arial, sans-serif;
 }
 
 .admin-container {
@@ -11,97 +11,162 @@ body {
   min-height: 100vh;
 }
 
-.message-image {
-  width: 60px;
-  height: 60px;
-}
-
-.menu {
-  width: 200px;
-  background-color: #f0f0f0;
+.admin-menu {
+  width: 220px;
+  background-color: #333;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.menu button {
+.admin-menu-button {
   display: block;
   width: 100%;
   padding: 10px 15px;
   margin-bottom: 10px;
   border: none;
-  background-color: #ddd;
-  color: #333;
+  background-color: #444;
+  color: white;
   font-size: 16px;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.menu button:hover {
-  background-color: #ccc;
+.admin-menu-button:hover {
+  background-color: #555;
 }
 
-.menu button.active {
-  background-color: #555;
+.admin-menu-button.active {
+  background-color: #007bff;
   color: white;
 }
 
-.content {
+.admin-return-home-icon {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 30px;
+  cursor: pointer;
+}
+
+.admin-content {
   flex: 1;
-  padding: 20px;
-  background-color: #fff;
+  padding: 30px;
+  background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow: auto;
 }
 
-.section-content {
-  display: none;
-  margin-top: 20px;
+.admin-user-list,
+.admin-reported-message-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.section-content.active {
-  display: block;
+.admin-user-item,
+.admin-reported-item {
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  background-color: white;
+  border-radius: 5px;
 }
 
+.admin-user-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
 
-.content-buttons {
+.admin-user-button:hover {
+  background-color: #0056b3;
+}
+
+.admin-reported-text {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.admin-message-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.admin-reported-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-keep-button,
+.admin-delete-button {
+  padding: 8px 15px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.admin-keep-button {
+  background-color: #28a745;
+}
+
+.admin-keep-button:hover {
+  background-color: #218838;
+}
+
+.admin-delete-button {
+  background-color: #dc3545;
+}
+
+.admin-delete-button:hover {
+  background-color: #c82333;
+}
+
+.admin-content-buttons {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-.content-buttons button {
-  padding: 8px 15px;
+.admin-button {
+  padding: 10px 20px;
   border: none;
-  background-color: #555;
+  background-color: #007bff;
   color: white;
   cursor: pointer;
 }
 
-.content-buttons button:hover {
-  background-color: #444;
+.admin-button:hover {
+  background-color: #0056b3;
 }
 
-.message-list {
+.admin-message-list {
   margin-top: 20px;
 }
 
-.message-list h3 {
-  font-size: 18px;
-  margin-bottom: 10px;
+.admin-list-title {
+  font-size: 20px;
+  margin-bottom: 15px;
 }
 
-.message-list li {
-  padding: 10px;
+.admin-message-item {
+  padding: 15px;
   border: 1px solid #ccc;
-  background-color: #f9f9f9;
+  background-color: white;
+  border-radius: 5px;
   margin-bottom: 10px;
-  list-style: none;
 }
 
-.message-list p {
+.admin-message-text {
   margin: 0;
   font-size: 16px;
 }
@@ -114,66 +179,77 @@ body {
   display: none;
 }
 
-.user-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.user-list li {
-  margin-bottom: 10px;
-}
-
-.user-list button {
-  padding: 8px 15px;
-  background-color: #555;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.user-list button:hover {
-  background-color: #444;
-}
-
-.reported-message-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.reported-message-list li {
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #ccc;
+/* Contacts Section */
+.admin-contacts-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
   background-color: #f9f9f9;
+  height: 80vh; /* Set a fixed height */
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
-.reported-message-list p {
+.admin-contacts-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-contacts-section::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.admin-contacts-section::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+.admin-contact-item {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-contact-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.admin-contact-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.admin-contact-details {
+  flex: 1;
+}
+
+.admin-contact-name {
+  font-size: 20px;
+  color: #333;
   margin: 0;
-  font-size: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-.reported-message-list button {
-  padding: 6px 12px;
-  background-color: #e74c3c;
+.admin-contact-button {
+  padding: 10px 20px;
+  background-color: #007bff;
   color: white;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
-  margin-right: 10px;
-  transition: background-color 0.2s ease;
+  font-size: 16px;
 }
 
-.reported-message-list button.keep-button {
-  background-color: #2ecc71;
-}
-
-.reported-message-list button:hover {
-  background-color: #c0392b;
-}
-
-.reported-message-list button.keep-button:hover {
-  background-color: #27ae60;
+.admin-contact-button:hover {
+  background-color: #0056b3;
 }

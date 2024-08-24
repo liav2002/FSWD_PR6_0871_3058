@@ -106,6 +106,11 @@ export default function Admin() {
     setDeleted_msg(newDeletedMsg);
   };
 
+  // Function to navigate back to home
+  const ReturnToHome = () => {
+    navigate(`/${currentUser.phone}`); // Redirect to the home route
+  };
+
 
   const handleUserClick = async (user) => {
     navigate(`/contact_profil/${user.id}`)
@@ -157,30 +162,37 @@ export default function Admin() {
 
 
   const Content1 = () => (
-    <div className="user-list">
+    <div className="admin-contacts-section">
       {users.map((user) => (
-        <li key={user.id}>
-          <button onClick={() => handleUserClick(user)}>{user.name}</button>
-        </li>
+        <div key={user.id} className="admin-contact-item">
+          <img src={user.profil} alt={user.name} className="admin-contact-avatar" />
+          <div className="admin-contact-details">
+            <h3 className="admin-contact-name">{user.name}</h3>
+            <button onClick={() => handleUserClick(user)} className="admin-contact-button">
+              View Profile
+            </button>
+          </div>
+        </div>
       ))}
     </div>
   );
 
 
   const Content2 = () => (
-    <div className="reported-message-list">
+    <div className="admin-reported-message-list">
       {Reported_msg.map((reported_msg) => (
-        <li key={reported_msg.id}>
+        <li key={reported_msg.id} className="admin-reported-item">
           {reported_msg.text && (
-            <p>{reported_msg.text}</p>
+            <p className="admin-reported-text">{reported_msg.text}</p>
           )}
 
           {reported_msg.image && (
-            <img src={reported_msg.image} alt="Reported Message Image" className="message-image" />
+            <img src={reported_msg.image} alt="Reported Message Image" className="admin-message-image" />
           )}
-          <br />
-          <button className="keep-button" onClick={() => handleKeepClick(reported_msg)}>Keep</button>
-          <button onClick={() => handleDeleteClick(reported_msg)}>Delete</button>
+          <div className="admin-reported-actions">
+            <button className="admin-keep-button" onClick={() => handleKeepClick(reported_msg)}>Keep</button>
+            <button className="admin-delete-button" onClick={() => handleDeleteClick(reported_msg)}>Delete</button>
+          </div>
         </li>
       ))}
     </div>
@@ -216,53 +228,52 @@ export default function Admin() {
 
   const Content3 = () => (
     <div>
-      <div className="content-buttons">
-        <button onClick={() => handleShowAllMessagesClick()}>Show All Messages</button>
-        <button onClick={() => handleShowKeptMessagesClick()}>Show Kept Messages</button>
-        <button onClick={() => handleShowDeletedMessagesClick()}>Show Deleted Messages</button>
+      <div className="admin-content-buttons">
+        <button className="admin-button" onClick={() => handleShowAllMessagesClick()}>Show All Messages</button>
+        <button className="admin-button" onClick={() => handleShowKeptMessagesClick()}>Show Kept Messages</button>
+        <button className="admin-button" onClick={() => handleShowDeletedMessagesClick()}>Show Deleted Messages</button>
       </div>
 
-      <div className={`message-list ${showAllCheckedMsg ? 'show-section' : 'hide-section'}`}>
-        <h3>Messages Checked</h3>
+      <div className={`admin-message-list ${showAllCheckedMsg ? 'show-section' : 'hide-section'}`}>
+        <h3 className="admin-list-title">Messages Checked</h3>
         {Reported_msgChecked.map((kept_msg) => (
-          <li key={kept_msg.id}>
+          <li key={kept_msg.id} className="admin-message-item">
             {kept_msg.text && (
-              <p>{kept_msg.text}</p>
+              <p className="admin-message-text">{kept_msg.text}</p>
             )}
 
             {kept_msg.image && (
-              <img src={kept_msg.image} alt="Reported Message Image" className="message-image" />
+              <img src={kept_msg.image} alt="Reported Message Image" className="admin-message-image" />
             )}
-
           </li>
         ))}
       </div>
 
-      <div className={`message-list ${showKept ? 'show-section' : 'hide-section'}`}>
-        <h3>Kept Messages</h3>
+      <div className={`admin-message-list ${showKept ? 'show-section' : 'hide-section'}`}>
+        <h3 className="admin-list-title">Kept Messages</h3>
         {msg_kept.map((kept_msg) => (
-          <li key={kept_msg.id}>
+          <li key={kept_msg.id} className="admin-message-item">
             {kept_msg.text && (
-              <p>{kept_msg.text}</p>
+              <p className="admin-message-text">{kept_msg.text}</p>
             )}
 
             {kept_msg.image && (
-              <img src={kept_msg.image} alt="Reported Message Image" className="message-image" />
+              <img src={kept_msg.image} alt="Reported Message Image" className="admin-message-image" />
             )}
           </li>
         ))}
       </div>
 
-      <div className={`message-list ${showDeleted ? 'show-section' : 'hide-section'}`}>
-        <h3>Deleted Messages</h3>
+      <div className={`admin-message-list ${showDeleted ? 'show-section' : 'hide-section'}`}>
+        <h3 className="admin-list-title">Deleted Messages</h3>
         {deleted_msg.map((deleted_msg) => (
-          <li key={deleted_msg.id}>
+          <li key={deleted_msg.id} className="admin-message-item">
             {deleted_msg.text && (
-              <p>{deleted_msg.text}</p>
+              <p className="admin-message-text">{deleted_msg.text}</p>
             )}
 
             {deleted_msg.image && (
-              <img src={deleted_msg.image} alt="Reported Message Image" className="message-image" />
+              <img src={deleted_msg.image} alt="Reported Message Image" className="admin-message-image" />
             )}
           </li>
         ))}
@@ -271,28 +282,18 @@ export default function Admin() {
   );
 
 
-  const LogOut = async () => {
-    if (currentUser) {
-      const currentTime = new Date().toLocaleString();
-      const cookies = new Cookies();
-      cookies.set(JSON.stringify(currentUser.email), currentTime, { path: '/' });
-      localStorage.removeItem("currentUser");
-    }
-    navigate("/", { replace: true });
-  }
-
-
   return (
     <div className="admin-container">
 
-      <div className="menu">
-        <img src="https://icon-library.com/images/logout-icon-png/logout-icon-png-20.jpg" onClick={() => LogOut()} className="log_out_icon"></img>
-        <button onClick={() => handleChoiceClick("contacts")}>contacts</button>
-        <button onClick={() => handleChoiceClick("messages to check")}>messages to check</button>
-        <button onClick={() => handleChoiceClick("All checked messages")}>All checked messages</button>
+      <div className="admin-menu">
+        {/* Changed the LogOut button to the ReturnToHome button */}
+        <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="admin-return-home-icon" alt="Return to Home" />
+        <button className={`admin-menu-button ${selectedChoice === 'contacts' ? 'active' : ''}`} onClick={() => handleChoiceClick("contacts")}>Contacts</button>
+        <button className={`admin-menu-button ${selectedChoice === 'messages to check' ? 'active' : ''}`} onClick={() => handleChoiceClick("messages to check")}>Messages to Check</button>
+        <button className={`admin-menu-button ${selectedChoice === 'All checked messages' ? 'active' : ''}`} onClick={() => handleChoiceClick("All checked messages")}>All Checked Messages</button>
       </div>
 
-      <div className="content">
+      <div className="admin-content">
         {selectedChoice === "contacts" && <Content1 />}
         {selectedChoice === "messages to check" && <Content2 />}
         {selectedChoice === "All checked messages" && <Content3 />}
