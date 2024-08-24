@@ -67,6 +67,10 @@ export default function GroupProfil() {
 
   const ReturnToHome = () => navigate(`/${currentUser.phone}`);
 
+  const handleParticipantClick = async (user) => {
+    navigate(`/contact_profil/${user.id}`)
+  };
+
   useEffect(() => {
     fetchGroupInfos();
   }, []);
@@ -92,7 +96,9 @@ export default function GroupProfil() {
               <p>Participants:</p>
               <ul>
                 {participantsList.map((user) => (
-                  <li key={user.id}>{user.name}</li>
+                  <li key={user.id} onClick={() => handleParticipantClick(user)}>
+                    {user.name}
+                  </li>
                 ))}
               </ul>
             </div>
