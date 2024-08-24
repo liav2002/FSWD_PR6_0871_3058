@@ -6,6 +6,7 @@ const url = 'http://localhost:5002';
 
 
 export default function Home() {
+  const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [usersWithUnread, setUsersWithUnread] = useState([]);
@@ -27,6 +28,30 @@ export default function Home() {
   const currentUser = localStorage.getItem("currentUser")
     ? JSON.parse(localStorage.getItem("currentUser"))
     : null;
+
+  const fetchAdmin = async () => {
+    if (currentUser) {
+      try {
+        const response = await fetch(url + `/users/isAdmin?currentUserID=${currentUser.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const resp = await response.json();
+          if (resp.data.isAdmin === 1) setIsAdmin(true);
+          else setIsAdmin(false);
+        } else {
+          console.error(`Request failed with status code ${response.status}`);
+        }
+      } catch (error) {
+        console.error('An error occurred:', error);
+      }
+    }
+  };
+
+  fetchAdmin();
 
   const navigate = useNavigate();
   const cookies = new Cookies();
@@ -671,6 +696,9 @@ export default function Home() {
     }
   };
 
+  const handleAdminClick = () => {
+    navigate("/admin");
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -719,7 +747,7 @@ export default function Home() {
     return (
       <div className="home-container">
         <div className="left-div">
-          <div>
+          <div className="button-container">
             <span>
               <img
                 src="https://icon-library.com/images/logout-icon-png/logout-icon-png-20.jpg"
@@ -728,25 +756,37 @@ export default function Home() {
                 alt="Logout"
               />
             </span>
+
             <button onClick={() => AddNewGroup()} className="new-group-button">
               New Group
             </button>
 
-            <div className="contact_container" onClick={() => DisplayYourInfos()}>
+            {isAdmin && (
               <span>
-                <img src={currentUser.profil} className="img_contact" alt="Profile" />
+                <img
+                  src="https://icon-library.com/images/admin-icon-png/admin-icon-png-28.jpg"
+                  onClick={() => handleAdminClick()}
+                  className="admin-icon"
+                  alt="Admin"
+                />
               </span>
-              <span>{currentUser.name}</span>
-            </div>
+            )}
+          </div>
 
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p>Last connection: </p>
-              {currentUser && cookies.get(JSON.stringify(currentUser.email)) != null ? (
-                <span>
-                  <p>{cookies.get(JSON.stringify(currentUser.email))}</p>
-                </span>
-              ) : null}
-            </div>
+          <div className="contact_container" onClick={() => DisplayYourInfos()}>
+            <span>
+              <img src={currentUser.profil} className="img_contact" alt="Profile" />
+            </span>
+            <span>{currentUser.name}</span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <p>Last connection: </p>
+            {currentUser && cookies.get(JSON.stringify(currentUser.email)) != null ? (
+              <span>
+                <p>{cookies.get(JSON.stringify(currentUser.email))}</p>
+              </span>
+            ) : null}
           </div>
 
           <input
