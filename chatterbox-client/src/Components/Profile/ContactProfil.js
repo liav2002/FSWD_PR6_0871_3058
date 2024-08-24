@@ -21,7 +21,7 @@ export default function ContactProfil() {
       });
       if (response.ok) {
         const usersData = await response.json();
-        setSelectedUser(usersData);
+        setSelectedUser(usersData.data);
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
