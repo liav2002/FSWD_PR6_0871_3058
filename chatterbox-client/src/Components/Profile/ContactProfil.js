@@ -1,6 +1,7 @@
-import React from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import "./profil.css";
 
 const url = 'http://localhost:5002';
 
@@ -12,7 +13,7 @@ export default function ContactProfil() {
 
   const fetchContactInfos = async () => {
     try {
-      const response = await fetch(url + `/users/UserInfo?UserId=${id}`, {
+      const response = await fetch(`${url}/users/UserInfo?UserId=${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -20,57 +21,44 @@ export default function ContactProfil() {
       });
       if (response.ok) {
         const usersData = await response.json();
-        setSelectedUser(usersData)
+        setSelectedUser(usersData.data);
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
     }
+  };
 
-  }
-
-  const ReturnToHome = async () => {
-    if (currentUser) {
-      if (currentUser.name === "Admin") {
-        navigate(`/admin`);
-      }
-      else {
-        navigate(`/${currentUser.phone}`);
-      }
-    }
-  }
+  const ReturnToHome = () => navigate(`/${currentUser.phone}`);
 
   useEffect(() => {
     fetchContactInfos();
   }, []);
 
-
   return (
-    <div>
-      <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="returnToHome"></img>
-      <div className="main_content">
-        <div className="contact_info_div">
-          <p className="contact_info_title">Contact information:</p>
-          {selectedUser != null ? (
-            <div className="user_info_container">
-              <div className="user_info">
-                <div>
-                  <img src={selectedUser.profil} className="img_contact_display_info" alt="User Profile" />
-                </div>
-                <div className="user_details">
-                  <p className="info_user_txt">{selectedUser.name}</p>
-                  <br />
-                  <p className="info_user_txt">{selectedUser.phone}</p>
-                </div>
+    <div className="contact-profile-container">
+      <div className="return-to-home-wrapper">
+        <img
+          src="https://img.icons8.com/?size=512&id=6483&format=png"
+          onClick={ReturnToHome}
+          className="return-to-home"
+          alt="Return to Home"
+        />
+      </div>
+      <div className="contact-profile-main">
+        <div className="contact-profile-content">
+          <p className="contact-profile-title">Contact Information</p>
+          {selectedUser && (
+            <div className="contact-profile-info">
+              <img src={selectedUser.profil} alt="Profile" />
+              <div>
+                <p>{selectedUser.name}</p>
+                <p>{selectedUser.phone}</p>
+                <p>Status: {selectedUser.status}</p>
               </div>
-              <div className="user_status">
-                <span className="info_title">Status:</span>
-                <span className="info_content">{selectedUser.status}</span>
-              </div>
-
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

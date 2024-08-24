@@ -1,5 +1,5 @@
-import React from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./profil.css";
 
@@ -14,7 +14,7 @@ export default function GroupProfil() {
 
   const fetchGroupInfos = async () => {
     try {
-      const response = await fetch(url + `/groups/GroupInfo?GroupId=${id}`, {
+      const response = await fetch(`${url}/groups/GroupInfo?GroupId=${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -22,86 +22,87 @@ export default function GroupProfil() {
       });
       if (response.ok) {
         const groupData = await response.json();
-        setSelectedGroup(groupData)
-        fetchParticipantsInfos(groupData);
+        setSelectedGroup(groupData.data);
+        fetchParticipantsInfos(groupData.data);
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error("An error occurred:", error);
     }
-
-  }
+  };
 
   const fetchParticipantsInfos = async (selectedGroup) => {
-    console.log("list participants", selectedGroup.participantsId);
-    const participantsInfoPromises = (selectedGroup.participantsId).map(async (participantId) => {
-      const participantResponse = await fetch(url + `/users/UserInfo?UserId=${participantId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (participantResponse.ok) {
-        const participantData = await participantResponse.json();
-        return participantData;
-      } else {
-        console.error(`Request for participant with ID ${participantId} failed with status code ${participantResponse.status}`);
-        return null;
-      }
-    });
-    const participantsInfo = await Promise.all(participantsInfoPromises);
-    const filteredParticipantsInfo = participantsInfo.filter(info => info !== null);
-    setParticipantsList(filteredParticipantsInfo);
-  }
+    console.log("Fetching participants for group:", selectedGroup);
 
+    try {
+        // Make the API call to get participants details using the new endpoint
+        const response = await fetch(url + `/groups/GroupParticipants?GroupId=${selectedGroup.id}`);
+        
+        if (response.ok) {
+            const result = await response.json();
 
-  const ReturnToHome = async () => {
-    if (currentUser) {
-      if (currentUser.name === "Admin") {
-        navigate(`/admin`);
-      }
-      else {
-        navigate(`/${currentUser.phone}`);
-      }
+            // Assuming the API returns a `data` field containing an array of participants
+            const participants = result.data;
+
+            // Log the retrieved participants for debugging
+            console.log("Participants retrieved from API:", participants);
+
+            // Set the participants list with the array of { name, id } objects
+            const participantsList = participants.map(participant => ({
+                id: participant.id,
+                name: participant.name
+            }));
+
+            // Set the participants list to the state
+            setParticipantsList(participantsList);
+            console.log("Participants list set:", participantsList);
+        } else {
+            console.error(`Failed to fetch participants. Status code: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('An error occurred while fetching participants:', error);
     }
-  }
+  };
+
+  const ReturnToHome = () => navigate(`/${currentUser.phone}`);
+
+  const handleParticipantClick = async (user) => {
+    navigate(`/contact_profil/${user.id}`)
+  };
 
   useEffect(() => {
     fetchGroupInfos();
   }, []);
 
-  const handleUserClick = async (user) => {
-    navigate(`/contact_profil/${user.id}`)
-  }
-
   return (
-    <div>
-      <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="returnToHome"></img>
-      <div className="main_content">
-        <div className="contact_info_div">
-
-          <p className="contact_info_title">Group information:</p>
-          {selectedGroup != null ? (
-            <div className="user_info_container">
-              <div className="user_info">
-                <div>
-                  <img src={selectedGroup.profil} className="img_contact_display_info" alt="Group Profile" />
-                </div>
-                <div className="user_details">
-                  <p className="info_user_txt">{selectedGroup.title}</p>
-                </div>
-              </div>
-              <div className="user_status">
-                <p className="info_title">Description:</p>
-                <span className="info_content">{selectedGroup.description}</span>
-                <p className="info_title">Participants:</p>
+    <div className="group-profile-container">
+      <div className="return-to-home-wrapper">
+        <img
+          src="https://img.icons8.com/?size=512&id=6483&format=png"
+          onClick={ReturnToHome}
+          className="return-to-home"
+          alt="Return to Home"
+        />
+      </div>
+      <div className="group-profile-main">
+        <div className="group-profile-content">
+          <p className="group-profile-main-title">Group Information</p>
+          {selectedGroup && (
+            <div className="group-profile-info">
+              <img src={selectedGroup.profil} alt="Group Profile" />
+              <p className="group-profile-title">{selectedGroup.title}</p>
+              <p className="group-profile-description">{selectedGroup.description}</p>
+              <p>Participants:</p>
+              <ul>
                 {participantsList.map((user) => (
-                  <button onClick={() => handleUserClick(user)}>{user.name}</button>
+                  <li key={user.id} onClick={() => handleParticipantClick(user)}>
+                    {user.name}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
-import React from "react"
-import { useNavigate } from "react-router-dom"
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const url = 'http://localhost:5002';
+const url = "http://localhost:5002";
 
 export default function YourProfil() {
   const currentUser = JSON.parse(localStorage["currentUser"]);
@@ -14,40 +14,35 @@ export default function YourProfil() {
   const navigate = useNavigate();
 
   const handleNameChange = async (event) => {
-    setName(event.target.value)
-
-  }
+    setName(event.target.value);
+  };
   const handleStatusChange = async (event) => {
-    setStatus(event.target.value)
-
-  }
+    setStatus(event.target.value);
+  };
   const handlePasswordChange = async (event) => {
-    setPassword(event.target.value)
-
-  }
+    setPassword(event.target.value);
+  };
   const handleEmailChange = async (event) => {
-    setEmail(event.target.value)
-
-  }
+    setEmail(event.target.value);
+  };
   const handleImageChange = async (event) => {
     const selectedImg = event.target.files[0];
     const imageURL = URL.createObjectURL(selectedImg);
     setImage(imageURL);
-
-
-  }
+  };
   const ReturnToHome = async () => {
-    navigate(`/${currentUser.phone}`)
-  }
+    navigate(`/${currentUser.phone}`);
+  };
   const SaveChange = async () => {
     try {
       const response = await fetch(
-        url + `/users/updateUserInfo?id=${currentUser.id}&name=${name}&status=${status}&password=${password}&email=${email}&profil=${image}`,
+        url +
+          `/users/updateUserInfo?id=${currentUser.id}&name=${name}&status=${status}&password=${password}&email=${email}&profil=${image}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-          },
+          }
         }
       );
       if (!response.ok) {
@@ -66,54 +61,75 @@ export default function YourProfil() {
       user.password = password;
       localStorage.removeItem(currentUser);
       localStorage.setItem("currentUser", JSON.stringify(user));
-      alert("Your profil is updated successfully.");
-
+      alert("Your profile is updated successfully.");
     } catch (error) {
       console.error("Error:", error);
     }
-
-  }
+  };
 
   return (
-    <div>
-      <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="returnToHome"></img>
-      <div className="main_content">
-        <div className="contact_info_div">
-          <p className="contact_info_title">Your profil:</p>
+    <div className="your-profile-container">
+      <div className="return-to-home-wrapper">
+        <img
+          src="https://img.icons8.com/?size=512&id=6483&format=png"
+          onClick={() => ReturnToHome()}
+          className="return-to-home"
+          alt="Return"
+        />
+      </div>
+      <div className="your-profile-main">
+        <div className="your-profile-content">
+          <p className="your-profile-title">Your Profile</p>
           {currentUser != null ? (
-            <div className="user_info_container">
-              <div className="user_info">
-                <div>
-                  <label htmlFor="imageInput">
-                    <img
-                      src={image !== "" ? image : currentUser.profil}
-                      className="img_contact_display_info"
-                      alt="User Profile"
-                    />
-                  </label>
-                  <input
-                    id="imageInput"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
+            <div className="your-profile-info">
+              <div className="your-profile-image-container">
+                <label htmlFor="imageInput">
+                  <img
+                    src={image !== "" ? image : currentUser.profil}
+                    className="your-profile-img"
+                    alt="User Profile"
                   />
-                </div>
-                <div className="user_details">
-                  <p className="info_user_txt"> Your name:</p>
-                  <input type="text" value={name !== "" ? name : currentUser.name} className="info_user_txt" onChange={handleNameChange} />
-                  <p className="info_user_txt">{currentUser.phone}</p>
-                  <input className="info_user_txt" type="text" value={email !== "" ? email : currentUser.email} onChange={handleEmailChange} />
-                </div>
+                </label>
+                <input
+                  id="imageInput"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
               </div>
-              <div className="user_status">
-                <p className="info_title">Info:</p>
-                <input type="text" value={status !== "" ? status : currentUser.status} className="info_content" onChange={handleStatusChange} />
+              <div className="your-profile-details">
+                <input
+                  type="text"
+                  value={name !== "" ? name : currentUser.name}
+                  className="your-profile-input"
+                  onChange={handleNameChange}
+                />
+                <input
+                  type="text"
+                  value={email !== "" ? email : currentUser.email}
+                  className="your-profile-input"
+                  onChange={handleEmailChange}
+                />
+                <p>{currentUser.phone}</p>
+                <select
+                  value={status}
+                  onChange={handleStatusChange}
+                  className="your-profile-select"
+                >
+                  <option value="available">available</option>
+                  <option value="busy">busy</option>
+                </select>
+                <input
+                  type="password"
+                  value={password !== "" ? password : currentUser.password}
+                  className="your-profile-input"
+                  placeholder="New Password"
+                  onChange={handlePasswordChange}
+                />
+                <button onClick={() => SaveChange()} className="your-profile-save-btn">
+                  Save
+                </button>
               </div>
-              <div className="user_status">
-                <p className="info_title">Your password:</p>
-                <input type="text" value={password !== "" ? password : currentUser.password} className="info_content" onChange={handlePasswordChange} />
-              </div>
-              <button onClick={() => SaveChange()}>Save</button>
             </div>
           ) : null}
         </div>
