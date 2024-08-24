@@ -18,7 +18,6 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState("");
   const [DisplayMenu, setDisplayMenu] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
-  const [FlaggedMessages, setFlaggedMessage] = useState([]);
   const [messageToEditId, setMessageToEditId] = useState(null);
   const [editedMessage, setEditedMessage] = useState("");
   // const [countMessagesUnread, setCountMessagesUnread] = useState([]);
@@ -351,7 +350,6 @@ export default function Home() {
           },
         });
         if (response.ok) {
-          console.log("fdsgjvfjsdvfdsjvfdshvfdshvf")
           const sendersIdGroup = await response.json();
           setGroupsWithUnread(sendersIdGroup.data);
           console.log(sendersIdGroup);
@@ -485,72 +483,29 @@ export default function Home() {
 
 
   const handleReportMessage = async (msg) => {
-    const newFlaggedMessage = {
-      msgId: msg.id,
-      checked: false,
-      sender: msg.sender,
-      receiver: msg.receiver,
-      text: msg.text,
-      date: new Date(msg.date).toISOString().slice(0, 19).replace('T', ' '), // Format the date
-      hour: msg.hour,
-      image: msg.image,
-      isItGroup: msg.isItGroup,
-      deleted: false
-    };
-    console.log(newFlaggedMessage);
+    console.log("Im here")
     try {
       // Send a POST request to the server to add the new message
-      const response = await fetch(url + "/messages/reportMessage", {
-        method: "POST",
+      const response = await fetch(`${url}/messages/reportMessage?id=${msg.id}&report=true`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newFlaggedMessage),
+        }
       });
       if (response.ok) {
-        // If the server successfully added the message, update the messages list
-        //const responseData = await response.json();
-        const NewFlaggedMsgId = await response.json();
-        newFlaggedMessage["id"] = NewFlaggedMsgId;
-        setFlaggedMessage([...FlaggedMessages, newFlaggedMessage])
-
+        console.log("message reported");
+        setMessages((prevMessages) =>
+          prevMessages.map((message) =>
+            message.id === msg.id
+              ? { ...message, reported: 1 } // Update the reported field to 1
+              : message
+          )
+        );
       } else {
-
-        console.error("Failed to add the new flagged message.");
+        console.error("Failed to add the new reported message.");
       }
     } catch (error) {
-      console.error("An error occurred while adding the new flagged message:", error);
-    }
-
-    try {
-      const response = await fetch(
-        url + `/messages/flagged?id=${msg.id}&flagged=${true}`, //lior
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Request failed for updating messages");
-      }
-      const contentType = response.headers.get("Content-Type");
-      if (contentType && contentType.includes("application/json")) {
-        const data = await response.json();
-        console.log(data);
-        setMessages(prevState => {
-          // Loop over your list
-          return prevState.map((item) => {
-            // Check for the item with the specified id and update it
-            return item.id === msg.id ? { ...item, flagged: data } : item
-          })
-        })
-      }
-
-
-    } catch (error) {
-      console.error("Error:", error);
+      console.error("An error occurred while adding the new reported message:", error);
     }
   }
 
@@ -564,13 +519,10 @@ export default function Home() {
       },
       });
       if (!response.ok) {
-        throw new Error("Request failed for deleting flagged message");
+        throw new Error("Request failed for deleting reported message");
       }
       const data = await response.json();
       console.log(data);
-      setFlaggedMessage((prevMsg) => {
-        return prevMsg.filter((flagged_msg) => flagged_msg.id !== msgId);
-      });
 
     } catch (error) {
       console.error("Error:", error);
@@ -716,7 +668,6 @@ export default function Home() {
           <div className="contact_container" onClick={() => handleGroupClick(group)}>
             <span><img src={group.profil} className="img_contact"></img></span>
             <span >{group.title}</span>
-            {console.log("djsgasjdgadghasjdghhasgd")}
             {groupsWithUnread.includes(group.id) ? <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span> : ""}
           </div>
         </li>)
@@ -846,12 +797,12 @@ export default function Home() {
                         alt={msg.isItRead ? "Read" : "Not read"}
                       />
 
-                      {/* If flagged */}
-                      {!isMyMessage && msg.flagged === 1 && (
+                      {/* If reported */}
+                      {!isMyMessage && msg.reported === 1 && (
                         <img
                           src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
-                          className="flagged_icon"
-                          alt="Flagged"
+                          className="reported_icon"
+                          alt="Reported"
                         />
                       )}
 
@@ -866,7 +817,8 @@ export default function Home() {
                       {/* Show Report/Unreport options for other user's message */}
                       {!isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (
                         <div className="message-options">
-                          {msg.flagged === 1 ? (
+                          {console.log("msg: ", msg)}
+                          {msg.reported === 1 ? (
                             <button className="option-button" onClick={() => RemoveReport(msg.id)}>Unreport</button>
                           ) : (
                             <button className="option-button" onClick={() => handleReportMessage(msg)}>Report</button>

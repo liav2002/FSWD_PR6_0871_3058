@@ -276,8 +276,8 @@ module.exports = (connection) => {
 
         // Validate that reported is either true or false
         if (req.query.report !== 'true' && req.query.report !== 'false') {
-            console.error("SERVER-ERROR: Invalid or missing 'reported'. It must be 'true' or 'false'.");
-            return sendResponse(res, 400, "Bad Request: 'reported' is required and must be 'true' or 'false'.");
+            console.error("SERVER-ERROR: Invalid or missing 'report'. It must be 'true' or 'false'.");
+            return sendResponse(res, 400, "Bad Request: 'report' is required and must be 'true' or 'false'.");
         }
 
         // Define the SQL query to update the reported status of the message with the given msgId

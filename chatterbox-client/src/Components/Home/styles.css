@@ -220,8 +220,8 @@ img {
   left: 10px;
 }
 
-/* Flagged Icon */
-.flagged_icon {
+/* Reported Icon */
+.reported {
   width: 15px;
   height: 15px;
   position: absolute;
