@@ -137,26 +137,26 @@ body {
   background-color: #444;
 }
 
-.flagged-message-list {
+.reported-message-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.flagged-message-list li {
+.reported-message-list li {
   margin-bottom: 20px;
   padding: 15px;
   border: 1px solid #ccc;
   background-color: #f9f9f9;
 }
 
-.flagged-message-list p {
+.reported-message-list p {
   margin: 0;
   font-size: 16px;
   margin-bottom: 10px;
 }
 
-.flagged-message-list button {
+.reported-message-list button {
   padding: 6px 12px;
   background-color: #e74c3c;
   color: white;
@@ -166,14 +166,14 @@ body {
   transition: background-color 0.2s ease;
 }
 
-.flagged-message-list button.keep-button {
+.reported-message-list button.keep-button {
   background-color: #2ecc71;
 }
 
-.flagged-message-list button:hover {
+.reported-message-list button:hover {
   background-color: #c0392b;
 }
 
-.flagged-message-list button.keep-button:hover {
+.reported-message-list button.keep-button:hover {
   background-color: #27ae60;
 }

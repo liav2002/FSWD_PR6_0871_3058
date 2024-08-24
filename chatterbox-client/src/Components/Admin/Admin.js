@@ -8,8 +8,8 @@ const url = 'http://localhost:5002';
 export default function Admin() {
   const [selectedChoice, setSelectedChoice] = useState("contacts");
   const [users, setUsers] = useState([]);
-  const [Flagged_msg, setFlagged_msg] = useState([]);
-  const [Flagged_msgChecked, setFlagged_msgChecked] = useState([]);
+  const [Reported_msg, setReported_msg] = useState([]);
+  const [Reported_msgChecked, setReported_msgChecked] = useState([]);
   const [msg_kept, setMsg_kept] = useState([]);
   const [deleted_msg, setDeleted_msg] = useState([]);
   const [showAllCheckedMsg, setShowAllCheckedMsg] = useState(false);
@@ -21,7 +21,7 @@ export default function Admin() {
 
 
   useEffect(() => {
-    AllFlagged();
+    AllReported();
     handleChoiceContacts();
   }, []);
 
@@ -37,7 +37,7 @@ export default function Admin() {
     console.log("users", users);
     if (users.length === 0) {
       try {
-        const response = await fetch(url + `/users/AllUsers`, {
+        const response = await fetch(`${url}/users/AllUsers?currentUserID=${currentUser.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export default function Admin() {
         });
         if (response.ok) {
           const usersData = await response.json();
-          setUsers(usersData);
+          setUsers(usersData.data);
         } else {
           console.error(`Request failed with status code ${response.status}`);
         }
@@ -55,19 +55,20 @@ export default function Admin() {
     }
   };
 
-  const AllFlagged = async () => {
-    let flagged_msgData = [];
+  const AllReported = async () => {
+    let reported_msgData = [];
 
-    if (Flagged_msg.length === 0) {
+    if (Reported_msg.length === 0) {
       try {
-        const response = await fetch(url + `/flagged_msg/getAllFlaggedMsg`, {
+        const response = await fetch(url + `/reports/getAllReportedMsg`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
         if (response.ok) {
-          flagged_msgData = await response.json();
+          reported_msgData = await response.json();
+          reported_msgData = reported_msgData.data;
 
         } else {
           console.error(`Request failed with status code ${response.status}`);
@@ -76,31 +77,31 @@ export default function Admin() {
         console.error('An error occurred:', error);
       }
     } else {
-      flagged_msgData = Flagged_msg;
+      reported_msgData = Reported_msg;
     }
 
-    const newFlaggedMsg = [];
-    const newFlaggedMsgChecked = [];
+    const newReportedMsg = [];
+    const newReportedMsgChecked = [];
     const newMsgKept = [];
     const newDeletedMsg = [];
 
-    flagged_msgData.forEach((flaggedMsg) => {
+    reported_msgData.forEach((reportedMsg) => {
 
-      console.log("res", flaggedMsg.checked);
+      console.log("res", reportedMsg.checked);
 
-      if (flaggedMsg.checked === 0) {
-        newFlaggedMsg.push(flaggedMsg);
-      } else if (flaggedMsg.checked === 1 && flaggedMsg.deleted === 0) {
-        newFlaggedMsgChecked.push(flaggedMsg);
-        newMsgKept.push(flaggedMsg);
-      } else if (flaggedMsg.checked === 1 && flaggedMsg.deleted === 1) {
-        newFlaggedMsgChecked.push(flaggedMsg);
-        newDeletedMsg.push(flaggedMsg);
+      if (reportedMsg.checked === 0) {
+        newReportedMsg.push(reportedMsg);
+      } else if (reportedMsg.checked === 1 && reportedMsg.deleted === 0) {
+        newReportedMsgChecked.push(reportedMsg);
+        newMsgKept.push(reportedMsg);
+      } else if (reportedMsg.checked === 1 && reportedMsg.deleted === 1) {
+        newReportedMsgChecked.push(reportedMsg);
+        newDeletedMsg.push(reportedMsg);
       }
     });
 
-    setFlagged_msg(newFlaggedMsg);
-    setFlagged_msgChecked(newFlaggedMsgChecked);
+    setReported_msg(newReportedMsg);
+    setReported_msgChecked(newReportedMsgChecked);
     setMsg_kept(newMsgKept);
     setDeleted_msg(newDeletedMsg);
   };
@@ -110,9 +111,9 @@ export default function Admin() {
     navigate(`/contact_profil/${user.id}`)
   }
 
-  const handleKeepClick = async (flagged_msg) => {
+  const handleKeepClick = async (reported_msg) => {
     try {
-      const response = await fetch(url + `/flagged_msg/markMessageChecked/${flagged_msg.id}`, {
+      const response = await fetch(url + `/reports/markMessageChecked/${reported_msg.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,9 +121,9 @@ export default function Admin() {
       });
 
       if (response.ok) {
-        setFlagged_msg(prevFlaggedMsg => prevFlaggedMsg.filter(msg => msg.id !== flagged_msg.id));
-        setFlagged_msgChecked(prevCheckedMsg => [...prevCheckedMsg, flagged_msg]);
-        setMsg_kept(prevCheckedMsg => [...prevCheckedMsg, flagged_msg]);
+        setReported_msg(prevReportedMsg => prevReportedMsg.filter(msg => msg.id !== reported_msg.id));
+        setReported_msgChecked(prevCheckedMsg => [...prevCheckedMsg, reported_msg]);
+        setMsg_kept(prevCheckedMsg => [...prevCheckedMsg, reported_msg]);
 
       } else {
         console.error(`Request failed with status code ${response.status}`);
@@ -133,9 +134,9 @@ export default function Admin() {
   };
 
 
-  const handleDeleteClick = async (flagged_msg) => {
+  const handleDeleteClick = async (reported_msg) => {
     try {
-      const response = await fetch(url + `/flagged_msg/deleteFlaggedMessage/${flagged_msg.id}`, {
+      const response = await fetch(url + `/reports/deleteReportedMessage/${reported_msg.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,9 +144,9 @@ export default function Admin() {
       });
 
       if (response.ok) {
-        setFlagged_msg(prevFlaggedMsg => prevFlaggedMsg.filter(msg => msg.id !== flagged_msg.id));
-        setFlagged_msgChecked(prevCheckedMsg => [...prevCheckedMsg, flagged_msg]);
-        setDeleted_msg(prevCheckedMsg => [...prevCheckedMsg, flagged_msg]);
+        setReported_msg(prevReportedMsg => prevReportedMsg.filter(msg => msg.id !== reported_msg.id));
+        setReported_msgChecked(prevCheckedMsg => [...prevCheckedMsg, reported_msg]);
+        setDeleted_msg(prevCheckedMsg => [...prevCheckedMsg, reported_msg]);
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
@@ -167,19 +168,19 @@ export default function Admin() {
 
 
   const Content2 = () => (
-    <div className="flagged-message-list">
-      {Flagged_msg.map((flagged_msg) => (
-        <li key={flagged_msg.id}>
-          {flagged_msg.text && (
-            <p>{flagged_msg.text}</p>
+    <div className="reported-message-list">
+      {Reported_msg.map((reported_msg) => (
+        <li key={reported_msg.id}>
+          {reported_msg.text && (
+            <p>{reported_msg.text}</p>
           )}
 
-          {flagged_msg.image && (
-            <img src={flagged_msg.image} alt="Flagged Message Image" className="message-image" />
+          {reported_msg.image && (
+            <img src={reported_msg.image} alt="Reported Message Image" className="message-image" />
           )}
           <br />
-          <button className="keep-button" onClick={() => handleKeepClick(flagged_msg)}>Keep</button>
-          <button onClick={() => handleDeleteClick(flagged_msg)}>Delete</button>
+          <button className="keep-button" onClick={() => handleKeepClick(reported_msg)}>Keep</button>
+          <button onClick={() => handleDeleteClick(reported_msg)}>Delete</button>
         </li>
       ))}
     </div>
@@ -187,7 +188,7 @@ export default function Admin() {
 
 
   const handleShowAllMessagesClick = () => {
-    console.log("All messages", Flagged_msgChecked);
+    console.log("All messages", Reported_msgChecked);
 
     setShowAllCheckedMsg(true);
     setShowKept(false);
@@ -223,14 +224,14 @@ export default function Admin() {
 
       <div className={`message-list ${showAllCheckedMsg ? 'show-section' : 'hide-section'}`}>
         <h3>Messages Checked</h3>
-        {Flagged_msgChecked.map((kept_msg) => (
+        {Reported_msgChecked.map((kept_msg) => (
           <li key={kept_msg.id}>
             {kept_msg.text && (
               <p>{kept_msg.text}</p>
             )}
 
             {kept_msg.image && (
-              <img src={kept_msg.image} alt="Flagged Message Image" className="message-image" />
+              <img src={kept_msg.image} alt="Reported Message Image" className="message-image" />
             )}
 
           </li>
@@ -246,7 +247,7 @@ export default function Admin() {
             )}
 
             {kept_msg.image && (
-              <img src={kept_msg.image} alt="Flagged Message Image" className="message-image" />
+              <img src={kept_msg.image} alt="Reported Message Image" className="message-image" />
             )}
           </li>
         ))}
@@ -261,7 +262,7 @@ export default function Admin() {
             )}
 
             {deleted_msg.image && (
-              <img src={deleted_msg.image} alt="Flagged Message Image" className="message-image" />
+              <img src={deleted_msg.image} alt="Reported Message Image" className="message-image" />
             )}
           </li>
         ))}
