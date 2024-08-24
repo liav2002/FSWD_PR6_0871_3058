@@ -126,6 +126,8 @@ export default function NewGroup() {
 
   }
 
+  const ReturnToHome = () => navigate(`/${currentUser.phone}`);
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -134,61 +136,48 @@ export default function NewGroup() {
   return (
     <form onSubmit={handleSubmit}>
       <div className="container-group">
+        <div className="return-to-home-wrapper">
+          <img
+            src="https://img.icons8.com/?size=512&id=6483&format=png"
+            onClick={ReturnToHome}
+            className="return-to-home"
+            alt="Return to Home"
+          />
+        </div>
         <div className="left-div-group">
           <p>Contacts: </p>
           {users.map((user) => (
             <li key={user.id} className="add_user_to_group_list">
               <div className="contact_container" onClick={() => AddUserToGroup(user)}>
                 <span><img src={user.profil} className="img_contact"></img></span>
-                <span >{user.name}</span>
+                <span>{user.name}</span>
               </div>
             </li>
           ))}
         </div>
         <div className="right-div-group">
-          <div>
-            <h3>Create a New Group</h3>
-            <p>Users added:</p>
-            {UsersAdded.map((user) => (
-              <li key={user.id} className="add_user_to_group_list">
-                <div className="contact_container">
-                  <span><img src={user.profil} className="img_contact"></img></span>
-                  <span >{user.name}</span>
-                  <span >
-                    <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => RemoveAddUser(user)} className="remove_add_user_icon"></img>
-                  </span>
-                </div>
-              </li>
-            ))}
-          </div>
-          <input
-            id="titleInput"
-            className="inputTypeIn"
-            type="text"
-            name="title"
-            value={inputs.title || ""}
-            onChange={handleChange}
-            placeholder="Enter Group Title:"
-            required
-          />
-          <textarea
-            value={inputs.description || ""}
-            name="description"
-            onChange={handleChange}
-            placeholder="Write a description..."
-          />
+          <h3>Create a New Group</h3>
+          <p>Users added:</p>
+          {UsersAdded.map((user) => (
+            <li key={user.id} className="add_user_to_group_list">
+              <div className="contact_container">
+                <span><img src={user.profil} className="img_contact"></img></span>
+                <span>{user.name}</span>
+                <span>
+                  <img src="https://img.icons8.com/?size=512&id=6483&format=png"
+                      onClick={() => RemoveAddUser(user)}
+                      className="remove_add_user_icon"></img>
+                </span>
+              </div>
+            </li>
+          ))}
+          <input id="titleInput" className="inputTypeIn" type="text" name="title" value={inputs.title || ""} onChange={handleChange} placeholder="Enter Group Title:" required />
+          <textarea value={inputs.description || ""} name="description" onChange={handleChange} placeholder="Write a description..."></textarea>
           <div className="profile-picture-container">
             {profilePictureOptions.map((option) => (
               <label key={option.value} className="profile-picture-option">
-                <input
-                  type="radio"
-                  name="profil"
-                  value={option.value}
-                  checked={inputs.profil === option.value}
-                  onChange={handleChange}
-                  required
-                />
-                <img src={option.value} alt={option.label} className="profile-picture-img" style={{ width: '100px', height: '100px' }} />
+                <input type="radio" name="profil" value={option.value} checked={inputs.profil === option.value} onChange={handleChange} required />
+                <img src={option.value} alt={option.label} className="profile-picture-img" />
               </label>
             ))}
           </div>

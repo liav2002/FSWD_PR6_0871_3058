@@ -1,24 +1,55 @@
+/* Main container for the group creation */
 .container-group {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start; /* Aligns the items to the top */
+  height: calc(100vh - 50px); /* Adjust height to consider the space for the 'X' button */
+  padding-top: 70px; /* Adds space below the 'X' button */
+  padding-left: 20px;
+  padding-right: 20px;
+  background-color: #f0f0f0;
+  position: relative;
 }
 
+/* Return to home button wrapper */
+.return-to-home-wrapper {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.return-to-home {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+/* Left div containing the contacts with vertical scrollbar */
 .left-div-group {
-  flex: 1;
+  flex: 0.4;
   padding-right: 20px;
   border-right: 1px solid #ccc;
+  text-align: left;
+  max-height: 100%; /* Ensure it doesn't extend beyond the screen */
+  overflow-y: auto; /* Vertical scroll when there are many contacts */
 }
 
+/* Right div for creating the group */
 .right-div-group {
-  flex: 1;
+  flex: 0.6;
   padding-left: 20px;
+  text-align: center;
 }
 
+/* Contacts list */
 .add_user_to_group_list {
   margin-bottom: 10px;
   list-style: none;
 }
 
+/* Contact container inside the list */
 .contact_container {
   display: flex;
   align-items: center;
@@ -39,36 +70,36 @@
   margin-left: 10px;
 }
 
-.inputTypeIn {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
+/* Input and text area styling */
+.inputTypeIn,
 textarea {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  resize: vertical;
 }
 
+/* Profile picture container with horizontal scroll */
 .profile-picture-container {
-  display: flex;
-  justify-content: space-between;
+  width: 100%;
+  max-width: 100%; /* Ensure it doesn't extend beyond the available space */
+  overflow-x: auto; /* Horizontal scroll for many images */
   margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-start;
 }
 
+/* Each profile picture option */
 .profile-picture-option {
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
+  margin-right: 15px;
 }
 
+/* Profile picture image styling */
 .profile-picture-img {
   width: 100px;
   height: 100px;
@@ -76,6 +107,7 @@ textarea {
   border: 2px solid transparent;
 }
 
+/* Create button */
 #CreateButton {
   background-color: #007bff;
   color: white;
