@@ -342,3 +342,10 @@ img {
   background-color: #218838;
 }
 
+.modified-indicator {
+  font-size: 12px;
+  color: #ec9600; 
+  margin-top: 5px;
+  text-align: right; 
+  font-weight: bold;
+}

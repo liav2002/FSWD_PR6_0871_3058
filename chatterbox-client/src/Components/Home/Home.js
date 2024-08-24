@@ -432,22 +432,10 @@ export default function Home() {
 
   const handleSubmitEdit = async (event, msgId) => {
     event.preventDefault();
-    const actualDate = new Date();
-    const hours = actualDate.getHours();
-    const min = actualDate.getMinutes();
-    const sec = actualDate.getSeconds();
-
-    const year = actualDate.getFullYear();
-    const month = String(actualDate.getMonth() + 1).padStart(2, '0');
-    const day = String(actualDate.getDate()).padStart(2, '0');
-    const date = `${year}-${month}-${day}`;
-    const hour = `${hours}:${min}:${sec}`;
 
     try {
       const requestData = {
-        text: editedMessage,
-        date: date,
-        hour: hour,
+        text: editedMessage
       };
 
       // Send a PUT request to the server to update the message
@@ -471,8 +459,7 @@ export default function Home() {
 
           // Update the text, hour, and date fields of the copied message
           updatedMessage.text = editedMessage;
-          updatedMessage.date = date;
-          updatedMessage.hour = hour;
+          updatedMessage.modified = 1;
           console.log("msg modifie", updatedMessage)
 
           // Create a new array with the updated message at the found index
@@ -876,8 +863,10 @@ export default function Home() {
                         </div>
                       )}
 
-                      {/* If modified */}
-                      {isMyMessage && msg.modified === 1 && <p className="modified">Modified</p>}
+                      {/* Display "Modified" label if the message has been modified */}
+                      {msg.modified === 1 && (
+                        <p className="modified-indicator">This message was edited</p>
+                      )}
                     </div>
                   );
                 })}
