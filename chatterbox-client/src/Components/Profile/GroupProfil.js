@@ -22,8 +22,8 @@ export default function GroupProfil() {
       });
       if (response.ok) {
         const groupData = await response.json();
-        setSelectedGroup(groupData);
-        fetchParticipantsInfos(groupData);
+        setSelectedGroup(groupData.data);
+        fetchParticipantsInfos(groupData.data);
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
@@ -32,23 +32,37 @@ export default function GroupProfil() {
     }
   };
 
-  const fetchParticipantsInfos = async (group) => {
-    const participantsInfoPromises = group.participantsId.map(async (participantId) => {
-      const participantResponse = await fetch(`${url}/users/UserInfo?UserId=${participantId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (participantResponse.ok) {
-        return await participantResponse.json();
-      } else {
-        console.error(`Failed for participant ID: ${participantId}`);
-        return null;
-      }
-    });
-    const participantsInfo = await Promise.all(participantsInfoPromises);
-    setParticipantsList(participantsInfo.filter((info) => info !== null));
+  const fetchParticipantsInfos = async (selectedGroup) => {
+    console.log("Fetching participants for group:", selectedGroup);
+
+    try {
+        // Make the API call to get participants details using the new endpoint
+        const response = await fetch(url + `/groups/GroupParticipants?GroupId=${selectedGroup.id}`);
+        
+        if (response.ok) {
+            const result = await response.json();
+
+            // Assuming the API returns a `data` field containing an array of participants
+            const participants = result.data;
+
+            // Log the retrieved participants for debugging
+            console.log("Participants retrieved from API:", participants);
+
+            // Set the participants list with the array of { name, id } objects
+            const participantsList = participants.map(participant => ({
+                id: participant.id,
+                name: participant.name
+            }));
+
+            // Set the participants list to the state
+            setParticipantsList(participantsList);
+            console.log("Participants list set:", participantsList);
+        } else {
+            console.error(`Failed to fetch participants. Status code: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('An error occurred while fetching participants:', error);
+    }
   };
 
   const ReturnToHome = () => navigate(`/${currentUser.phone}`);
@@ -69,12 +83,12 @@ export default function GroupProfil() {
       </div>
       <div className="group-profile-main">
         <div className="group-profile-content">
-          <p className="group-profile-title">Group Information</p>
+          <p className="group-profile-main-title">Group Information</p>
           {selectedGroup && (
             <div className="group-profile-info">
               <img src={selectedGroup.profil} alt="Group Profile" />
-              <p>{selectedGroup.title}</p>
-              <p>{selectedGroup.description}</p>
+              <p className="group-profile-title">{selectedGroup.title}</p>
+              <p className="group-profile-description">{selectedGroup.description}</p>
               <p>Participants:</p>
               <ul>
                 {participantsList.map((user) => (
