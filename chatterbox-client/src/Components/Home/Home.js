@@ -17,9 +17,9 @@ export default function Home() {
   const [newMessage, setNewMessage] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
   const [DisplayMenu, setDisplayMenu] = useState(false);
-  const [SelectedMessageId, setSelectedMessageId] = useState(null);
+  const [selectedMessageId, setSelectedMessageId] = useState(null);
   const [FlaggedMessages, setFlaggedMessage] = useState([]);
-  const [MessagesToEditId, setMessageToEditId] = useState(null);
+  const [messageToEditId, setMessageToEditId] = useState(null);
   const [editedMessage, setEditedMessage] = useState("");
   // const [countMessagesUnread, setCountMessagesUnread] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -442,7 +442,6 @@ export default function Home() {
     const day = String(actualDate.getDate()).padStart(2, '0');
     const date = `${year}-${month}-${day}`;
     const hour = `${hours}:${min}:${sec}`;
-    console.log("nouvelle heure:", hour)
 
     try {
       const requestData = {
@@ -825,7 +824,7 @@ export default function Home() {
                   const messageClass = isMyMessage ? "my-message" : "other-message";
 
                   return (
-                    <div key={msg.id} className={messageClass}>
+                    <div key={msg.id} className={messageClass} onClick={() => !messageToEditId && handleMessageClick(msg.id)}>
                       {/* Display the participant's name for group messages only if it's not the current user's message */}
                       {!isMyMessage && msg.isItGroup === 1 && (
                         <p className="participants_name">
@@ -834,7 +833,18 @@ export default function Home() {
                       )}
 
                       {/* Display the message text */}
-                      {msg.text && <p className="message-text">{msg.text}</p>}
+                      {messageToEditId === msg.id ? (
+                        <form onSubmit={(event) => handleSubmitEdit(event, msg.id)}>
+                          <textarea
+                            className="edit-message-input"
+                            value={editedMessage}
+                            onChange={(e) => setEditedMessage(e.target.value)}
+                          />
+                          <button type="submit" className="save-button">Save</button>
+                        </form>
+                      ) : (
+                        <p className="message-text">{msg.text}</p>
+                      )}
 
                       {/* Display the image if present */}
                       {msg.image && <img src={msg.image} className="img_msg" alt="Message image" />}
@@ -858,8 +868,16 @@ export default function Home() {
                         />
                       )}
 
+                      {/* Show options if the message is yours and it's not in edit mode */}
+                      {isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (
+                        <div className="message-options">
+                          <button className="option-button" onClick={() => handleEditMessage(msg.id, msg.text)}>Edit</button>
+                          <button className="option-button" onClick={() => handleDeleteMessage(msg.id)}>Delete</button>
+                        </div>
+                      )}
+
                       {/* If modified */}
-                      {isMyMessage && msg.modified === 1 && <p>Modified</p>} 
+                      {isMyMessage && msg.modified === 1 && <p className="modified">Modified</p>}
                     </div>
                   );
                 })}

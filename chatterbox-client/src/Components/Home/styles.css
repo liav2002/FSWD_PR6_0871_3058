@@ -292,3 +292,53 @@ img {
     width: 100%;
   }
 }
+
+/* Message Options */
+.message-options {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.option-button {
+  padding: 5px 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.option-button:hover {
+  background-color: #0056b3;
+}
+
+/* Edit Message Input */
+.edit-message-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+/* Save Button */
+.save-button {
+  padding: 5px 15px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #218838;
+}
+
