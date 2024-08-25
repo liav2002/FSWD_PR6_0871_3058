@@ -40,7 +40,7 @@ html, body {
 
 /* Centered Chat Area */
 .chat-container {
-  width: 90%; /* Set to a percentage to make it responsive */
+  width: 450px; /* Set to a percentage to make it responsive */
   max-width: 1000px; /* Maximum width for larger screens */
   background-color: white;
   display: flex;
@@ -296,7 +296,7 @@ img {
   }
 
   .chat-container {
-    width: 100%;
+    max-width: 100%; /* Allow it to take up the full width on smaller screens */
     height: auto;
   }
 
