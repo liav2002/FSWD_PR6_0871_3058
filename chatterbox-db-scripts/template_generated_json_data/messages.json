@@ -78,7 +78,7 @@
       "hour": "10:05:38",
       "image": "https://th.bing.com/th/id/R.cc516a1c1dd8613ac11d047d4a751c67?rik=TRY5wBqhcpFm6g&pid=ImgRaw&r=0",
       "isItRead": false,
-      "isItGroup": true,
+      "isItGroup": false,
       "modified": false,
       "reported": false,
       "readedBy": [2]
