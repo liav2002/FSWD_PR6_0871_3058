@@ -106,16 +106,17 @@ export default function Home() {
     });
   };
   
-  // Function to refresh messages every X seconds
+  // Function to refresh messages and mark them as read every X seconds
   const useAutoRefreshMessages = (selectedUser, showWindow, refreshInterval = 2000) => {
     const intervalRef = useRef(null);
-  
+
     useEffect(() => {
       if (selectedUser && showWindow) {
-        const fetchUpdatedMessages = async () => {
+        const fetchAndMarkMessages = async () => {
           try {
+            // Fetch updated messages
             const response = await fetch(
-              url + `/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${selectedUser.id}`,
+              `${url}/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${selectedUser.id}`,
               {
                 method: 'GET',
                 headers: {
@@ -127,14 +128,18 @@ export default function Home() {
               const messagesData = await response.json();
               setMessages(messagesData.data);
             }
+
+            // Call markMessagesAsRead after fetching messages
+            await markMessagesAsRead(currentUser, selectedUser);
+
           } catch (error) {
             console.error('An error occurred during auto-refresh:', error);
           }
         };
-  
+
         // Start polling for messages every X seconds
-        intervalRef.current = setInterval(fetchUpdatedMessages, refreshInterval);
-  
+        intervalRef.current = setInterval(fetchAndMarkMessages, refreshInterval);
+
         // Cleanup interval on component unmount or when conditions change
         return () => {
           clearInterval(intervalRef.current);
@@ -147,15 +152,12 @@ export default function Home() {
       }
     }, [selectedUser, showWindow, refreshInterval]);
   };
-  
-  // Usage inside your component
-  useAutoRefreshMessages(selectedUser, showWindow);
 
-
+  // Function to mark messages as read
   const markMessagesAsRead = async (CurrentUser, SelectedUser) => {
     const currentUserId = CurrentUser.id;
     const selectedUserId = SelectedUser.id;
-  
+
     if ("phone" in SelectedUser) {
       // Case for individual user messages
       try {
@@ -169,15 +171,15 @@ export default function Home() {
             selectedUserId: selectedUserId // Send the selected user's ID
           })
         });
-  
+
         if (response.ok) {
           console.log('Messages marked as read');
-  
+
           setMessages(prevState => {
             // Update the messages in the state to reflect the 'read' status
             return prevState.map((item) => {
-              return item.receiver === currentUserId && item.sender === selectedUserId && item.isItGroup === false 
-                ? { ...item, isItRead: true } 
+              return item.receiver === currentUserId && item.sender === selectedUserId && item.isItGroup === false
+                ? { ...item, isItRead: true }
                 : item;
             });
           });
@@ -200,7 +202,7 @@ export default function Home() {
             selectedUserId: selectedUserId // Send the selected group's ID
           })
         });
-  
+
         if (response.ok) {
           const data = await response.json();
           if (data.length > 0) {
@@ -220,8 +222,8 @@ export default function Home() {
     }
   };
   
-  
-
+  // Usage inside your component
+  useAutoRefreshMessages(selectedUser, showWindow);
 
   const handleGroupClick = async (group) => {
     const groupId = group.id;
