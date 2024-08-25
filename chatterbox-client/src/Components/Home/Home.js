@@ -114,18 +114,38 @@ export default function Home() {
       if (selectedUser && showWindow) {
         const fetchAndMarkMessages = async () => {
           try {
-            // Fetch updated messages
-            const response = await fetch(
-              `${url}/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${selectedUser.id}`,
-              {
-                method: 'GET',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
+            let response, messagesData;
+
+            // Case 1: SelectedUser is an individual user
+            if ("phone" in selectedUser) {
+              // Fetch updated messages for individual user
+              response = await fetch(
+                `${url}/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${selectedUser.id}`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                }
+              );
+            } 
+            // Case 2: SelectedUser is a group
+            else {
+              // Fetch updated messages for group
+              response = await fetch(
+                `${url}/messages/messagesWithCurrentGroup?currentId=${currentUser.id}&groupId=${selectedUser.id}`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                }
+              );
+            }
+
+            // Handle response
             if (response.ok) {
-              const messagesData = await response.json();
+              messagesData = await response.json();
               setMessages(messagesData.data);
             }
 
@@ -158,8 +178,8 @@ export default function Home() {
     const currentUserId = CurrentUser.id;
     const selectedUserId = SelectedUser.id;
 
+    // Case 1: Mark messages as read for individual user
     if ("phone" in SelectedUser) {
-      // Case for individual user messages
       try {
         const response = await fetch(`${url}/messages/markMessagesAsRead`, {
           method: 'PUT',
@@ -173,8 +193,6 @@ export default function Home() {
         });
 
         if (response.ok) {
-          console.log('Messages marked as read');
-
           setMessages(prevState => {
             // Update the messages in the state to reflect the 'read' status
             return prevState.map((item) => {
@@ -189,11 +207,12 @@ export default function Home() {
       } catch (error) {
         console.error('An error occurred:', error);
       }
-    } else {
-      // Case for group messages
+    } 
+    // Case 2: Mark messages as read for group
+    else {
       try {
         const response = await fetch(`${url}/messages/markMessagesGroupAsRead`, {
-          method: 'POST',
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
