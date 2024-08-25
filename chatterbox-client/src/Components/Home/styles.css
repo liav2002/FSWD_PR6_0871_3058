@@ -11,10 +11,11 @@ html, body {
   display: flex;
   height: 100vh;
   width: 100%;
+  flex-direction: row;
 }
 
 .left-div {
-  flex-basis: 25%;
+  flex-basis: 20%; /* Adjusted for better responsiveness */
   background-color: #283747;
   color: white;
   padding: 20px;
@@ -34,12 +35,13 @@ html, body {
   justify-content: center;
   align-items: center;
   padding: 20px;
-  margin-left: 25%;
+  margin-left: 20%; /* Matches the flex-basis of left-div */
 }
 
 /* Centered Chat Area */
 .chat-container {
-  width: 800px;
+  width: 90%; /* Set to a percentage to make it responsive */
+  max-width: 1000px; /* Maximum width for larger screens */
   background-color: white;
   display: flex;
   flex-direction: column;
@@ -83,7 +85,7 @@ img {
   margin-left: 10px;
 }
 
-/* New Group Button and Logout Button */
+/* Button Container */
 .button-container {
   display: flex;
   justify-content: space-between; /* Space out the buttons evenly */
@@ -100,9 +102,7 @@ img {
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  margin-top: 10px;
   transition: background-color 0.3s ease;
-  margin-right: 10px; /* Add margin-right to separate the buttons */
 }
 
 .new-group-button:hover {
@@ -141,7 +141,7 @@ img {
   flex-grow: 1;
   overflow-y: auto;
   padding: 10px;
-  background-color: white; /* Ensures chat area stays white */
+  background-color: white;
   border-radius: 10px;
 }
 
@@ -149,11 +149,11 @@ img {
 .my-message {
   background-color: #007bff;
   color: white;
-  padding: 20px 10px; /* Increase padding to allow space for participant name */
+  padding: 20px 10px; /* Increased padding to allow space for participant name */
   border-radius: 10px;
   max-width: 60%;
   margin-left: auto;
-  margin-bottom: 30px; /* Extra space to accommodate participant's name */
+  margin-bottom: 30px;
   position: relative;
   word-wrap: break-word;
   text-align: right; /* Ensure the message text is right-aligned */
@@ -162,11 +162,11 @@ img {
 .other-message {
   background-color: #e9ecef;
   color: black;
-  padding: 20px 10px; /* Increase padding to allow space for participant name */
+  padding: 20px 10px; /* Increased padding to allow space for participant name */
   border-radius: 10px;
   max-width: 60%;
   margin-right: auto;
-  margin-bottom: 30px; /* Extra space to accommodate participant's name */
+  margin-bottom: 30px;
   position: relative;
   word-wrap: break-word;
 }
@@ -207,17 +207,16 @@ img {
   font-weight: bold;
   font-size: 12px;
   margin-bottom: 5px;
-  position: relative; /* Keep it relative to its parent container */
   text-align: left;
 }
 
 /* Modified Indicator */
-.modified {
+.modified-indicator {
   font-size: 12px;
-  color: #6c757d;
-  position: absolute;
-  bottom: -20px;
-  left: 10px;
+  color: #ec9600;
+  margin-top: 5px;
+  text-align: right;
+  font-weight: bold;
 }
 
 /* Reported Icon */
@@ -273,6 +272,12 @@ img {
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .right-div {
+    margin-left: 22%; /* Adjusted to slightly smaller left-div on large screens */
+  }
+}
+
 @media (max-width: 768px) {
   .home-container {
     flex-direction: column;
@@ -281,6 +286,8 @@ img {
   .left-div {
     width: 100%;
     height: auto;
+    position: static;
+    margin-bottom: 20px;
   }
 
   .right-div {
@@ -290,6 +297,35 @@ img {
 
   .chat-container {
     width: 100%;
+    height: auto;
+  }
+
+  .button-container {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .new-group-button {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .admin-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chat-container {
+    padding: 10px;
+    width: 100%;
+    height: auto;
+  }
+
+  .my-message,
+  .other-message {
+    max-width: 80%;
+    font-size: 14px;
   }
 }
 
@@ -342,10 +378,11 @@ img {
   background-color: #218838;
 }
 
+/* Modified Indicator */
 .modified-indicator {
   font-size: 12px;
-  color: #ec9600; 
+  color: #ec9600;
   margin-top: 5px;
-  text-align: right; 
+  text-align: right;
   font-weight: bold;
 }
