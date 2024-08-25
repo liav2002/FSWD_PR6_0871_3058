@@ -849,7 +849,7 @@ export default function Home() {
 
                       {/* Display read confirmation */}
                       <img
-                        src={msg.isItRead ? "https://clipart-library.com/new_gallery/7-71944_green-tick-transparent-transparent-tick.png" : "http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"}
+                        src={msg.isItRead ? "https://www.clipartmax.com/png/small/28-289625_single-tick-whtsapp-gray-2-clip-art-double-check-icon-png.png" : "http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"}
                         className="read-confirm"
                         alt={msg.isItRead ? "Read" : "Not read"}
                       />
