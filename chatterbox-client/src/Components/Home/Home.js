@@ -809,7 +809,7 @@ export default function Home() {
                       {!isMyMessage && msg.reported === 1 && (
                         <img
                           src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
-                          className="reported_icon"
+                          className="reported"
                           alt="Reported"
                         />
                       )}
