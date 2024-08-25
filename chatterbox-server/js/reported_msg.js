@@ -271,42 +271,55 @@ module.exports = (connection) => {
         });
     });
 
-    // DELETE a reported message
-    router.delete('/id', (req, res) => {
-        console.log("SERVER-DEBUG: router '/id' handler.");
+    // Add the route for canceling a report by a client
+    router.delete('/cancelReportByClient', (req, res) => {
+        console.log("SERVER-DEBUG: router '/cancelReportByClient' handler.");
 
-        const msgId = req.query.id;  
-
-        // Log the request parameters
-        console.log("SERVER-DEBUG: request parameters:");
-        console.log("SERVER-DEBUG: msgId <- ", msgId);
+        // Extract msgId from query parameters
+        const msgId = req.query.msgId;
+        console.log("SERVER-DEBUG: msg_id <- " + msgId);
 
         // Validate that msgId is provided and is a positive integer
-        if (!msgId || isNaN(msgId) || parseInt(msgId) <= 0 || !Number.isInteger(Number(msgId))) {
+        if (!msgId || isNaN(msgId) || parseInt(msgId) <= 0) {
             console.error("SERVER-ERROR: Invalid or missing 'msgId'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'msgId' is required and must be a positive integer.");
         }
 
-        // Define the SQL query to delete a reported message with the given msgId
-        const query = `DELETE FROM reported_msg WHERE msgId = ?`;
+        // Step 1: Remove the report from the reported_msg table
+        const deleteReportedQuery = 'DELETE FROM reported_msg WHERE msgId = ?';
 
-        // Execute the SQL query with the msgId as a parameter
-        connection.query(query, [parseInt(msgId)], (error, results) => {
-            if (error) {
-                // If an error occurs during the query execution, log the error and send a response with an error message
-                console.error('SERVER-ERROR: Error in request execution', error);
-                return sendResponse(res, 500, 'An error occurred while deleting the reported message.');
+        connection.query(deleteReportedQuery, [parseInt(msgId)], (err, result) => {
+            if (err) {
+                console.error('SERVER-ERROR: Error while deleting report from reported_msg table:', err);
+                return sendResponse(res, 500, 'Error occurred while deleting the reported message.');
             }
 
-            // Check if any rows were affected by the delete operation
-            if (results.affectedRows === 0) {
-                // If no rows were affected, send a response with an error message
-                return sendResponse(res, 404, 'Reported message not found.');
+            // Check if a row was deleted
+            if (result.affectedRows === 0) {
+                console.log("SERVER-DEBUG: No report found with the provided 'msgId'.");
+                return sendResponse(res, 404, 'No report found for the provided message.');
             }
 
-            // If a row was affected (reported message deleted), send a response with the deleted msgId
-            console.log("SERVER-DEBUG: Reported message deleted successfully, msgId:", msgId);
-            return sendResponse(res, 200, 'Reported message deleted successfully.', { msgId: parseInt(msgId) });
+            console.log("SERVER-DEBUG: Report successfully deleted from reported_msg table for msgId:", msgId);
+
+            // Step 2: Update the messages table to set the 'reported' field to false
+            const updateMessageQuery = 'UPDATE messages SET reported = false WHERE id = ?';
+
+            connection.query(updateMessageQuery, [parseInt(msgId)], (err, updateResult) => {
+                if (err) {
+                    console.error('SERVER-ERROR: Error while updating the message:', err);
+                    return sendResponse(res, 500, 'Error occurred while updating the message.');
+                }
+
+                // Check if any rows were affected by the update operation
+                if (updateResult.affectedRows === 0) {
+                    console.log("SERVER-DEBUG: No message found with the provided 'msgId'.");
+                    return sendResponse(res, 404, 'No message found to update the report status.');
+                }
+
+                console.log("SERVER-DEBUG: Message successfully updated for msgId:", msgId);
+                return sendResponse(res, 200, 'Report canceled and message updated successfully.');
+            });
         });
     });
 

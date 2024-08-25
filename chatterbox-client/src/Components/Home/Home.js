@@ -544,7 +544,8 @@ export default function Home() {
 
   const RemoveReport = async (msgId) => {
     try { 
-      const response = await fetch(url + `/messages/id?id=${msgId}`, { //lior
+      console.log("I'm here on unreport, msgID is: ", msgId);
+      const response = await fetch(url + `/reports/cancelReportByClient?msgId=${msgId}`, {
         method: "DELETE",
         headers: {
           'Content-Type': 'application/json',
@@ -556,41 +557,16 @@ export default function Home() {
       const data = await response.json();
       console.log(data);
 
-    } catch (error) {
-      console.error("Error:", error);
-    }
-
-    try {
-      const response = await fetch(
-        url + `/messages/flagged?id=${msgId}&flagged=${false}`, //lior
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      // Update the message state to reflect the reported status
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          message.id === msgId ? { ...message, reported: 0 } : message
+        )
       );
-      if (!response.ok) {
-        throw new Error("Request failed for updating messages");
-      }
-      const contentType = response.headers.get("Content-Type");
-      if (contentType && contentType.includes("application/json")) {
-        const data = await response.json();
-        console.log(data);
-        setMessages(prevState => {
-          // Loop over your list
-          return prevState.map((item) => {
-            // Check for the item with the specified id and update it
-            return item.id === msgId ? { ...item, flagged: data } : item
-          })
-        })
-      }
-
 
     } catch (error) {
       console.error("Error:", error);
     }
-
   }
 
 
