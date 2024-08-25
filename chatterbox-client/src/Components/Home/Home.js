@@ -844,7 +844,7 @@ export default function Home() {
                           <button className="option-button" onClick={() => handleEditMessage(msg.id, msg.text)}>Edit</button>
                           <button className="option-button" onClick={() => handleDeleteMessage(msg.id)}>Delete</button>
                         </div>
-                      ) && console.log("click on message: ", msg)}
+                      )}
 
                       {/* Show Report/Unreport options for other user's message */}
                       {!isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (
