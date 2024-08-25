@@ -849,7 +849,6 @@ export default function Home() {
                       {/* Show Report/Unreport options for other user's message */}
                       {!isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (
                         <div className="message-options">
-                          {console.log("msg: ", msg)}
                           {msg.reported === 1 ? (
                             <button className="option-button" onClick={() => RemoveReport(msg.id)}>Unreport</button>
                           ) : (
