@@ -177,42 +177,48 @@ export default function Home() {
   const handleGroupClick = async (group) => {
     const groupId = group.id;
     setSelectedUser(group);
+  
     try {
       const response = await fetch(
-        url + `/messages/messagesWithCurrentGroup?groupId=${groupId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+        url + `/messages/messagesWithCurrentGroup?groupId=${groupId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
+  
       console.log(`Status: ${response.status}`);
       console.log('Response headers:', response.headers);
-
+  
       if (response.ok) {
         const messagesData = await response.json();
-        console.log("\n\n\n\n" ,"hibffhfdgbhdsffdvfdvfd");
         console.log('Messages:', messagesData);
-        setMessages(messagesData.data);
-        if (messagesData.length > 0) {
+  
+        // Check if the response contains messages
+        if (messagesData.data && messagesData.data.length > 0) {
+          setMessages(messagesData.data);
           markMessagesAsRead(currentUser, group);
+        } else {
+          setMessages([]); // Clear the messages if there are none
         }
+      } else if (response.status === 404) {
+        setMessages([]); // Clear the messages in case of 404 not found without console error
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
     } catch (error) {
       console.error('An error occurred:', error);
     }
-    // markMessagesAsRead(currentUser, group);
+  
     setGroupsWithUnread((prevSenderIds) => {
       return prevSenderIds.filter((senderId) => group.id !== senderId);
     });
-
-
+  
     fetchParticipantsInfos(group);
     setShowWindow(true);
-    //return null;
-  }
+  };
 
   const handleNewMessageChange = (event) => {
     setNewMessage(event.target.value);
@@ -483,31 +489,57 @@ export default function Home() {
 
 
   const handleReportMessage = async (msg) => {
-    console.log("Im here")
     try {
-      // Send a POST request to the server to add the new message
+      // Step 1: Update the message status in the messages table
       const response = await fetch(`${url}/messages/reportMessage?id=${msg.id}&report=true`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         }
       });
+
       if (response.ok) {
-        console.log("message reported");
+        console.log("Message status updated");
+
+        // Update the message state to reflect the reported status
         setMessages((prevMessages) =>
           prevMessages.map((message) =>
-            message.id === msg.id
-              ? { ...message, reported: 1 } // Update the reported field to 1
-              : message
+            message.id === msg.id ? { ...message, reported: 1 } : message
           )
         );
+
+        // Step 2: Send the report details to the reported_msg table
+        const newReportedMsg = {
+          msgId: msg.id,
+          sender: msg.sender,
+          receiver: msg.receiver,
+          text: msg.text,
+          date: new Date(msg.date).toISOString().slice(0, 19).replace('T', ' '), // Format the date
+          hour: msg.hour,
+          image: msg.image || null,
+          isItGroup: msg.isItGroup,
+        };
+
+        const reportResponse = await fetch(`${url}/reports/addReportedMessage`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newReportedMsg),
+        });
+
+        if (reportResponse.ok) {
+          console.log("Message reported successfully in reported_msg table");
+        } else {
+          console.error("Failed to add the reported message.");
+        }
       } else {
-        console.error("Failed to add the new reported message.");
+        console.error("Failed to update the message status.");
       }
     } catch (error) {
-      console.error("An error occurred while adding the new reported message:", error);
+      console.error("An error occurred while reporting the message:", error);
     }
-  }
+  };
 
 
   const RemoveReport = async (msgId) => {
@@ -812,7 +844,7 @@ export default function Home() {
                           <button className="option-button" onClick={() => handleEditMessage(msg.id, msg.text)}>Edit</button>
                           <button className="option-button" onClick={() => handleDeleteMessage(msg.id)}>Delete</button>
                         </div>
-                      )}
+                      ) && console.log("click on message: ", msg)}
 
                       {/* Show Report/Unreport options for other user's message */}
                       {!isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (

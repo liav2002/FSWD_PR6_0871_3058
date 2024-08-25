@@ -31,13 +31,17 @@ export default function Admin() {
     if (choice === "contacts") {
       handleChoiceContacts();
     }
+
+    else if (choice === "messages to check" || choice === "All checked messages") {
+      AllReported();
+    }
   };
 
   const handleChoiceContacts = async () => {
     console.log("users", users);
     if (users.length === 0) {
       try {
-        const response = await fetch(`${url}/users/AllUsers?currentUserID=${currentUser.id}`, {
+        const response = await fetch(`${url}/users/AllUsersIncludeAdmins`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -56,28 +60,26 @@ export default function Admin() {
   };
 
   const AllReported = async () => {
+    console.log("try get all repotred messages");
     let reported_msgData = [];
 
-    if (Reported_msg.length === 0) {
-      try {
-        const response = await fetch(url + `/reports/getAllReportedMsg`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.ok) {
-          reported_msgData = await response.json();
-          reported_msgData = reported_msgData.data;
+    try {
+      const response = await fetch(url + `/reports/getAllReportedMsg`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        reported_msgData = await response.json();
+        reported_msgData = reported_msgData.data;
+        console.log("got reported messages: ", reported_msgData);
 
-        } else {
-          console.error(`Request failed with status code ${response.status}`);
-        }
-      } catch (error) {
-        console.error('An error occurred:', error);
+      } else {
+        console.error(`Request failed with status code ${response.status}`);
       }
-    } else {
-      reported_msgData = Reported_msg;
+    } catch (error) {
+      console.error('An error occurred:', error);
     }
 
     const newReportedMsg = [];
@@ -100,9 +102,16 @@ export default function Admin() {
       }
     });
 
+    console.log("reported that need to be handle: ", newReportedMsg);
     setReported_msg(newReportedMsg);
+
+    console.log("reported that checked: ", newReportedMsgChecked);
     setReported_msgChecked(newReportedMsgChecked);
+
+    console.log("reported that checked and kept: ", newMsgKept);
     setMsg_kept(newMsgKept);
+
+    console.log("reported that checked and delete: ", newDeletedMsg);
     setDeleted_msg(newDeletedMsg);
   };
 
@@ -115,6 +124,7 @@ export default function Admin() {
   const handleUserClick = async (user) => {
     navigate(`/contact_profil/${user.id}`)
   }
+
 
   const handleKeepClick = async (reported_msg) => {
     try {
@@ -164,7 +174,10 @@ export default function Admin() {
   const Content1 = () => (
     <div className="admin-contacts-section">
       {users.map((user) => (
-        <div key={user.id} className="admin-contact-item">
+        <div 
+          key={user.id} 
+          className={`admin-contact-item ${user.isAdmin ? 'admin-contact-item-gold' : ''}`}
+        >
           <img src={user.profil} alt={user.name} className="admin-contact-avatar" />
           <div className="admin-contact-details">
             <h3 className="admin-contact-name">{user.name}</h3>
