@@ -31,6 +31,14 @@ export default function Admin() {
     if (choice === "contacts") {
       handleChoiceContacts();
     }
+
+    else if (choice === "messages to check") {
+      AllReported();
+    }
+
+    // else if (choice === "All checked messages") {
+
+    // }
   };
 
   const handleChoiceContacts = async () => {

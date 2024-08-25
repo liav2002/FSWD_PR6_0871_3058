@@ -108,7 +108,7 @@
       "isItRead": true,
       "isItGroup": false,
       "modified": false,
-      "reported": false,
+      "reported": true,
       "readedBy": [2]
   },
   {
