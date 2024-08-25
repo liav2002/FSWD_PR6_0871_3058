@@ -155,29 +155,32 @@ export default function Home() {
   const markMessagesAsRead = async (CurrentUser, SelectedUser) => {
     const currentUserId = CurrentUser.id;
     const selectedUserId = SelectedUser.id;
+  
     if ("phone" in SelectedUser) {
+      // Case for individual user messages
       try {
-        const response = await fetch(url + '/messages/markMessagesAsRead', {
-          method: 'POST',
+        const response = await fetch(`${url}/messages/markMessagesAsRead`, {
+          method: 'PUT',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            currentUserId,
-            selectedUserId
+            currentUserId: currentUserId,  // Send the current user's ID
+            selectedUserId: selectedUserId // Send the selected user's ID
           })
         });
-
+  
         if (response.ok) {
           console.log('Messages marked as read');
-
+  
           setMessages(prevState => {
-            // Loop over your list
+            // Update the messages in the state to reflect the 'read' status
             return prevState.map((item) => {
-              // Check for the item with the specified id and update it
-              return item.receiver == currentUserId && item.isItGroup == false ? { ...item, isItRead: true } : item
-            })
-          })
+              return item.receiver === currentUserId && item.sender === selectedUserId && item.isItGroup === false 
+                ? { ...item, isItRead: true } 
+                : item;
+            });
+          });
         } else {
           console.error(`Request failed with status code ${response.status}`);
         }
@@ -185,29 +188,28 @@ export default function Home() {
         console.error('An error occurred:', error);
       }
     } else {
+      // Case for group messages
       try {
-        const response = await fetch(url + '/messages/markMessagesGroupAsRead', {
+        const response = await fetch(`${url}/messages/markMessagesGroupAsRead`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            currentUserId,
-            selectedUserId
+            currentUserId: currentUserId,  // Send the current user's ID
+            selectedUserId: selectedUserId // Send the selected group's ID
           })
         });
-
+  
         if (response.ok) {
           const data = await response.json();
           if (data.length > 0) {
             setMessages(prevState => {
-              // Loop over your list
+              // Update the group messages in the state to reflect the 'read' status
               return prevState.map((item) => {
-                // Check if the item's ID is in the list of IDs from the server response
                 return data.includes(item.id) ? { ...item, isItRead: true } : item;
               });
             });
-
           }
         } else {
           console.error(`Request failed with status code ${response.status}`);
@@ -215,9 +217,10 @@ export default function Home() {
       } catch (error) {
         console.error('An error occurred:', error);
       }
-
     }
   };
+  
+  
 
 
   const handleGroupClick = async (group) => {
