@@ -226,10 +226,11 @@ body {
   background-color: #f1f1f1;
 }
 
+/* Regular contact item */
 .admin-contact-item {
   display: flex;
   align-items: center;
-  background-color: #fff;
+  background-color: white;
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 15px;
@@ -237,6 +238,13 @@ body {
   max-width: 500px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Gold highlight for admin contacts */
+.admin-contact-item-gold {
+  background-color: #ffd700; /* Gold color */
+  border: 2px solid #daa520; /* Slightly darker gold for the border */
+  box-shadow: 0 5px 15px rgba(218, 165, 32, 0.3); /* Gold shadow */
 }
 
 .admin-contact-item:hover {

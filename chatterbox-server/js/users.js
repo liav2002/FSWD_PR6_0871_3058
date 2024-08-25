@@ -365,6 +365,53 @@ module.exports = (connection) => {
         });
     });
 
+    router.get('/AllUsersIncludeAdmins', (req, res) => {
+        console.log("SERVER-DEBUG: router '/AllUsersIncludeAdmins' handler.");
+    
+        // Path to the admins.json file
+        const adminsFilePath = path.join(__dirname, '..', 'data', 'admins.json');
+    
+        // Read the admins.json file
+        fs.readFile(adminsFilePath, 'utf8', (err, data) => {
+            if (err) {
+                console.error("SERVER-ERROR: Failed to read 'admins.json' file:", err);
+                return sendResponse(res, 500, 'Error reading admin information.');
+            }
+    
+            let adminIds;
+            try {
+                // Parse the JSON data
+                const jsonData = JSON.parse(data);
+                adminIds = jsonData.adminUsers;
+    
+                // Ensure adminIds is an array
+                if (!Array.isArray(adminIds)) {
+                    throw new Error("Parsed admin IDs are not in an array format");
+                }
+    
+            } catch (parseErr) {
+                console.error("SERVER-ERROR: Failed to parse 'admins.json' file:", parseErr);
+                return sendResponse(res, 500, 'Error parsing admin information.');
+            }
+    
+            // Perform the SQL query to get all users
+            connection.query('SELECT * FROM users', (err, rows) => {
+                if (err) {
+                    console.error('SERVER-ERROR: Failed executing the query:', err);
+                    return sendResponse(res, 500, 'Error retrieving users.');
+                }
+    
+                // Add an 'isAdmin' field to each user row based on whether the user is in the admin list
+                const usersWithAdminFlag = rows.map(user => ({
+                    ...user,
+                    isAdmin: adminIds.includes(user.id) // Check if user.id is in the list of admin IDs
+                }));
+    
+                return sendResponse(res, 200, 'Users retrieved successfully', usersWithAdminFlag);
+            });
+        });
+    });
+
     // Route GET to retrieve all users and groups except the currently logged-in user
     router.get('/AllUsersAndGroups', (req, res) => {
         console.log("SERVER-DEBUG: router '/AllUsersAndGroups' handler.");

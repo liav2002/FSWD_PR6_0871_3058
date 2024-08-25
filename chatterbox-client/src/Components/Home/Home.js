@@ -483,31 +483,57 @@ export default function Home() {
 
 
   const handleReportMessage = async (msg) => {
-    console.log("Im here")
     try {
-      // Send a POST request to the server to add the new message
+      // Step 1: Update the message status in the messages table
       const response = await fetch(`${url}/messages/reportMessage?id=${msg.id}&report=true`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         }
       });
+
       if (response.ok) {
-        console.log("message reported");
+        console.log("Message status updated");
+
+        // Update the message state to reflect the reported status
         setMessages((prevMessages) =>
           prevMessages.map((message) =>
-            message.id === msg.id
-              ? { ...message, reported: 1 } // Update the reported field to 1
-              : message
+            message.id === msg.id ? { ...message, reported: 1 } : message
           )
         );
+
+        // Step 2: Send the report details to the reported_msg table
+        const newReportedMsg = {
+          msgId: msg.id,
+          sender: msg.sender,
+          receiver: msg.receiver,
+          text: msg.text,
+          date: new Date(msg.date).toISOString().slice(0, 19).replace('T', ' '), // Format the date
+          hour: msg.hour,
+          image: msg.image || null,
+          isItGroup: msg.isItGroup,
+        };
+
+        const reportResponse = await fetch(`${url}/reports/addReportedMessage`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newReportedMsg),
+        });
+
+        if (reportResponse.ok) {
+          console.log("Message reported successfully in reported_msg table");
+        } else {
+          console.error("Failed to add the reported message.");
+        }
       } else {
-        console.error("Failed to add the new reported message.");
+        console.error("Failed to update the message status.");
       }
     } catch (error) {
-      console.error("An error occurred while adding the new reported message:", error);
+      console.error("An error occurred while reporting the message:", error);
     }
-  }
+  };
 
 
   const RemoveReport = async (msgId) => {

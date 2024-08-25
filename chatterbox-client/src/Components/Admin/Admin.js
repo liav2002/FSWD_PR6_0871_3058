@@ -45,7 +45,7 @@ export default function Admin() {
     console.log("users", users);
     if (users.length === 0) {
       try {
-        const response = await fetch(`${url}/users/AllUsers?currentUserID=${currentUser.id}`, {
+        const response = await fetch(`${url}/users/AllUsersIncludeAdmins`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -124,6 +124,7 @@ export default function Admin() {
     navigate(`/contact_profil/${user.id}`)
   }
 
+
   const handleKeepClick = async (reported_msg) => {
     try {
       const response = await fetch(url + `/reports/markMessageChecked/${reported_msg.msgId}`, {
@@ -172,7 +173,10 @@ export default function Admin() {
   const Content1 = () => (
     <div className="admin-contacts-section">
       {users.map((user) => (
-        <div key={user.id} className="admin-contact-item">
+        <div 
+          key={user.id} 
+          className={`admin-contact-item ${user.isAdmin ? 'admin-contact-item-gold' : ''}`}
+        >
           <img src={user.profil} alt={user.name} className="admin-contact-avatar" />
           <div className="admin-contact-details">
             <h3 className="admin-contact-name">{user.name}</h3>
