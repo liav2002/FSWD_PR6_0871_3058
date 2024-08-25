@@ -71,24 +71,26 @@ export default function Home() {
 
   const handleUserClick = async (user) => {
     setSelectedUser(user);
-
+    setShowWindow(true);
+  
     try {
       const response = await fetch(
-        url + `/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${user.id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+        url + `/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${user.id}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
       console.log(`Status: ${response.status}`);
       console.log('Response headers:', response.headers);
-
+  
       if (response.ok) {
         const messagesData = await response.json();
         console.log('Messages:', messagesData);
         setMessages(messagesData.data);
-        if (messagesData.length > 0) {
+        if (messagesData.data.length > 0) {
           markMessagesAsRead(currentUser, user);
         }
       } else {
@@ -97,13 +99,57 @@ export default function Home() {
     } catch (error) {
       console.error('An error occurred:', error);
     }
-
-
+  
+    // Remove user from the unread list
     setUsersWithUnread((prevSenderIds) => {
       return prevSenderIds.filter((senderId) => user.id !== senderId);
     });
-    setShowWindow(true);
   };
+  
+  // Function to refresh messages every X seconds
+  const useAutoRefreshMessages = (selectedUser, showWindow, refreshInterval = 2000) => {
+    const intervalRef = useRef(null);
+  
+    useEffect(() => {
+      if (selectedUser && showWindow) {
+        const fetchUpdatedMessages = async () => {
+          try {
+            const response = await fetch(
+              url + `/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${selectedUser.id}`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            if (response.ok) {
+              const messagesData = await response.json();
+              setMessages(messagesData.data);
+            }
+          } catch (error) {
+            console.error('An error occurred during auto-refresh:', error);
+          }
+        };
+  
+        // Start polling for messages every X seconds
+        intervalRef.current = setInterval(fetchUpdatedMessages, refreshInterval);
+  
+        // Cleanup interval on component unmount or when conditions change
+        return () => {
+          clearInterval(intervalRef.current);
+        };
+      } else {
+        // Clear interval when selectedUser is empty or showWindow is false
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+      }
+    }, [selectedUser, showWindow, refreshInterval]);
+  };
+  
+  // Usage inside your component
+  useAutoRefreshMessages(selectedUser, showWindow);
 
 
   const markMessagesAsRead = async (CurrentUser, SelectedUser) => {
