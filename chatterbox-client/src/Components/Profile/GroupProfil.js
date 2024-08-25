@@ -90,9 +90,9 @@ export default function GroupProfil() {
           <p className="group-profile-main-title">Group Information</p>
           {selectedGroup && (
             <div className="group-profile-info">
-              <img src={selectedGroup.profil} alt="Group Profile" />
-              <p className="group-profile-title">{selectedGroup.title}</p>
-              <p className="group-profile-description">{selectedGroup.description}</p>
+              <img src={selectedGroup.profil.replace(/['"]/g, "")} alt="Group Profile" />
+              <p className="group-profile-title">{selectedGroup.title.replace(/['"]/g, "")}</p>
+              <p className="group-profile-description">{selectedGroup.description.replace(/['"]/g, "")}</p>
               <p>Participants:</p>
               <ul>
                 {participantsList.map((user) => (

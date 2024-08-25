@@ -744,8 +744,8 @@ export default function Home() {
     return(
     <li key={uniqueKey} className="contact_list">
           <div className="contact_container" onClick={() => handleGroupClick(group)}>
-            <span><img src={group.profil} className="img_contact"></img></span>
-            <span >{group.title}</span>
+            <span><img src={group.profil.replace(/['"]/g, "")} className="img_contact"></img></span>
+            <span >{group.title.replace(/['"]/g, "")}</span>
             {groupsWithUnread.includes(group.id) ? <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span> : ""}
           </div>
         </li>)
@@ -825,10 +825,10 @@ export default function Home() {
                 {selectedUser && (
                   <>
                     <span>
-                      <img src={selectedUser.profil} className="img_contact" alt="Selected User Profile" />
+                      <img src={selectedUser.profil.replace(/['"]/g, "")} className="img_contact" alt="Selected User Profile" />
                     </span>
                     <span>
-                      {"phone" in selectedUser ? selectedUser.name : selectedUser.title}
+                      {"phone" in selectedUser ? selectedUser.name.replace(/['"]/g, "") : selectedUser.title.replace(/['"]/g, "")}
                     </span>
                   </>
                 )}
