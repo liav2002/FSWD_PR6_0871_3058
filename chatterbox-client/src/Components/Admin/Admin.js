@@ -32,13 +32,9 @@ export default function Admin() {
       handleChoiceContacts();
     }
 
-    else if (choice === "messages to check") {
+    else if (choice === "messages to check" || choice === "All checked messages") {
       AllReported();
     }
-
-    // else if (choice === "All checked messages") {
-
-    // }
   };
 
   const handleChoiceContacts = async () => {
@@ -64,28 +60,26 @@ export default function Admin() {
   };
 
   const AllReported = async () => {
+    console.log("try get all repotred messages");
     let reported_msgData = [];
 
-    if (Reported_msg.length === 0) {
-      try {
-        const response = await fetch(url + `/reports/getAllReportedMsg`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.ok) {
-          reported_msgData = await response.json();
-          reported_msgData = reported_msgData.data;
+    try {
+      const response = await fetch(url + `/reports/getAllReportedMsg`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        reported_msgData = await response.json();
+        reported_msgData = reported_msgData.data;
+        console.log("got reported messages: ", reported_msgData);
 
-        } else {
-          console.error(`Request failed with status code ${response.status}`);
-        }
-      } catch (error) {
-        console.error('An error occurred:', error);
+      } else {
+        console.error(`Request failed with status code ${response.status}`);
       }
-    } else {
-      reported_msgData = Reported_msg;
+    } catch (error) {
+      console.error('An error occurred:', error);
     }
 
     const newReportedMsg = [];
@@ -108,9 +102,16 @@ export default function Admin() {
       }
     });
 
+    console.log("reported that need to be handle: ", newReportedMsg);
     setReported_msg(newReportedMsg);
+
+    console.log("reported that checked: ", newReportedMsgChecked);
     setReported_msgChecked(newReportedMsgChecked);
+
+    console.log("reported that checked and kept: ", newMsgKept);
     setMsg_kept(newMsgKept);
+
+    console.log("reported that checked and delete: ", newDeletedMsg);
     setDeleted_msg(newDeletedMsg);
   };
 

@@ -177,42 +177,48 @@ export default function Home() {
   const handleGroupClick = async (group) => {
     const groupId = group.id;
     setSelectedUser(group);
+  
     try {
       const response = await fetch(
-        url + `/messages/messagesWithCurrentGroup?groupId=${groupId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+        url + `/messages/messagesWithCurrentGroup?groupId=${groupId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
+  
       console.log(`Status: ${response.status}`);
       console.log('Response headers:', response.headers);
-
+  
       if (response.ok) {
         const messagesData = await response.json();
-        console.log("\n\n\n\n" ,"hibffhfdgbhdsffdvfdvfd");
         console.log('Messages:', messagesData);
-        setMessages(messagesData.data);
-        if (messagesData.length > 0) {
+  
+        // Check if the response contains messages
+        if (messagesData.data && messagesData.data.length > 0) {
+          setMessages(messagesData.data);
           markMessagesAsRead(currentUser, group);
+        } else {
+          setMessages([]); // Clear the messages if there are none
         }
+      } else if (response.status === 404) {
+        setMessages([]); // Clear the messages in case of 404 not found without console error
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
     } catch (error) {
       console.error('An error occurred:', error);
     }
-    // markMessagesAsRead(currentUser, group);
+  
     setGroupsWithUnread((prevSenderIds) => {
       return prevSenderIds.filter((senderId) => group.id !== senderId);
     });
-
-
+  
     fetchParticipantsInfos(group);
     setShowWindow(true);
-    //return null;
-  }
+  };
 
   const handleNewMessageChange = (event) => {
     setNewMessage(event.target.value);
