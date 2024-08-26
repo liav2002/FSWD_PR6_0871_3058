@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useParams } from 'react-router-dom';
 import "./styles.css";
 import { useNavigate } from "react-router-dom";
 import Cookies from "universal-cookie";
@@ -6,6 +7,7 @@ const url = 'http://localhost:5002';
 
 
 export default function Home() {
+  const { phone } = useParams();
   const [isAdmin, setIsAdmin] = useState(false);
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -801,7 +803,7 @@ export default function Home() {
     }
   };
 
-  if (currentUser) {
+  if (currentUser && currentUser.phone == phone) {
     return (
       <div className="home-container">
         <div className="left-div">
