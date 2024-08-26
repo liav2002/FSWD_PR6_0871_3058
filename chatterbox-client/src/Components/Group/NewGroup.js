@@ -26,7 +26,6 @@ export default function NewGroup() {
       if (response.ok) {
         
         const usersData = await response.json();
-        console.log(usersData.data)
         setUsers(usersData.data);
       } else {
         console.error(`Request failed with status code ${response.status}`);
@@ -65,11 +64,7 @@ export default function NewGroup() {
   const handleChange = ({ target }) => {
     const { name, value } = target;
     let newValue = value;
-
-    if (name === 'title') {
-    } if (name === 'description') {
-      console.log("");
-    }
+    
     if (name === 'profilePictureOption') {
       setInputs((values) => ({ ...values, profil: newValue }));
     } else {
@@ -83,11 +78,9 @@ export default function NewGroup() {
     setUsersAddedId([...UsersAddedId, currentUser.id]);
     const participantsIdString = JSON.stringify([...UsersAddedId, currentUser.id]);
     inputs["participantsId"] = JSON.parse(participantsIdString);
-    // inputs["participantsId"] = JSON.stringify(UsersAdded);
     inputs["adminId"] = currentUser.id;
 
     const data = JSON.stringify(inputs);
-    console.log(inputs);
 
     try {
       const response = await fetch(url + "/groups/AddGroup", {
@@ -98,15 +91,10 @@ export default function NewGroup() {
         },
       });
 
-      console.log(`Status: ${response.status}`);
-      console.log("Response headers:", response.headers);
-
-
       if (response.status === 200 || response.status === 201) {
 
         alert("group created successfully.");
         const res = await response.json();
-        console.log("client", res);
         navigate(`/${currentUser.phone}`);
 
       } else {
