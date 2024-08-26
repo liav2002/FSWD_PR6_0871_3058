@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Cookies from "universal-cookie";
 import "./signInOut.css";  // Ensure to use the same css file to keep consistency
 
@@ -9,6 +9,19 @@ const url = 'http://localhost:5002';
 export default function Register() {
   const [inputs, setInputs] = useState({});
   const navigate = useNavigate();
+  const currentUser = localStorage.getItem("currentUser")
+    ? JSON.parse(localStorage.getItem("currentUser"))
+    : null;
+
+  useEffect(() => {
+    const secureUser = () => {
+      if (currentUser) {
+        navigate(`/${currentUser.phone}`, { replace: true });
+      }
+    };
+
+    secureUser();
+  }, [navigate]);
 
   const handleChange = ({ target }) => {
     const { name, value } = target;
@@ -40,7 +53,7 @@ export default function Register() {
         cookies.set('user_connection', currentTime, { path: '/' });
         navigate(`/${res.data.phone}`);
       }
-      else if (response.status === 400 ) {
+      else if (response.status === 400) {
         const res = await response.json();
         console.log(res.message);
         alert(res.message);
@@ -73,85 +86,89 @@ export default function Register() {
   ];
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h1>REGISTER</h1>
-        <form onSubmit={handleSubmit} className="login-form">
-          <input
-            id="nameInput"
-            className="inputTypeIn"
-            type="text"
-            name="name"
-            value={inputs.name || ""}
-            onChange={handleChange}
-            placeholder="Name"
-            required
-          />
-          <input
-            id="passwordInput"
-            className="inputTypeIn"
-            type="password"
-            name="password"
-            value={inputs.password || ""}
-            onChange={handleChange}
-            placeholder="Password"
-            required
-          />
-          <input
-            id="phoneInput"
-            className="inputTypeIn"
-            type="tel"
-            name="phone"
-            value={inputs.phone || ""}
-            onChange={handleChange}
-            placeholder="Phone"
-            pattern="[0-9]{3}[0-9]{3}[0-9]{4}"
-            required
-          />
-          <input
-            id="emailInput"
-            className="inputTypeIn"
-            type="email"
-            name="email"
-            value={inputs.email || ""}
-            onChange={handleChange}
-            placeholder="Email"
-            required
-          />
-          
-          {/* Profile picture selection */}
-          <div className="profile-picture-container">
-            {profilePictureOptions.map((option) => (
-              <label key={option.value} className="profile-picture-option">
-                <input
-                  type="radio"
-                  name="profilePictureOption"
-                  value={option.value}
-                  checked={inputs.profilePictureOption === option.value}
-                  onChange={handleChange}
-                  required
-                />
-                <img src={option.value} alt={option.label} className="profile-picture-img" />
-              </label>
-            ))}
+    <>
+      {!currentUser && (
+        <div className="login-container">
+          <div className="login-box">
+            <h1>REGISTER</h1>
+            <form onSubmit={handleSubmit} className="login-form">
+              <input
+                id="nameInput"
+                className="inputTypeIn"
+                type="text"
+                name="name"
+                value={inputs.name || ""}
+                onChange={handleChange}
+                placeholder="Name"
+                required
+              />
+              <input
+                id="passwordInput"
+                className="inputTypeIn"
+                type="password"
+                name="password"
+                value={inputs.password || ""}
+                onChange={handleChange}
+                placeholder="Password"
+                required
+              />
+              <input
+                id="phoneInput"
+                className="inputTypeIn"
+                type="tel"
+                name="phone"
+                value={inputs.phone || ""}
+                onChange={handleChange}
+                placeholder="Phone"
+                pattern="[0-9]{3}[0-9]{3}[0-9]{4}"
+                required
+              />
+              <input
+                id="emailInput"
+                className="inputTypeIn"
+                type="email"
+                name="email"
+                value={inputs.email || ""}
+                onChange={handleChange}
+                placeholder="Email"
+                required
+              />
+
+              {/* Profile picture selection */}
+              <div className="profile-picture-container">
+                {profilePictureOptions.map((option) => (
+                  <label key={option.value} className="profile-picture-option">
+                    <input
+                      type="radio"
+                      name="profilePictureOption"
+                      value={option.value}
+                      checked={inputs.profilePictureOption === option.value}
+                      onChange={handleChange}
+                      required
+                    />
+                    <img src={option.value} alt={option.label} className="profile-picture-img" />
+                  </label>
+                ))}
+              </div>
+
+              <input
+                id="statusInput"
+                className="inputTypeIn"
+                type="text"
+                name="status"
+                value={inputs.status || ""}
+                onChange={handleChange}
+                placeholder="Status"
+                required
+              />
+
+              <button id="registerButton" type="submit">
+                REGISTER
+              </button>
+            </form>
           </div>
-
-          <input
-            id="statusInput"
-            className="inputTypeIn"
-            type="text"
-            name="status"
-            value={inputs.status || ""}
-            onChange={handleChange}
-            placeholder="Status"
-            required
-          />
-
-          <button id="registerButton" type="submit">
-            REGISTER
-          </button>
-        </form>
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

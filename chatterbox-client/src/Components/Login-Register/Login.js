@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./signInOut.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const validPhone = /^$|^\d{0,10}$/;
 const url = 'http://localhost:5002';
@@ -9,6 +9,20 @@ const url = 'http://localhost:5002';
 export default function Login() {
   const [inputs, setInputs] = useState({});
   const navigate = useNavigate();
+  const currentUser = localStorage.getItem("currentUser")
+    ? JSON.parse(localStorage.getItem("currentUser"))
+    : null;
+
+  useEffect(() => {
+    const secureUser = () => {
+
+      if (currentUser) {
+        navigate(`/${currentUser.phone}`, { replace: true });
+      }
+    };
+
+    secureUser();
+  }, [navigate]);
 
   const handleChange = ({ target }) => {
     let isValid = true;
@@ -62,39 +76,43 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h1>WELCOME</h1>
-        <form onSubmit={handleSubmit} className="login-form">
-          <input
-            className="inputTypeIn"
-            id="phoneInput"
-            type="tel"
-            name="phone"
-            value={inputs.phone || ""}
-            onChange={handleChange}
-            placeholder="Phone Number"
-            required
-          />
+    <>
+      {!currentUser && (
+        <div className="login-container">
+          <div className="login-box">
+            <h1>WELCOME</h1>
+            <form onSubmit={handleSubmit} className="login-form">
+              <input
+                className="inputTypeIn"
+                id="phoneInput"
+                type="tel"
+                name="phone"
+                value={inputs.phone || ""}
+                onChange={handleChange}
+                placeholder="Phone Number"
+                required
+              />
 
-          <input
-            id="passwordInput"
-            className="inputTypeIn"
-            type="password"
-            name="password"
-            value={inputs.password || ""}
-            onChange={handleChange}
-            placeholder="Password"
-            required
-          />
-          <button id="submitButton" type="submit">
-            LOG IN
-          </button>
-        </form>
-        <Link className="loginLink" to="/register">
-          Don’t have an account? <span className="link-text">Register</span>
-        </Link>
-      </div>
-    </div>
+              <input
+                id="passwordInput"
+                className="inputTypeIn"
+                type="password"
+                name="password"
+                value={inputs.password || ""}
+                onChange={handleChange}
+                placeholder="Password"
+                required
+              />
+              <button id="submitButton" type="submit">
+                LOG IN
+              </button>
+            </form>
+            <Link className="loginLink" to="/register">
+              Don’t have an account? <span className="link-text">Register</span>
+            </Link>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
