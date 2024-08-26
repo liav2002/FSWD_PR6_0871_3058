@@ -3,15 +3,12 @@ const mysql = require('mysql2');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-// Read the database configuration from config.json
 const configFilePath = path.join(__dirname, '..', 'config.json');
 const configData = fs.readFileSync(configFilePath, 'utf-8');
 const dbConfig = JSON.parse(configData);
 
-// Create a connection to the database
 const con = mysql.createConnection(dbConfig);
 
-// Function to execute an SQL query
 function executeQuery(query) {
   return new Promise((resolve, reject) => {
     con.query(query, (error, results) => {
@@ -24,7 +21,6 @@ function executeQuery(query) {
   });
 }
 
-// Function to close the database connection
 function closeConnection() {
   return new Promise((resolve, reject) => {
     con.end((err) => {
@@ -37,7 +33,6 @@ function closeConnection() {
   });
 }
 
-// Function to create the "users" table and insert data from "users.json"
 async function setupUsersTable() {
   try {
     const usersFilePath = path.join(__dirname, 'template_generated_json_data', 'users.json');
@@ -56,7 +51,6 @@ async function setupUsersTable() {
       )
     `);
 
-    // Clear existing data
     await executeQuery(`TRUNCATE TABLE users`);
 
     for (const user of usersArray) {
@@ -75,7 +69,6 @@ async function setupUsersTable() {
   }
 }
 
-// Function to create the "messages" table and insert data from "messages.json"
 async function setupMessagesTable() {
   try {
     const messagesFilePath = path.join(__dirname, 'template_generated_json_data', 'messages.json');
@@ -99,7 +92,6 @@ async function setupMessagesTable() {
       )
     `);
 
-    // Clear existing data
     await executeQuery(`TRUNCATE TABLE messages`);
 
     for (const message of messagesArray) {
@@ -117,7 +109,6 @@ async function setupMessagesTable() {
   }
 }
 
-// Function to create the "chat_groups" table and insert data from "groups.json"
 async function setupChatGroupsTable() {
   try {
     const groupsFilePath = path.join(__dirname, 'template_generated_json_data', 'groups.json');
@@ -135,7 +126,6 @@ async function setupChatGroupsTable() {
       )
     `);
 
-    // Clear existing data
     await executeQuery(`TRUNCATE TABLE chat_groups`);
 
     for (const group of groupsArray) {
@@ -152,7 +142,6 @@ async function setupChatGroupsTable() {
   }
 }
 
-// Function to create the "reported_msg" table and insert data from "reported_msg.json"
 async function setupReportedMessagesTable() {
   try {
     const reportedMsgFilePath = path.join(__dirname, 'template_generated_json_data', 'reported_msg.json');
@@ -175,7 +164,6 @@ async function setupReportedMessagesTable() {
       )
     `);
 
-    // Clear existing data
     await executeQuery(`TRUNCATE TABLE reported_msg`);
 
     for (const reportedMsg of reportedMsgArray) {
@@ -193,7 +181,6 @@ async function setupReportedMessagesTable() {
   }
 }
 
-// Function to initialize database and insert data
 async function initializeDatabase() {
   await setupUsersTable();
   await setupMessagesTable();
@@ -203,5 +190,4 @@ async function initializeDatabase() {
   console.log('Database setup complete. All data inserted successfully.');
 }
 
-// Call the initializeDatabase function
 initializeDatabase();

@@ -6,7 +6,6 @@ const path = require('path');
 
 const adminUsers = [1];
 
-// Utility function to send a consistent JSON response
 function sendResponse(res, status, message, data = null) {
     const response = { message };
 
@@ -19,7 +18,6 @@ function sendResponse(res, status, message, data = null) {
 
 module.exports = (connection) => {
     
-    // Login
     router.get('/loginUser', (req, res) => {
         console.log("SERVER-DEBUG: router '/loginUser' handler.");
 
@@ -30,20 +28,17 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: phone <- " + phone);
         console.log("SERVER-DEBUG: password <- " + password);
 
-        // Check if the phone and password are provided
         if (!phone || !password) {
             console.error("SERVER-ERROR: Missing required parameters 'phone' or 'password'.");
             return sendResponse(res, 400, "Bad Request: 'phone' and 'password' are required.");
         }
 
-        // Validate phone format (10 digits)
         const phoneRegex = /^[0-9]{10}$/;
         if (!phoneRegex.test(phone)) {
             console.error("SERVER-ERROR: Invalid phone format.");
             return sendResponse(res, 400, "Bad Request: Invalid phone format. Must be 10 digits.");
         }
 
-        // SQL query to retrieve the user's information by phone number
         connection.query('SELECT * FROM users WHERE phone = ?', [phone], (err, rows) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
@@ -55,9 +50,8 @@ module.exports = (connection) => {
                 return sendResponse(res, 404, 'User not found');
             }
 
-            const user = rows[0]; // First result row
+            const user = rows[0]; 
 
-            // Compare the provided plain-text password with the hashed password in the database
             bcrypt.compare(password, user.password, (err, isMatch) => {
                 if (err) {
                     console.error('SERVER-ERROR: Error comparing passwords:', err);
@@ -69,7 +63,6 @@ module.exports = (connection) => {
                     return sendResponse(res, 401, 'Invalid credentials');
                 }
 
-                // Password is correct, return user info
                 const userInfo = {
                     id: user.id,
                     name: user.name,
@@ -85,23 +78,20 @@ module.exports = (connection) => {
         });
     });
 
-    // Register
     router.post('/registerUser', async (req, res) => {
         console.log("SERVER-DEBUG: router '/registerUser' handler.");
 
-        // Check if the Content-Type is application/json
         if (!req.is('application/json')) {
             console.error("SERVER-ERROR: Invalid or missing Content-Type. Expected 'application/json'.");
             return sendResponse(res, 400, "Bad Request: Content-Type must be application/json.");
         }
 
-        const user = req.body; // Retrieve user data from the request
+        const user = req.body; 
 
         console.log("SERVER-DEBUG: request body:");
         console.log("SERVER-DEBUG: user details:");
         console.log(user);
 
-        // Validate required parameters
         const requiredFields = ['name', 'phone', 'email', 'profilePictureOption', 'status', 'password'];
         for (let field of requiredFields) {
             if (!user[field]) {
@@ -110,46 +100,38 @@ module.exports = (connection) => {
             }
         }
 
-        // Validation rules
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
-        const phoneRegex = /^[0-9]{10}$/; // Basic phone validation: 10 digits
-        const statusOptions = ['available', 'busy']; // Valid status options
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+        const phoneRegex = /^[0-9]{10}$/; 
+        const statusOptions = ['available', 'busy']; 
 
-        // Validate name (must be a non-empty string)
         if (typeof user.name !== 'string' || user.name.trim().length === 0) {
             console.error("SERVER-ERROR: Invalid name format.");
             return sendResponse(res, 400, "Bad Request: Invalid name format.");
         }
 
-        // Validate email format
         if (!emailRegex.test(user.email)) {
             console.error("SERVER-ERROR: Invalid email format.");
             return sendResponse(res, 400, "Bad Request: Invalid email format.");
         }
 
-        // Validate phone format
         if (!phoneRegex.test(user.phone)) {
             console.error("SERVER-ERROR: Invalid phone format. Must be 10 digits.");
             return sendResponse(res, 400, "Bad Request: Invalid phone format. Must be 10 digits.");
         }
 
-        // Validate status
         if (!statusOptions.includes(user.status)) {
             console.error("SERVER-ERROR: Invalid status. Must be 'available' or 'busy'.");
             return sendResponse(res, 400, "Bad Request: Invalid status. Must be 'available' or 'busy'.");
         }
 
-        // Validate password (must be at least 6 characters long)
         if (typeof user.password !== 'string' || user.password.length < 6) {
             console.error("SERVER-ERROR: Invalid password. Must be at least 6 characters long.");
             return sendResponse(res, 400, "Bad Request: Invalid password. Must be at least 6 characters long.");
         }
 
         try {
-            // Hash the password using bcrypt
-            const hashedPassword = await bcrypt.hash(user.password, 10); // 10 is the salt rounds
+            const hashedPassword = await bcrypt.hash(user.password, 10); 
 
-            // Check if the phone number is already in use
             connection.query('SELECT * FROM users WHERE phone = ?', [user.phone], (err, rows) => {
                 if (err) {
                     console.error('SERVER-ERROR: Error while executing the query:', err);
@@ -161,7 +143,6 @@ module.exports = (connection) => {
                     return sendResponse(res, 400, 'Phone number is already in use');
                 }
 
-                // Insert the user into the database using prepared statements
                 connection.query(
                     'INSERT INTO users (name, phone, email, profil, status, password) VALUES (?, ?, ?, ?, ?, ?)',
                     [user.name.trim(), user.phone.trim(), user.email.trim(), user.profilePictureOption.trim(), user.status.trim(), hashedPassword],
@@ -181,7 +162,7 @@ module.exports = (connection) => {
                         };
 
                         console.log("SERVER-DEBUG: User successfully registered:", userToAdd);
-                        return sendResponse(res, 201, 'User registered successfully', userToAdd); // 201 Created
+                        return sendResponse(res, 201, 'User registered successfully', userToAdd); 
                     }
                 );
             });
@@ -191,20 +172,17 @@ module.exports = (connection) => {
         }
     });
 
-    // Get User Info
     router.get('/UserInfo', (req, res) => {
         console.log("SERVER-DEBUG: router '/UserInfo' handler.");
 
         const userId = req.query.UserId;
         console.log("SERVER-DEBUG: user_id <- " + userId);
 
-        // Validate that the userId is provided and is a positive integer
         if (!userId || isNaN(userId) || parseInt(userId) <= 0 || !Number.isInteger(Number(userId))) {
             console.error("SERVER-ERROR: Invalid or missing 'UserId'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'UserId' is required and must be a positive integer.");
         }
 
-        // SQL query to retrieve user information by ID
         const query = 'SELECT * FROM users WHERE id = ?';
         connection.query(query, [parseInt(userId)], (err, results) => {
             if (err) {
@@ -223,7 +201,6 @@ module.exports = (connection) => {
         });
     });
 
-    // Update User Information
     router.put('/updateUserInfo', async (req, res) => {
         console.log("SERVER-DEBUG: router '/updateUserInfo' handler.");
 
@@ -242,13 +219,11 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: user_email <- " + userEmail);
         console.log("SERVER-DEBUG: user_profile <- " + userProfile);
 
-        // Validate required parameters
         if (!userId || !userName || !userStatus || !userPassword || !userEmail || !userProfile) {
             console.error("SERVER-ERROR: Missing required parameter(s).");
             return sendResponse(res, 400, "Bad Request: All fields (id, name, status, password, email, profil) are required.");
         }
 
-        // Validate input format (same as registration validation)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const statusOptions = ['available', 'busy'];
 
@@ -263,7 +238,6 @@ module.exports = (connection) => {
         }
 
         try {
-            // Hash the new password
             const hashedPassword = await bcrypt.hash(userPassword, 10);
 
             const query = 'UPDATE users SET name = ?, email = ?, profil = ?, status = ?, password = ? WHERE id = ?';
@@ -285,7 +259,6 @@ module.exports = (connection) => {
         }
     });
 
-    // Information about chat group participants
     router.get('/ParticipantsInfo', (req, res) => {
         console.log("SERVER-DEBUG: router '/ParticipantsInfo' handler.");
 
@@ -294,7 +267,6 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: group_id <- " + groupId);
 
-        // Validate that groupId is provided and is a positive integer
         if (!groupId || isNaN(groupId) || parseInt(groupId) <= 0 || !Number.isInteger(Number(groupId))) {
             console.error("SERVER-ERROR: Invalid or missing 'GroupId'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'GroupId' is required and must be a positive integer.");
@@ -302,14 +274,12 @@ module.exports = (connection) => {
 
         const query = 'SELECT participantsId FROM chat_groups WHERE id = ?';
 
-        // Execute the SQL query with the parameter
         connection.query(query, [parseInt(groupId)], (err, results) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed in request execution', err);
                 return sendResponse(res, 500, 'An error occurred while retrieving participants information.');
             }
 
-            // Check if the group exists
             if (results.length === 0) {
                 console.error("SERVER-DEBUG: No group found with the provided 'GroupId'.");
                 return sendResponse(res, 404, 'Group not found.');
@@ -321,13 +291,11 @@ module.exports = (connection) => {
                     ? JSON.parse(group.participantsId)
                     : group.participantsId;
 
-                // Validate that participantsIdArray is an array
                 if (!Array.isArray(participantsIdArray)) {
                     console.error("SERVER-ERROR: participantsId is not a valid array.");
                     return sendResponse(res, 500, 'Invalid participantsId format.');
                 }
 
-                // Convert participants IDs to integers
                 const participantsIdIntegers = participantsIdArray.map(id => parseInt(id)).filter(id => !isNaN(id));
 
                 console.log("SERVER-DEBUG: participantsId as integers:", participantsIdIntegers);
@@ -339,7 +307,6 @@ module.exports = (connection) => {
         });
     });
 
-    // Route to retrieve all users except the currently logged-in user
     router.get('/AllUsers', (req, res) => {
         console.log("SERVER-DEBUG: router '/AllUsers' handler.");
 
@@ -348,13 +315,11 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: current_user_id <- " + currentUserID);
 
-        // Validate that currentUserID is provided and is a positive integer
         if (!currentUserID || isNaN(currentUserID) || parseInt(currentUserID) <= 0 || !Number.isInteger(Number(currentUserID))) {
             console.error("SERVER-ERROR: Invalid or missing 'currentUserID'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'currentUserID' is required and must be a positive integer.");
         }
 
-        // Perform the SQL query to get all users except the current user
         connection.query('SELECT * FROM users WHERE id != ?', [parseInt(currentUserID)], (err, rows) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
@@ -368,10 +333,8 @@ module.exports = (connection) => {
     router.get('/AllUsersIncludeAdmins', (req, res) => {
         console.log("SERVER-DEBUG: router '/AllUsersIncludeAdmins' handler.");
     
-        // Path to the admins.json file
         const adminsFilePath = path.join(__dirname, '..', 'data', 'admins.json');
     
-        // Read the admins.json file
         fs.readFile(adminsFilePath, 'utf8', (err, data) => {
             if (err) {
                 console.error("SERVER-ERROR: Failed to read 'admins.json' file:", err);
@@ -380,11 +343,9 @@ module.exports = (connection) => {
     
             let adminIds;
             try {
-                // Parse the JSON data
                 const jsonData = JSON.parse(data);
                 adminIds = jsonData.adminUsers;
     
-                // Ensure adminIds is an array
                 if (!Array.isArray(adminIds)) {
                     throw new Error("Parsed admin IDs are not in an array format");
                 }
@@ -394,17 +355,15 @@ module.exports = (connection) => {
                 return sendResponse(res, 500, 'Error parsing admin information.');
             }
     
-            // Perform the SQL query to get all users
             connection.query('SELECT * FROM users', (err, rows) => {
                 if (err) {
                     console.error('SERVER-ERROR: Failed executing the query:', err);
                     return sendResponse(res, 500, 'Error retrieving users.');
                 }
     
-                // Add an 'isAdmin' field to each user row based on whether the user is in the admin list
                 const usersWithAdminFlag = rows.map(user => ({
                     ...user,
-                    isAdmin: adminIds.includes(user.id) // Check if user.id is in the list of admin IDs
+                    isAdmin: adminIds.includes(user.id) 
                 }));
     
                 return sendResponse(res, 200, 'Users retrieved successfully', usersWithAdminFlag);
@@ -412,7 +371,6 @@ module.exports = (connection) => {
         });
     });
 
-    // Route GET to retrieve all users and groups except the currently logged-in user
     router.get('/AllUsersAndGroups', (req, res) => {
         console.log("SERVER-DEBUG: router '/AllUsersAndGroups' handler.");
 
@@ -421,27 +379,23 @@ module.exports = (connection) => {
         console.log("SERVER-DEBUG: request information:");
         console.log("SERVER-DEBUG: current_user_id <- " + currentUserID);
 
-        // Validate that currentUserID is provided and is a positive integer
         if (!currentUserID || isNaN(currentUserID) || parseInt(currentUserID) <= 0 || !Number.isInteger(Number(currentUserID))) {
             console.error("SERVER-ERROR: Invalid or missing 'currentUserID'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'currentUserID' is required and must be a positive integer.");
         }
 
-        // Make an SQL query to retrieve all users except the currently logged-in user
         connection.query('SELECT * FROM users WHERE id != ?', [parseInt(currentUserID)], (err, users) => {
             if (err) {
                 console.error('SERVER-ERROR: Failed executing the query:', err);
                 return sendResponse(res, 500, 'Error retrieving users.');
             }
 
-            // Retrieve groups from the database that contain the currentUser's id in the participantsId list
             connection.query('SELECT * FROM chat_groups WHERE JSON_CONTAINS(participantsId, ?)', [JSON.stringify([parseInt(currentUserID)])], (err, groups) => {
                 if (err) {
                     console.error('SERVER-ERROR: Failed executing the query:', err);
                     return sendResponse(res, 500, 'Error retrieving groups.');
                 }
 
-                // Combine the filtered group list with the list of users retrieved from the database
                 const combinedData = {
                     users: users,
                     groups: groups
@@ -452,31 +406,24 @@ module.exports = (connection) => {
         });
     });
 
-    // Route to check if a user is an admin
     router.get('/isAdmin', (req, res) => {
         console.log("SERVER-DEBUG: router '/isAdmin' handler.");
-
-        // Extract the currentUserID from the query parameters and log it
         const currentUserID = req.query.currentUserID;
         console.log("SERVER-DEBUG: currentUserID <- " + currentUserID);
 
-        // Validate that the currentUserID is provided and is a positive integer
         if (!currentUserID || isNaN(currentUserID) || parseInt(currentUserID) <= 0 || !Number.isInteger(Number(currentUserID))) {
             console.error("SERVER-ERROR: Invalid or missing 'currentUserID'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'currentUserID' is required and must be a positive integer.");
         }
 
-        // Path to the JSON file that stores the admin user IDs
         const jsonFilePath = path.join(__dirname, '../data/admins.json');
 
-        // Read the JSON file asynchronously
         fs.readFile(jsonFilePath, 'utf8', (err, data) => {
             if (err) {
                 console.error("SERVER-ERROR: Failed to read 'admins.json'", err);
                 return sendResponse(res, 500, 'Internal Server Error: Could not read admin users file.');
             }
 
-            // Parse the JSON data
             let adminUsers;
             try {
                 adminUsers = JSON.parse(data).adminUsers;
@@ -485,10 +432,8 @@ module.exports = (connection) => {
                 return sendResponse(res, 500, 'Internal Server Error: Could not parse admin users file.');
             }
 
-            // Check if the user is an admin
             const isAdmin = adminUsers.includes(parseInt(currentUserID)) ? 1 : 0;
 
-            // Log the result and send the response
             console.log("SERVER-DEBUG: User isAdmin status:", isAdmin);
             return sendResponse(res, 200, 'Admin status checked successfully.', { isAdmin });
         });

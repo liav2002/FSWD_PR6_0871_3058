@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// Utility function to send a consistent JSON response
 function sendResponse(res, status, message, data = null) {
     const response = { message };
 
@@ -14,23 +13,19 @@ function sendResponse(res, status, message, data = null) {
 
 module.exports = (connection) => {
 
-    // POST a reported message
     router.post('/addReportedMessage', (req, res) => {
         console.log("SERVER-DEBUG: router '/addReportedMessage' handler.");
 
-        // Check if the Content-Type is application/json
         if (!req.is('application/json')) {
             console.error("SERVER-ERROR: Invalid or missing Content-Type. Expected 'application/json'.");
             return sendResponse(res, 400, "Bad Request: Content-Type must be application/json.");
         }
 
-        const newReportedMsg = req.body; // Extract the new reported message data from the request body
+        const newReportedMsg = req.body; 
 
-        // Log the request body for debugging purposes
         console.log("SERVER-DEBUG: request body:");
         console.log("SERVER-DEBUG: reported message details:", newReportedMsg);
 
-        // Validate required fields in the newReportedMsg object
         const requiredFields = ['msgId', 'sender', 'receiver', 'text', 'date', 'hour', 'isItGroup'];
         for (let field of requiredFields) {
             if (newReportedMsg[field] === undefined || newReportedMsg[field] === null) {
@@ -39,13 +34,11 @@ module.exports = (connection) => {
             }
         }
 
-        // Ensure isItGroup is either boolean or valid number (0 or 1)
         if (typeof newReportedMsg.isItGroup !== 'boolean' && ![0, 1].includes(newReportedMsg.isItGroup)) {
             console.error("SERVER-ERROR: Invalid 'isItGroup' type.");
             return sendResponse(res, 400, "Bad Request: 'isItGroup' must be a boolean or 0/1.");
         }
 
-        // Secure and sanitize inputs using parameterized query to prevent SQL injection
         const sanitizedReportedMsg = {
             msgId: parseInt(newReportedMsg.msgId),
             sender: parseInt(newReportedMsg.sender),
@@ -55,11 +48,10 @@ module.exports = (connection) => {
             hour: newReportedMsg.hour.trim(),
             image: newReportedMsg.image ? newReportedMsg.image.trim() : null,
             isItGroup: newReportedMsg.isItGroup === true || newReportedMsg.isItGroup === 1 ? 1 : 0,
-            checked: 0,  // New reported messages are unchecked by default
-            deleted: 0   // New reported messages are not deleted by default
+            checked: 0,  
+            deleted: 0  
         };
 
-        // Validate that msgId, sender, and receiver are positive integers
         if (isNaN(sanitizedReportedMsg.msgId) || sanitizedReportedMsg.msgId <= 0 ||
             isNaN(sanitizedReportedMsg.sender) || sanitizedReportedMsg.sender <= 0 ||
             isNaN(sanitizedReportedMsg.receiver) || sanitizedReportedMsg.receiver <= 0) {
@@ -67,7 +59,6 @@ module.exports = (connection) => {
             return sendResponse(res, 400, "Bad Request: 'msgId', 'sender', and 'receiver' must be positive integers.");
         }
 
-        // Step 1: Check if the message ID exists in the messages table
         const checkMessageQuery = 'SELECT id FROM messages WHERE id = ?';
         connection.query(checkMessageQuery, [sanitizedReportedMsg.msgId], (checkErr, checkResults) => {
             if (checkErr) {
@@ -80,14 +71,12 @@ module.exports = (connection) => {
                 return sendResponse(res, 404, 'Message ID does not exist.');
             }
 
-            // Step 2: Begin transaction to ensure atomicity
             connection.beginTransaction(err => {
                 if (err) {
                     console.error("SERVER-ERROR: Transaction error", err);
                     return sendResponse(res, 500, 'An error occurred while starting the transaction.');
                 }
 
-                // Step 3: Insert the new reported message into the reported_msg table
                 const insertQuery = `
                 INSERT INTO reported_msg (msgId, sender, receiver, text, date, hour, image, isItGroup, checked, deleted) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -112,9 +101,8 @@ module.exports = (connection) => {
                         });
                     }
 
-                    const newReportedMsgId = results.insertId; // Get the ID of the newly inserted reported message
+                    const newReportedMsgId = results.insertId; 
 
-                    // Step 4: Update the `reported` field in the `messages` table for the reported message
                     const updateMessageQuery = `UPDATE messages SET reported = true WHERE id = ?`;
 
                     connection.query(updateMessageQuery, [sanitizedReportedMsg.msgId], (updateErr, updateResults) => {
@@ -125,7 +113,6 @@ module.exports = (connection) => {
                             });
                         }
 
-                        // Step 5: Commit the transaction
                         connection.commit(commitErr => {
                             if (commitErr) {
                                 console.error('SERVER-ERROR: Transaction commit error', commitErr);
@@ -134,7 +121,6 @@ module.exports = (connection) => {
                                 });
                             }
 
-                            // Step 6: Log the successful insertion and return the ID of the new reported message
                             console.log("SERVER-DEBUG: New reported message added with ID:", newReportedMsgId);
                             return sendResponse(res, 201, 'Reported message added and message updated successfully.', { id: newReportedMsgId });
                         });
@@ -144,11 +130,9 @@ module.exports = (connection) => {
         });
     });
 
-    // GET all reported messages (checked = true)
     router.get('/getAllReportedMsg', (req, res) => {
         console.log("SERVER-DEBUG: router '/getAllReportedMsg' handler.");
 
-        // SQL query to retrieve all reported (reported) messages
         const query = `SELECT * FROM reported_msg`;
 
         connection.query(query, (err, reportedRows) => {
@@ -157,36 +141,29 @@ module.exports = (connection) => {
                 return sendResponse(res, 500, "An error occurred while retrieving reported messages.");
             }
 
-            // Check if no reported messages are found
             if (reportedRows.length === 0) {
                 console.log("SERVER-DEBUG: No reported messages found.");
                 return sendResponse(res, 404, "No reported messages found.");
             }
 
-            // Log the reported messages for debugging purposes
             console.log("SERVER-DEBUG: Reported messages retrieved:", reportedRows);
 
-            // Return the reported messages in the response
             return sendResponse(res, 200, "Reported messages retrieved successfully.", reportedRows);
         });
     });
 
-    // POST to mark a message as checked and update the reported status
     router.post('/markMessageChecked/:messageId', (req, res) => {
         console.log("SERVER-DEBUG: router '/markMessageChecked' handler.");
         
         const messageId = req.params.messageId;
 
-        // Log the message ID for debugging purposes
         console.log("SERVER-DEBUG: messageId <- " + messageId);
 
-        // Validate that messageId is a positive integer
         if (!messageId || isNaN(messageId) || parseInt(messageId) <= 0 || !Number.isInteger(Number(messageId))) {
             console.error("SERVER-ERROR: Invalid 'messageId'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'messageId' must be a positive integer.");
         }
 
-        // Query to update the 'checked' variable in the 'reported_msg' table
         const updateReportedMsgQuery = 'UPDATE reported_msg SET checked = true WHERE msgId = ?';
         connection.query(updateReportedMsgQuery, [parseInt(messageId)], (updateErr, updateResult) => {
             if (updateErr) {
@@ -194,13 +171,11 @@ module.exports = (connection) => {
                 return sendResponse(res, 500, "An error occurred while updating the 'checked' status.");
             }
 
-            // Check if any rows were affected
             if (updateResult.affectedRows === 0) {
                 console.log("SERVER-DEBUG: No reported message found with the specified 'messageId'.");
                 return sendResponse(res, 404, "Reported message not found.");
             }
 
-            // Query to update the 'reported' status in the 'messages' table
             const updateMessageQuery = 'UPDATE messages SET reported = false WHERE id = ?';
             connection.query(updateMessageQuery, [parseInt(messageId)], (updateMessageErr, updateMessageResult) => {
                 if (updateMessageErr) {
@@ -208,35 +183,28 @@ module.exports = (connection) => {
                     return sendResponse(res, 500, "An error occurred while updating the 'reported' status in the messages.");
                 }
 
-                // Check if any rows were affected
                 if (updateMessageResult.affectedRows === 0) {
                     console.log("SERVER-DEBUG: No message found with the specified 'messageId'.");
                     return sendResponse(res, 404, "Message not found.");
                 }
 
-                // Successfully updated both tables
                 console.log("SERVER-DEBUG: Message 'checked' and 'reported' status updated successfully.");
                 return sendResponse(res, 200, "Message checked and reported status updated successfully.");
             });
         });
     });
 
-    // POST to mark a reported message as deleted and remove it from the messages table
     router.post('/deleteReportedMessage/:messageId', (req, res) => {
         console.log("SERVER-DEBUG: router '/deleteReportedMessage' handler.");
         
         const messageId = req.params.messageId;
-
-        // Log the message ID for debugging purposes
         console.log("SERVER-DEBUG: messageId <- " + messageId);
 
-        // Validate that messageId is a positive integer
         if (!messageId || isNaN(messageId) || parseInt(messageId) <= 0 || !Number.isInteger(Number(messageId))) {
             console.error("SERVER-ERROR: Invalid 'messageId'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'messageId' must be a positive integer.");
         }
 
-        // Query to update the 'checked' and 'deleted' fields in the 'reported_msg' table
         const updateReportedMsgQuery = 'UPDATE reported_msg SET checked = true, deleted = true WHERE msgId = ?';
         connection.query(updateReportedMsgQuery, [parseInt(messageId)], (updateErr, updateResult) => {
             if (updateErr) {
@@ -244,13 +212,11 @@ module.exports = (connection) => {
                 return sendResponse(res, 500, "An error occurred while updating the reported message.");
             }
 
-            // Check if any rows were affected
             if (updateResult.affectedRows === 0) {
                 console.log("SERVER-DEBUG: No reported message found with the specified 'messageId'.");
                 return sendResponse(res, 404, "Reported message not found.");
             }
 
-            // Query to delete the message from the 'messages' table
             const deleteMessageQuery = 'DELETE FROM messages WHERE id = ?';
             connection.query(deleteMessageQuery, [parseInt(messageId)], (deleteErr, deleteResult) => {
                 if (deleteErr) {
@@ -258,34 +224,28 @@ module.exports = (connection) => {
                     return sendResponse(res, 500, "An error occurred while deleting the message from the messages table.");
                 }
 
-                // Check if any rows were affected by the delete operation
                 if (deleteResult.affectedRows === 0) {
                     console.log("SERVER-DEBUG: No message found with the specified 'messageId'.");
                     return sendResponse(res, 404, "Message not found.");
                 }
 
-                // Successfully marked the reported message as deleted and removed it from the messages table
                 console.log("SERVER-DEBUG: Reported message marked as deleted and message removed successfully.");
                 return sendResponse(res, 200, "Reported message marked as deleted and message removed successfully.");
             });
         });
     });
 
-    // Add the route for canceling a report by a client
     router.delete('/cancelReportByClient', (req, res) => {
         console.log("SERVER-DEBUG: router '/cancelReportByClient' handler.");
 
-        // Extract msgId from query parameters
         const msgId = req.query.msgId;
         console.log("SERVER-DEBUG: msg_id <- " + msgId);
 
-        // Validate that msgId is provided and is a positive integer
         if (!msgId || isNaN(msgId) || parseInt(msgId) <= 0) {
             console.error("SERVER-ERROR: Invalid or missing 'msgId'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'msgId' is required and must be a positive integer.");
         }
 
-        // Step 1: Remove the report from the reported_msg table
         const deleteReportedQuery = 'DELETE FROM reported_msg WHERE msgId = ?';
 
         connection.query(deleteReportedQuery, [parseInt(msgId)], (err, result) => {
@@ -294,7 +254,6 @@ module.exports = (connection) => {
                 return sendResponse(res, 500, 'Error occurred while deleting the reported message.');
             }
 
-            // Check if a row was deleted
             if (result.affectedRows === 0) {
                 console.log("SERVER-DEBUG: No report found with the provided 'msgId'.");
                 return sendResponse(res, 404, 'No report found for the provided message.');
@@ -302,7 +261,6 @@ module.exports = (connection) => {
 
             console.log("SERVER-DEBUG: Report successfully deleted from reported_msg table for msgId:", msgId);
 
-            // Step 2: Update the messages table to set the 'reported' field to false
             const updateMessageQuery = 'UPDATE messages SET reported = false WHERE id = ?';
 
             connection.query(updateMessageQuery, [parseInt(msgId)], (err, updateResult) => {
@@ -311,7 +269,6 @@ module.exports = (connection) => {
                     return sendResponse(res, 500, 'Error occurred while updating the message.');
                 }
 
-                // Check if any rows were affected by the update operation
                 if (updateResult.affectedRows === 0) {
                     console.log("SERVER-DEBUG: No message found with the provided 'msgId'.");
                     return sendResponse(res, 404, 'No message found to update the report status.');
