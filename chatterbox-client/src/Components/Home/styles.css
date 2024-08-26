@@ -1,10 +1,9 @@
-/* General Styles */
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
   font-family: 'Helvetica Neue', sans-serif;
-  background-color: #e9f5ff; /* Light-blue background */
+  background-color: #e9f5ff; 
 }
 
 .home-container {
@@ -15,7 +14,7 @@ html, body {
 }
 
 .left-div {
-  flex-basis: 20%; /* Adjusted for better responsiveness */
+  flex-basis: 20%; 
   background-color: #283747;
   color: white;
   padding: 20px;
@@ -35,13 +34,12 @@ html, body {
   justify-content: center;
   align-items: center;
   padding: 20px;
-  margin-left: 20%; /* Matches the flex-basis of left-div */
+  margin-left: 20%;
 }
 
-/* Centered Chat Area */
 .chat-container {
-  width: 450px; /* Set to a percentage to make it responsive */
-  max-width: 1000px; /* Maximum width for larger screens */
+  width: 450px; 
+  max-width: 1000px;
   background-color: white;
   display: flex;
   flex-direction: column;
@@ -58,7 +56,6 @@ img {
   border-radius: 50%;
 }
 
-/* User List */
 .ul_list_contact {
   list-style-type: none;
   padding: 0;
@@ -85,13 +82,12 @@ img {
   margin-left: 10px;
 }
 
-/* Button Container */
 .button-container {
   display: flex;
-  justify-content: space-between; /* Space out the buttons evenly */
-  align-items: center; /* Align buttons vertically in the center */
-  gap: 10px; /* Add space between the buttons */
-  margin-bottom: 20px; /* Space below the button container */
+  justify-content: space-between; 
+  align-items: center; 
+  gap: 10px; 
+  margin-bottom: 20px; 
 }
 
 .new-group-button {
@@ -123,7 +119,6 @@ img {
   margin-right: 10px;
 }
 
-/* Last Connection Styling */
 .last-connection {
   color: #b3b3b3;
   font-size: 12px;
@@ -136,7 +131,6 @@ img {
   padding: 0;
 }
 
-/* Chat Area */
 .messages-container {
   flex-grow: 1;
   overflow-y: auto;
@@ -145,24 +139,23 @@ img {
   border-radius: 10px;
 }
 
-/* Message Styling */
 .my-message {
   background-color: #007bff;
   color: white;
-  padding: 20px 10px; /* Increased padding to allow space for participant name */
+  padding: 20px 10px;
   border-radius: 10px;
   max-width: 60%;
   margin-left: auto;
   margin-bottom: 30px;
   position: relative;
   word-wrap: break-word;
-  text-align: right; /* Ensure the message text is right-aligned */
+  text-align: right;
 }
 
 .other-message {
   background-color: #e9ecef;
   color: black;
-  padding: 20px 10px; /* Increased padding to allow space for participant name */
+  padding: 20px 10px; 
   border-radius: 10px;
   max-width: 60%;
   margin-right: auto;
@@ -193,7 +186,6 @@ img {
   height: 15px;
 }
 
-/* Image Messages */
 .img_msg {
   width: 100px;
   height: 100px;
@@ -201,7 +193,6 @@ img {
   border-radius: 10px;
 }
 
-/* Participant Name (Group Chats) */
 .participants_name {
   color: rgb(0, 0, 0);
   font-weight: bold;
@@ -210,7 +201,6 @@ img {
   text-align: left;
 }
 
-/* Modified Indicator */
 .modified-indicator {
   font-size: 12px;
   color: #ec9600;
@@ -219,7 +209,6 @@ img {
   font-weight: bold;
 }
 
-/* Reported Icon */
 .reported {
   width: 15px;
   height: 15px;
@@ -228,7 +217,6 @@ img {
   right: 30px;
 }
 
-/* Chat Input Area */
 .chat-input-form {
   display: flex;
   flex-direction: column;
@@ -271,10 +259,9 @@ img {
   margin-bottom: 10px;
 }
 
-/* Responsive Design */
 @media (max-width: 1200px) {
   .right-div {
-    margin-left: 22%; /* Adjusted to slightly smaller left-div on large screens */
+    margin-left: 22%; 
   }
 }
 
@@ -296,7 +283,7 @@ img {
   }
 
   .chat-container {
-    max-width: 100%; /* Allow it to take up the full width on smaller screens */
+    max-width: 100%;
     height: auto;
   }
 
@@ -329,7 +316,6 @@ img {
   }
 }
 
-/* Message Options */
 .message-options {
   display: flex;
   justify-content: center;
@@ -352,7 +338,6 @@ img {
   background-color: #505b67;
 }
 
-/* Edit Message Input */
 .edit-message-input {
   width: 100%;
   padding: 10px;
@@ -362,7 +347,6 @@ img {
   font-size: 16px;
 }
 
-/* Save Button */
 .save-button {
   padding: 5px 15px;
   border: none;
@@ -378,7 +362,6 @@ img {
   background-color: #218838;
 }
 
-/* Modified Indicator */
 .modified-indicator {
   font-size: 12px;
   color: #ec9600;
@@ -403,8 +386,8 @@ img {
 }
 
 .remove-button:hover .remove-icon {
-  transform: scale(1.2); /* Slightly enlarge the icon on hover */
-  filter: brightness(1.2); /* Brighten the icon on hover */
+  transform: scale(1.2);
+  filter: brightness(1.2);
 }
 
 .remove-icon {

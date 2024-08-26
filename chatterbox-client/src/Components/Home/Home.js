@@ -22,7 +22,6 @@ export default function Home() {
   const [selectedMessageId, setSelectedMessageId] = useState(null);
   const [messageToEditId, setMessageToEditId] = useState(null);
   const [editedMessage, setEditedMessage] = useState("");
-  // const [countMessagesUnread, setCountMessagesUnread] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [participantsList, setParticipantsList] = useState([]);
 
@@ -85,12 +84,9 @@ export default function Home() {
           },
         }
       );
-      console.log(`Status: ${response.status}`);
-      console.log('Response headers:', response.headers);
   
       if (response.ok) {
         const messagesData = await response.json();
-        console.log('Messages:', messagesData);
         setMessages(messagesData.data);
         if (messagesData.data.length > 0) {
           markMessagesAsRead(currentUser, user);
@@ -101,14 +97,12 @@ export default function Home() {
     } catch (error) {
       console.error('An error occurred:', error);
     }
-  
-    // Remove user from the unread list
+
     setUsersWithUnread((prevSenderIds) => {
       return prevSenderIds.filter((senderId) => user.id !== senderId);
     });
   };
   
-  // Function to refresh messages, mark them as read, and fetch unread messages every X seconds
   const useAutoRefreshMessages = (selectedUser, showWindow, refreshInterval = 2000) => {
     const intervalRef = useRef(null);
 
@@ -117,9 +111,7 @@ export default function Home() {
         try {
           let response, messagesData;
 
-          // Case 1: SelectedUser is an individual user
           if ("phone" in selectedUser) {
-            // Fetch updated messages for individual user
             response = await fetch(
               `${url}/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${selectedUser.id}`,
               {
@@ -130,9 +122,8 @@ export default function Home() {
               }
             );
           } 
-          // Case 2: SelectedUser is a group
+
           else {
-            // Fetch updated messages for group
             response = await fetch(
               `${url}/messages/messagesWithCurrentGroup?currentId=${currentUser.id}&groupId=${selectedUser.id}`,
               {
@@ -144,16 +135,13 @@ export default function Home() {
             );
           }
 
-          // Handle response
           if (response.ok) {
             messagesData = await response.json();
             setMessages(messagesData.data);
           }
 
-          // Call markMessagesAsRead after fetching messages
           await markMessagesAsRead(currentUser, selectedUser);
 
-          // Also fetch unread messages
           await fetchUnreadMessages();
 
         } catch (error) {
@@ -164,7 +152,6 @@ export default function Home() {
       const fetchUnreadMessages = async () => {
         if (currentUser) {
           try {
-            // Fetch unread individual messages
             const response = await fetch(url + `/messages/getUnreadSenderIDs?currentUserId=${currentUser.id}`, {
               method: 'GET',
               headers: {
@@ -174,7 +161,6 @@ export default function Home() {
             if (response.status === 200) {
               const sendersId = await response.json();
               setUsersWithUnread(sendersId.data);
-              console.log(sendersId);
             } else {
               console.error(`Request failed with status code ${response.status}`);
             }
@@ -182,7 +168,6 @@ export default function Home() {
             console.error('An error occurred:', error);
           }
 
-          // Fetch unread group messages
           try {
             const response = await fetch(url + `/messages/getUnreadSenderIDsGroup?currentUserId=${currentUser.id}`, {
               method: 'GET',
@@ -193,7 +178,6 @@ export default function Home() {
             if (response.ok) {
               const sendersIdGroup = await response.json();
               setGroupsWithUnread(sendersIdGroup.data);
-              console.log(sendersIdGroup);
             } else {
               console.error(`Request failed with status code ${response.status}`);
             }
@@ -203,21 +187,18 @@ export default function Home() {
         }
       };
 
-      // Start the interval
       if (selectedUser && showWindow) {
         intervalRef.current = setInterval(fetchAndMarkMessages, refreshInterval);
       } else {
         intervalRef.current = setInterval(fetchUnreadMessages, refreshInterval);
       }
 
-      // Cleanup interval on component unmount or when conditions change
       return () => {
         clearInterval(intervalRef.current);
       };
     }, [selectedUser, showWindow, refreshInterval]);
   };
 
-  // Function to mark messages as read
   const markMessagesAsRead = async (CurrentUser, SelectedUser) => {
     const currentUserId = CurrentUser.id;
     const selectedUserId = SelectedUser.id;
@@ -285,7 +266,6 @@ export default function Home() {
     }
   };
   
-  // Usage inside your component
   useAutoRefreshMessages(selectedUser, showWindow);
 
   const handleGroupClick = async (group) => {
@@ -303,22 +283,17 @@ export default function Home() {
         }
       );
   
-      console.log(`Status: ${response.status}`);
-      console.log('Response headers:', response.headers);
-  
       if (response.ok) {
         const messagesData = await response.json();
-        console.log('Messages:', messagesData);
-  
-        // Check if the response contains messages
+
         if (messagesData.data && messagesData.data.length > 0) {
           setMessages(messagesData.data);
           markMessagesAsRead(currentUser, group);
         } else {
-          setMessages([]); // Clear the messages if there are none
+          setMessages([]); 
         }
       } else if (response.status === 404) {
-        setMessages([]); // Clear the messages in case of 404 not found without console error
+        setMessages([]); 
       } else {
         console.error(`Request failed with status code ${response.status}`);
       }
@@ -347,8 +322,6 @@ export default function Home() {
 
   const handleSubmitNewMessage = async (event) => {
     event.preventDefault();
-    console.log("image", selectedImage)
-
     const actualDate = new Date();
     const hours = actualDate.getHours();
     const min = actualDate.getMinutes();
@@ -358,7 +331,6 @@ export default function Home() {
     const month = String(actualDate.getMonth() + 1).padStart(2, '0');
     const day = String(actualDate.getDate()).padStart(2, '0');
 
-    // verifiy if the selectedUser is a group
     let Isgroup = false;
     if ("adminId" in selectedUser) {
       Isgroup = true
@@ -367,19 +339,16 @@ export default function Home() {
       Isgroup = false;
     }
 
-    // Create a new message object with the necessary data
     const newMessageData = {
       sender: currentUser.id,
       receiver: selectedUser.id,
       text: newMessage,
       date: `${year}-${month}-${day}`,
       hour: `${hours}:${min}:${sec}`,
-      // image: selectedImage,
       isItRead: false,
       isItGroup: Isgroup,
       modified: false,
       readedBy: JSON.stringify([])
-      // Add any other data needed for the server request
     };
 
     if (selectedImage) {
@@ -390,7 +359,6 @@ export default function Home() {
     }
 
     try {
-      // Send a POST request to the server to add the new message
       const response = await fetch(url + "/messages/addMessage", {
         method: "POST",
         headers: {
@@ -398,15 +366,10 @@ export default function Home() {
         },
         body: JSON.stringify(newMessageData), 
       });
-      console.log("response: msg ajoute", response)
       if (response.ok) {
-        // If the server successfully added the message, update the messages list
-        //const responseData = await response.json();
         const NewMsgId = await response.json();
         newMessageData["id"] = NewMsgId.id;
         setMessages([...messages, newMessageData]);
-        // setMessages([...messages, responseData]);
-        // Clear the new message and selected image after adding
         setNewMessage("");
         setSelectedImage("");
       } else {
@@ -459,7 +422,6 @@ export default function Home() {
         throw new Error("Request failed for deleting message");
       }
       const data = await response.json();
-      console.log(data);
       setMessages((prevMsg) => {
         return prevMsg.filter((msg) => msg.id !== msgId);
       });
@@ -489,11 +451,8 @@ export default function Home() {
       const contentType = response.headers.get("Content-Type");
       if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
-        console.log(data);
         setMessages(prevState => {
-          // Loop over your list
           return prevState.map((item) => {
-            // Check for the item with the specified id and update it
             return item.id === msgId ? { ...item, modified: data } : item
           })
         })
@@ -514,7 +473,6 @@ export default function Home() {
         text: editedMessage
       };
 
-      // Send a PUT request to the server to update the message
       const response = await fetch(url + `/messages/updateMessage?id=${msgId}`, {
         method: "PUT",
         headers: {
@@ -526,26 +484,20 @@ export default function Home() {
 
 
       if (response.ok) {
-        // Find the index of the message in the messages array
         const messageIndex = messages.findIndex((msg) => msg.id === msgId);
 
         if (messageIndex !== -1) {
-          // Create a deep copy of the message at the found index
           const updatedMessage = JSON.parse(JSON.stringify(messages[messageIndex]));
 
-          // Update the text, hour, and date fields of the copied message
           updatedMessage.text = editedMessage;
           updatedMessage.modified = 1;
-          console.log("msg modifie", updatedMessage)
 
-          // Create a new array with the updated message at the found index
           const updatedMessages = [
             ...messages.slice(0, messageIndex),
             updatedMessage,
             ...messages.slice(messageIndex + 1),
           ];
 
-          // Set the state with the updated messages array
           setMessages(updatedMessages);
         }
       } else {
@@ -562,7 +514,6 @@ export default function Home() {
 
   const handleReportMessage = async (msg) => {
     try {
-      // Step 1: Update the message status in the messages table
       const response = await fetch(`${url}/messages/reportMessage?id=${msg.id}&report=true`, {
         method: "PUT",
         headers: {
@@ -571,22 +522,18 @@ export default function Home() {
       });
 
       if (response.ok) {
-        console.log("Message status updated");
-
-        // Update the message state to reflect the reported status
         setMessages((prevMessages) =>
           prevMessages.map((message) =>
             message.id === msg.id ? { ...message, reported: 1 } : message
           )
         );
 
-        // Step 2: Send the report details to the reported_msg table
         const newReportedMsg = {
           msgId: msg.id,
           sender: msg.sender,
           receiver: msg.receiver,
           text: msg.text,
-          date: new Date(msg.date).toISOString().slice(0, 19).replace('T', ' '), // Format the date
+          date: new Date(msg.date).toISOString().slice(0, 19).replace('T', ' '),
           hour: msg.hour,
           image: msg.image || null,
           isItGroup: msg.isItGroup,
@@ -600,11 +547,9 @@ export default function Home() {
           body: JSON.stringify(newReportedMsg),
         });
 
-        if (reportResponse.ok) {
-          console.log("Message reported successfully in reported_msg table");
-        } else {
+        if (!reportResponse.ok) {
           console.error("Failed to add the reported message.");
-        }
+        } 
       } else {
         console.error("Failed to update the message status.");
       }
@@ -616,7 +561,6 @@ export default function Home() {
 
   const RemoveReport = async (msgId) => {
     try { 
-      console.log("I'm here on unreport, msgID is: ", msgId);
       const response = await fetch(url + `/reports/cancelReportByClient?msgId=${msgId}`, {
         method: "DELETE",
         headers: {
@@ -627,9 +571,7 @@ export default function Home() {
         throw new Error("Request failed for deleting reported message");
       }
       const data = await response.json();
-      console.log(data);
 
-      // Update the message state to reflect the reported status
       setMessages((prevMessages) =>
         prevMessages.map((message) =>
           message.id === msgId ? { ...message, reported: 0 } : message
@@ -682,30 +624,21 @@ export default function Home() {
 
 
   const fetchParticipantsInfos = async (selectedGroup) => {
-    console.log("Fetching participants for group:", selectedGroup);
 
     try {
-        // Make the API call to get participants details using the new endpoint
         const response = await fetch(url + `/groups/GroupParticipants?GroupId=${selectedGroup.id}`);
         
         if (response.ok) {
             const result = await response.json();
 
-            // Assuming the API returns a `data` field containing an array of participants
             const participants = result.data;
 
-            // Log the retrieved participants for debugging
-            console.log("Participants retrieved from API:", participants);
-
-            // Set the participants list with the array of { name, id } objects
             const participantsList = participants.map(participant => ({
                 id: participant.id,
                 name: participant.name
             }));
 
-            // Set the participants list to the state
             setParticipantsList(participantsList);
-            console.log("Participants list set:", participantsList);
         } else {
             console.error(`Failed to fetch participants. Status code: ${response.status}`);
         }
@@ -728,8 +661,6 @@ export default function Home() {
       });
   
       if (response.ok) {
-        console.log('Participant removed successfully.');
-        // Optionally remove the group from the UI or refresh the group list
         setGroups((prevGroups) => prevGroups.filter((g) => g.id !== group.id));
       } else if (response.status === 404) {
         console.error('Group not found.');
@@ -886,14 +817,12 @@ export default function Home() {
 
                   return (
                     <div key={msg.id} className={messageClass} onClick={() => !messageToEditId && handleMessageClick(msg.id)}>
-                      {/* Display the participant's name for group messages only if it's not the current user's message */}
                       {!isMyMessage && msg.isItGroup === 1 && (
                         <p className="participants_name">
                           {participantsList.find((user) => Number(user.id) === Number(msg.sender))?.name || "Unknown Participant"}
                         </p>
                       )}
 
-                      {/* Display the message text */}
                       {messageToEditId === msg.id ? (
                         <form onSubmit={(event) => handleSubmitEdit(event, msg.id)}>
                           <textarea
@@ -907,20 +836,16 @@ export default function Home() {
                         <p className="message-text">{msg.text}</p>
                       )}
 
-                      {/* Display the image if present */}
                       {msg.image && <img src={msg.image} className="img_msg" alt="Message image" />}
 
-                      {/* Display the date and hour */}
                       <p className="message-date">{new Date(msg.date).toLocaleDateString()} {msg.hour}</p>
 
-                      {/* Display read confirmation */}
                       <img
                         src={msg.isItRead ? "https://www.clipartmax.com/png/small/28-289625_single-tick-whtsapp-gray-2-clip-art-double-check-icon-png.png" : "http://www.clipartbest.com/cliparts/dir/LB8/dirLB85i9.png"}
                         className="read-confirm"
                         alt={msg.isItRead ? "Read" : "Not read"}
                       />
 
-                      {/* If reported */}
                       {!isMyMessage && msg.reported === 1 && (
                         <img
                           src="https://image.similarpng.com/very-thumbnail/2021/06/Attention-sign-icon.png"
@@ -929,7 +854,6 @@ export default function Home() {
                         />
                       )}
 
-                      {/* Show options for your own message */}
                       {isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (
                         <div className="message-options">
                           <button className="option-button" onClick={() => handleEditMessage(msg.id, msg.text)}>Edit</button>
@@ -937,7 +861,6 @@ export default function Home() {
                         </div>
                       )}
 
-                      {/* Show Report/Unreport options for other user's message */}
                       {!isMyMessage && selectedMessageId === msg.id && DisplayMenu && !messageToEditId && (
                         <div className="message-options">
                           {msg.reported === 1 ? (
@@ -948,7 +871,6 @@ export default function Home() {
                         </div>
                       )}
 
-                      {/* Display "Modified" label if the message has been modified */}
                       {msg.modified === 1 && (
                         <p className="modified-indicator">
                           {isMyMessage ? "This message was edited" : "This message was edited by the sender"}
