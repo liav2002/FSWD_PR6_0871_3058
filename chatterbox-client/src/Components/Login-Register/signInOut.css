@@ -1,4 +1,3 @@
-/* General reset for margins, paddings, and box-sizing */
 * {
   margin: 0;
   padding: 0;
@@ -7,14 +6,13 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #e9f5ff; /* Light background for contrast */
+  background-color: #e9f5ff; 
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
 }
 
-/* Container for both login and register */
 .login-container {
   display: flex;
   justify-content: center;
@@ -23,7 +21,6 @@ body {
   background-color: #e9f5ff;
 }
 
-/* The central login/register box */
 .login-box {
   background-color: white;
   padding: 40px;
@@ -34,7 +31,6 @@ body {
   text-align: center;
 }
 
-/* Shared Heading for Login/Register */
 h1 {
   font-size: 32px;
   margin-bottom: 30px;
@@ -43,7 +39,6 @@ h1 {
   font-family: 'Poppins', sans-serif;
 }
 
-/* Shared input styling */
 .inputTypeIn {
   width: 100%;
   padding: 12px 15px;
@@ -61,7 +56,6 @@ h1 {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
-/* Submit button styling (different for login and register) */
 #submitButton, 
 #registerButton {
   padding: 12px;
@@ -73,7 +67,6 @@ h1 {
   transition: background-color 0.3s ease;
 }
 
-/* Specific styling for login button */
 #submitButton {
   background-color: #007bff;
   color: white;
@@ -83,7 +76,6 @@ h1 {
   background-color: #0056b3;
 }
 
-/* Specific styling for register button */
 #registerButton {
   background-color: #28a745;
   color: white;
@@ -93,19 +85,18 @@ h1 {
   background-color: #218838;
 }
 
-/* Profile picture selection styling */
 .profile-picture-container {
   display: flex;
   justify-content: flex-start;
   margin: 20px 0;
-  overflow-x: auto; /* Add horizontal scrollbar */
-  white-space: nowrap; /* Prevent wrapping */
+  overflow-x: auto; 
+  white-space: nowrap;
 }
 
 .profile-picture-option {
   text-align: center;
-  flex: 0 0 auto; /* Ensure the images don't shrink or grow */
-  margin-right: 10px; /* Add some space between the images */
+  flex: 0 0 auto; 
+  margin-right: 10px; 
 }
 
 .profile-picture-img {
@@ -117,7 +108,6 @@ h1 {
   transition: border-color 0.3s ease;
 }
 
-/* Highlight the selected profile picture */
 input[type="radio"]:checked + .profile-picture-img {
   border-color: #007bff;
 }
@@ -126,7 +116,6 @@ input[type="radio"] {
   display: none;
 }
 
-/* Highlight the selected profile picture */
 input[type="radio"]:checked + .profile-picture-img {
   border-color: #007bff;
 }
@@ -135,7 +124,6 @@ input[type="radio"] {
   display: none;
 }
 
-/* Link styling for both login and register */
 .loginLink {
   margin-top: 20px;
   display: inline-block;
@@ -154,7 +142,6 @@ input[type="radio"] {
   text-decoration: underline;
 }
 
-/* Error Page Styling */
 .header404 {
   font-size: 80px;
   color: #ff4a4a;

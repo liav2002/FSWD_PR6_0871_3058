@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Cookies from "universal-cookie";
-import "./signInOut.css";  // Ensure to use the same css file to keep consistency
+import "./signInOut.css"; 
 
 const url = 'http://localhost:5002';
 
@@ -55,7 +55,6 @@ export default function Register() {
       }
       else if (response.status === 400) {
         const res = await response.json();
-        console.log(res.message);
         alert(res.message);
       }
       else {
@@ -134,7 +133,6 @@ export default function Register() {
                 required
               />
 
-              {/* Profile picture selection */}
               <div className="profile-picture-container">
                 {profilePictureOptions.map((option) => (
                   <label key={option.value} className="profile-picture-option">
