@@ -123,42 +123,71 @@ module.exports = (connection) => {
         });
     });
 
-    // DELETE a group
-    router.delete('/RemoveGroup', (req, res) => {
-        console.log("SERVER-DEBUG: router '/RemoveGroup' handler.");
+    // PUT request to remove a participant from a group
+    router.put('/RemoveParticipant', (req, res) => {
+        console.log("SERVER-DEBUG: router '/RemoveParticipant' handler.");
 
-        // Extract the GroupId from the query parameters and log it
+        // Extract the GroupId and ParticipantId from the query parameters
         const groupId = req.query.GroupId;
-        console.log("SERVER-DEBUG: group_id <- " + groupId);
+        const participantId = req.query.ParticipantId;
+        console.log("SERVER-DEBUG: group_id <- " + groupId + ", participant_id <- " + participantId);
 
-        // Validate that the GroupId is provided and is a positive integer
+        // Validate that the GroupId and ParticipantId are provided and are positive integers
         if (!groupId || isNaN(groupId) || parseInt(groupId) <= 0 || !Number.isInteger(Number(groupId))) {
             console.error("SERVER-ERROR: Invalid or missing 'GroupId'. It must be a positive integer.");
             return sendResponse(res, 400, "Bad Request: 'GroupId' is required and must be a positive integer.");
         }
 
-        // Create an SQL query with a prepared parameter to delete the group
-        const query = 'DELETE FROM chat_groups WHERE id = ?';
+        if (!participantId || isNaN(participantId) || parseInt(participantId) <= 0 || !Number.isInteger(Number(participantId))) {
+            console.error("SERVER-ERROR: Invalid or missing 'ParticipantId'. It must be a positive integer.");
+            return sendResponse(res, 400, "Bad Request: 'ParticipantId' is required and must be a positive integer.");
+        }
 
-        // Execute the SQL query with the GroupId as a parameter
-        connection.query(query, [parseInt(groupId)], (err, results) => {
+        // SQL query to get the participantsId for the given group
+        const selectQuery = 'SELECT participantsId FROM chat_groups WHERE id = ?';
+
+        // Execute the SQL query to retrieve participantsId for the group
+        connection.query(selectQuery, [parseInt(groupId)], (err, results) => {
             if (err) {
-                // If an error occurs during query execution, log the error and send a response
                 console.error("SERVER-ERROR: Error in request execution", err);
-                return sendResponse(res, 500, 'An error occurred while deleting the group.');
+                return sendResponse(res, 500, 'An error occurred while fetching group data.');
             }
 
-            // Check if any rows were affected by the delete operation
-            if (results.affectedRows === 0) {
+            // Check if the group was found
+            if (results.length === 0) {
                 console.log("SERVER-DEBUG: No group found with the provided 'GroupId'.");
                 return sendResponse(res, 404, 'Group not found.');
             }
 
-            // If the group was deleted successfully, log and return success response
-            console.log("SERVER-DEBUG: Group successfully deleted. Group ID:", groupId);
-            return sendResponse(res, 200, 'Group deleted successfully.', { id: parseInt(groupId) });
+            // Assuming participantsId is stored as an array in the database
+            let participants = results[0].participantsId;
+
+            // Check if the participant is part of the group
+            if (!Array.isArray(participants) || !participants.includes(parseInt(participantId))) {
+                console.log("SERVER-DEBUG: Participant not found in group.");
+                return sendResponse(res, 404, 'Participant not found in the group.');
+            }
+
+            // Remove the participant from the list
+            participants = participants.filter(id => id !== parseInt(participantId));
+
+            // SQL query to update the participantsId in the chat_groups table
+            const updateQuery = 'UPDATE chat_groups SET participantsId = ? WHERE id = ?';
+
+            // Execute the SQL query to update the group
+            connection.query(updateQuery, [JSON.stringify(participants), parseInt(groupId)], (err, updateResults) => {
+                if (err) {
+                    console.error("SERVER-ERROR: Error in updating participants", err);
+                    return sendResponse(res, 500, 'An error occurred while updating the group.');
+                }
+
+                console.log("SERVER-DEBUG: Participant removed successfully. Group ID:", groupId, ", Participant ID:", participantId);
+                return sendResponse(res, 200, 'Participant removed successfully.', { groupId: parseInt(groupId), participantId: parseInt(participantId) });
+            });
         });
     });
+
+
 
     // GET participants' names of a group
     router.get('/GroupParticipants', (req, res) => {

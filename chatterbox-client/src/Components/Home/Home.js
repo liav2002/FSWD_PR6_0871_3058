@@ -716,6 +716,30 @@ export default function Home() {
     navigate("/admin");
   };
 
+  const handleRemoveParticipantClick = async (group) => {
+    try {
+      const response = await fetch(`${url}/groups/RemoveParticipant?GroupId=${group.id}&ParticipantId=${currentUser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (response.ok) {
+        console.log('Participant removed successfully.');
+        // Optionally remove the group from the UI or refresh the group list
+        setGroups((prevGroups) => prevGroups.filter((g) => g.id !== group.id));
+      } else if (response.status === 404) {
+        console.error('Group not found.');
+      } else {
+        console.error('Failed to delete group.');
+      }
+    } catch (error) {
+      console.error('An error occurred while deleting the group:', error);
+    }
+  };
+  
+
   useEffect(() => {
     fetchUsers();
     fetchUnreadMessges();
@@ -729,27 +753,47 @@ export default function Home() {
       <div>
         <li key={uniqueKey} className="contact_list">
           <div className="contact_container" onClick={() => handleUserClick(user)}>
-            <span><img src={user.profil} className="img_contact"></img></span>
-            <span >{user.name}</span>
-            {usersWithUnread.includes(user.id) ? <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span> : ""}
+            <span>
+              <img src={user.profil} className="img_contact" alt="Profile"></img>
+            </span>
+            <span>{user.name}</span>
+            {usersWithUnread.includes(user.id) ? (
+              <span>
+                <img
+                  src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png"
+                  className="greenIcon"
+                  alt="Unread"
+                ></img>
+              </span>
+            ) : null}
           </div>
         </li>
-        </div>
-      )
+      </div>
+    )
   });
 
   uniqueKey = 0;
   const groupList = groups.map((group)=>{
     uniqueKey++;
     return(
-    <li key={uniqueKey} className="contact_list">
-          <div className="contact_container" onClick={() => handleGroupClick(group)}>
-            <span><img src={group.profil.replace(/['"]/g, "")} className="img_contact"></img></span>
-            <span >{group.title.replace(/['"]/g, "")}</span>
-            {groupsWithUnread.includes(group.id) ? <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span> : ""}
-          </div>
-        </li>)
-  })
+      <li key={uniqueKey} className="contact_list">
+        <div className="contact_container" onClick={() => handleGroupClick(group)}>
+          <span><img src={group.profil.replace(/['"]/g, "")} className="img_contact"></img></span>
+          <span >{group.title.replace(/['"]/g, "")}</span>
+          {groupsWithUnread.includes(group.id) ? <span><img src="https://img.icons8.com/?size=512&id=FkQHNSmqWQWH&format=png" className="greenIcon"></img></span> : ""}
+        </div>
+        <button
+            className="remove-button"
+            onClick={() => handleRemoveParticipantClick(group)}
+          >
+            <img
+              src="https://th.bing.com/th/id/OIP.2LKH2iNiSM4bdgoBvjyK9AHaJI?rs=1&pid=ImgDetMain"
+              alt="Remove"
+              className="remove-icon"
+            />
+          </button>
+      </li>)
+  });
 
 
   const playAudio = () => {

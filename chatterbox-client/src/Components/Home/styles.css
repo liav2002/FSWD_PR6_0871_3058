@@ -386,3 +386,28 @@ img {
   text-align: right;
   font-weight: bold;
 }
+
+.contact_list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.remove-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+}
+
+.remove-button:hover .remove-icon {
+  transform: scale(1.2); /* Slightly enlarge the icon on hover */
+  filter: brightness(1.2); /* Brighten the icon on hover */
+}
+
+.remove-icon {
+  width: 24px;
+  height: 24px;
+}
