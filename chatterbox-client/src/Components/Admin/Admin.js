@@ -6,6 +6,7 @@ import Cookies from "universal-cookie";
 const url = 'http://localhost:5002';
 
 export default function Admin() {
+  const [isAdmin, setIsAdmin] = useState(0);
   const [selectedChoice, setSelectedChoice] = useState("contacts");
   const [users, setUsers] = useState([]);
   const [Reported_msg, setReported_msg] = useState([]);
@@ -19,11 +20,34 @@ export default function Admin() {
   const cookies = new Cookies();
   const currentUser = JSON.parse(localStorage["currentUser"]);
 
+  const fetchAdmin = async () => {
+    if (currentUser) {
+      try {
+        const response = await fetch(url + `/users/isAdmin?currentUserID=${currentUser.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const resp = await response.json();
+          if (resp.data.isAdmin === 1) setIsAdmin(1);
+          else setIsAdmin(2);
+        } else {
+          console.error(`Request failed with status code ${response.status}`);
+        }
+      } catch (error) {
+        console.error('An error occurred:', error);
+      }
+    }
+  };
+
+  fetchAdmin();
 
   useEffect(() => {
     AllReported();
     handleChoiceContacts();
-  }, []);
+  }, [navigate]);
 
 
   const handleChoiceClick = (choice) => {
@@ -174,8 +198,8 @@ export default function Admin() {
   const Content1 = () => (
     <div className="admin-contacts-section">
       {users.map((user) => (
-        <div 
-          key={user.id} 
+        <div
+          key={user.id}
           className={`admin-contact-item ${user.isAdmin ? 'admin-contact-item-gold' : ''}`}
         >
           <img src={user.profil} alt={user.name} className="admin-contact-avatar" />
@@ -257,13 +281,13 @@ export default function Admin() {
         <button className="admin-button" onClick={() => handleShowKeptMessagesClick()}>Show Kept Messages</button>
         <button className="admin-button" onClick={() => handleShowDeletedMessagesClick()}>Show Deleted Messages</button>
       </div>
-  
+
       <div className={`admin-message-list ${showAllCheckedMsg ? 'show-section' : 'hide-section'}`}>
         <h3 className="admin-list-title">Messages Checked</h3>
         {Reported_msgChecked.map((kept_msg) => {
           const sender = users.find(user => user.id === kept_msg.sender);
           const receiver = users.find(user => user.id === kept_msg.receiver);
-  
+
           return (
             <li key={kept_msg.id} className="admin-message-item">
               {kept_msg.text && (
@@ -279,13 +303,13 @@ export default function Admin() {
           );
         })}
       </div>
-  
+
       <div className={`admin-message-list ${showKept ? 'show-section' : 'hide-section'}`}>
         <h3 className="admin-list-title">Kept Messages</h3>
         {msg_kept.map((kept_msg) => {
           const sender = users.find(user => user.id === kept_msg.sender);
           const receiver = users.find(user => user.id === kept_msg.receiver);
-  
+
           return (
             <li key={kept_msg.id} className="admin-message-item">
               {kept_msg.text && (
@@ -301,13 +325,13 @@ export default function Admin() {
           );
         })}
       </div>
-  
+
       <div className={`admin-message-list ${showDeleted ? 'show-section' : 'hide-section'}`}>
         <h3 className="admin-list-title">Deleted Messages</h3>
         {deleted_msg.map((deleted_msg) => {
           const sender = users.find(user => user.id === deleted_msg.sender);
           const receiver = users.find(user => user.id === deleted_msg.receiver);
-  
+
           return (
             <li key={deleted_msg.id} className="admin-message-item">
               {deleted_msg.text && (
@@ -325,26 +349,35 @@ export default function Admin() {
       </div>
     </div>
   );
-  
-  
 
 
+
+  if (isAdmin === 0) return;
+  
   return (
-    <div className="admin-container">
+    <>
+      {currentUser && isAdmin === 1 ? (
+        <div className="admin-container">
+          <div className="admin-menu">
+            {/* Changed the LogOut button to the ReturnToHome button */}
+            <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="admin-return-home-icon" alt="Return to Home" />
+            <button className={`admin-menu-button ${selectedChoice === 'contacts' ? 'active' : ''}`} onClick={() => handleChoiceClick("contacts")}>Contacts</button>
+            <button className={`admin-menu-button ${selectedChoice === 'messages to check' ? 'active' : ''}`} onClick={() => handleChoiceClick("messages to check")}>Messages to Check</button>
+            <button className={`admin-menu-button ${selectedChoice === 'All checked messages' ? 'active' : ''}`} onClick={() => handleChoiceClick("All checked messages")}>All Checked Messages</button>
+          </div>
 
-      <div className="admin-menu">
-        {/* Changed the LogOut button to the ReturnToHome button */}
-        <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="admin-return-home-icon" alt="Return to Home" />
-        <button className={`admin-menu-button ${selectedChoice === 'contacts' ? 'active' : ''}`} onClick={() => handleChoiceClick("contacts")}>Contacts</button>
-        <button className={`admin-menu-button ${selectedChoice === 'messages to check' ? 'active' : ''}`} onClick={() => handleChoiceClick("messages to check")}>Messages to Check</button>
-        <button className={`admin-menu-button ${selectedChoice === 'All checked messages' ? 'active' : ''}`} onClick={() => handleChoiceClick("All checked messages")}>All Checked Messages</button>
-      </div>
-
-      <div className="admin-content">
-        {selectedChoice === "contacts" && <Content1 />}
-        {selectedChoice === "messages to check" && <Content2 />}
-        {selectedChoice === "All checked messages" && <Content3 />}
-      </div>
-    </div>
+          <div className="admin-content">
+            {selectedChoice === "contacts" && <Content1 />}
+            {selectedChoice === "messages to check" && <Content2 />}
+            {selectedChoice === "All checked messages" && <Content3 />}
+          </div>
+        </div>
+      ) : (
+        <div>
+          <h1 className="header404"><b>404</b></h1>
+          <div className="body">Oops! Something went wrong.</div>
+        </div>
+      )}
+    </>
   );
 }
