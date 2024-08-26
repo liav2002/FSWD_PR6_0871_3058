@@ -1,0 +1,156 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #e9f5ff; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #e9f5ff;
+}
+
+.login-box {
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #333;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+}
+
+.inputTypeIn {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease-in-out;
+}
+
+.inputTypeIn:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+#submitButton, 
+#registerButton {
+  padding: 12px;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+#submitButton {
+  background-color: #007bff;
+  color: white;
+}
+
+#submitButton:hover {
+  background-color: #0056b3;
+}
+
+#registerButton {
+  background-color: #28a745;
+  color: white;
+}
+
+#registerButton:hover {
+  background-color: #218838;
+}
+
+.profile-picture-container {
+  display: flex;
+  justify-content: flex-start;
+  margin: 20px 0;
+  overflow-x: auto; 
+  white-space: nowrap;
+}
+
+.profile-picture-option {
+  text-align: center;
+  flex: 0 0 auto; 
+  margin-right: 10px; 
+}
+
+.profile-picture-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+input[type="radio"]:checked + .profile-picture-img {
+  border-color: #007bff;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+input[type="radio"]:checked + .profile-picture-img {
+  border-color: #007bff;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+.loginLink {
+  margin-top: 20px;
+  display: inline-block;
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.loginLink .link-text {
+  font-weight: bold;
+  color: #0056b3;
+}
+
+.loginLink:hover .link-text {
+  text-decoration: underline;
+}
+
+.header404 {
+  font-size: 80px;
+  color: #ff4a4a;
+  margin-top: 50px;
+  text-align: center;
+}
+
+.body {
+  font-size: 24px;
+  color: #333;
+  text-align: center;
+}
