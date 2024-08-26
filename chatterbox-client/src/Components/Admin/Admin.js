@@ -62,7 +62,6 @@ export default function Admin() {
   };
 
   const handleChoiceContacts = async () => {
-    console.log("users", users);
     if (users.length === 0) {
       try {
         const response = await fetch(`${url}/users/AllUsersIncludeAdmins`, {
@@ -84,7 +83,6 @@ export default function Admin() {
   };
 
   const AllReported = async () => {
-    console.log("try get all repotred messages");
     let reported_msgData = [];
 
     try {
@@ -97,7 +95,6 @@ export default function Admin() {
       if (response.ok) {
         reported_msgData = await response.json();
         reported_msgData = reported_msgData.data;
-        console.log("got reported messages: ", reported_msgData);
 
       } else {
         console.error(`Request failed with status code ${response.status}`);
@@ -112,9 +109,6 @@ export default function Admin() {
     const newDeletedMsg = [];
 
     reported_msgData.forEach((reportedMsg) => {
-
-      console.log("res", reportedMsg.checked);
-
       if (reportedMsg.checked === 0) {
         newReportedMsg.push(reportedMsg);
       } else if (reportedMsg.checked === 1 && reportedMsg.deleted === 0) {
@@ -126,20 +120,15 @@ export default function Admin() {
       }
     });
 
-    console.log("reported that need to be handle: ", newReportedMsg);
     setReported_msg(newReportedMsg);
 
-    console.log("reported that checked: ", newReportedMsgChecked);
     setReported_msgChecked(newReportedMsgChecked);
 
-    console.log("reported that checked and kept: ", newMsgKept);
     setMsg_kept(newMsgKept);
 
-    console.log("reported that checked and delete: ", newDeletedMsg);
     setDeleted_msg(newDeletedMsg);
   };
 
-  // Function to navigate back to home
   const ReturnToHome = () => {
     navigate(`/${currentUser.phone}`); // Redirect to the home route
   };
@@ -218,7 +207,6 @@ export default function Admin() {
   const Content2 = () => (
     <div className="admin-reported-message-list">
       {Reported_msg.map((reported_msg) => {
-        // Find the sender and receiver from the users array
         const sender = users.find(user => user.id === reported_msg.sender);
         const receiver = users.find(user => user.id === reported_msg.receiver);
 
@@ -248,8 +236,6 @@ export default function Admin() {
 
 
   const handleShowAllMessagesClick = () => {
-    console.log("All messages", Reported_msgChecked);
-
     setShowAllCheckedMsg(true);
     setShowKept(false);
     setShowDeleted(false);
@@ -257,8 +243,6 @@ export default function Admin() {
 
 
   const handleShowKeptMessagesClick = () => {
-    console.log("messages gardes", msg_kept);
-
     setShowAllCheckedMsg(false);
     setShowKept(true);
     setShowDeleted(false);
@@ -266,8 +250,6 @@ export default function Admin() {
 
 
   const handleShowDeletedMessagesClick = () => {
-    console.log("deleted", deleted_msg);
-
     setShowAllCheckedMsg(false);
     setShowKept(false);
     setShowDeleted(true);
@@ -359,7 +341,6 @@ export default function Admin() {
       {currentUser && isAdmin === 1 ? (
         <div className="admin-container">
           <div className="admin-menu">
-            {/* Changed the LogOut button to the ReturnToHome button */}
             <img src="https://img.icons8.com/?size=512&id=6483&format=png" onClick={() => ReturnToHome()} className="admin-return-home-icon" alt="Return to Home" />
             <button className={`admin-menu-button ${selectedChoice === 'contacts' ? 'active' : ''}`} onClick={() => handleChoiceClick("contacts")}>Contacts</button>
             <button className={`admin-menu-button ${selectedChoice === 'messages to check' ? 'active' : ''}`} onClick={() => handleChoiceClick("messages to check")}>Messages to Check</button>
