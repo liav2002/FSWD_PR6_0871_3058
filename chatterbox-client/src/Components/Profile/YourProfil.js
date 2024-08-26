@@ -48,11 +48,6 @@ export default function YourProfil() {
       if (!response.ok) {
         throw new Error("Request failed for updating user");
       }
-      const contentType = response.headers.get("Content-Type");
-      if (contentType && contentType.includes("application/json")) {
-        const data = await response.json();
-        console.log(data);
-      }
       let user = JSON.parse(localStorage.getItem("currentUser"));
       user.name = name;
       user.email = email;
