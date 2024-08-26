@@ -106,70 +106,112 @@ export default function Home() {
     });
   };
   
-  // Function to refresh messages and mark them as read every X seconds
+  // Function to refresh messages, mark them as read, and fetch unread messages every X seconds
   const useAutoRefreshMessages = (selectedUser, showWindow, refreshInterval = 2000) => {
     const intervalRef = useRef(null);
 
     useEffect(() => {
-      if (selectedUser && showWindow) {
-        const fetchAndMarkMessages = async () => {
-          try {
-            let response, messagesData;
+      const fetchAndMarkMessages = async () => {
+        try {
+          let response, messagesData;
 
-            // Case 1: SelectedUser is an individual user
-            if ("phone" in selectedUser) {
-              // Fetch updated messages for individual user
-              response = await fetch(
-                `${url}/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${selectedUser.id}`,
-                {
-                  method: 'GET',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                }
-              );
-            } 
-            // Case 2: SelectedUser is a group
-            else {
-              // Fetch updated messages for group
-              response = await fetch(
-                `${url}/messages/messagesWithCurrentGroup?currentId=${currentUser.id}&groupId=${selectedUser.id}`,
-                {
-                  method: 'GET',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                }
-              );
-            }
-
-            // Handle response
-            if (response.ok) {
-              messagesData = await response.json();
-              setMessages(messagesData.data);
-            }
-
-            // Call markMessagesAsRead after fetching messages
-            await markMessagesAsRead(currentUser, selectedUser);
-
-          } catch (error) {
-            console.error('An error occurred during auto-refresh:', error);
+          // Case 1: SelectedUser is an individual user
+          if ("phone" in selectedUser) {
+            // Fetch updated messages for individual user
+            response = await fetch(
+              `${url}/messages/messagesWithCurrentUser?currentId=${currentUser.id}&selectedUserId=${selectedUser.id}`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+          } 
+          // Case 2: SelectedUser is a group
+          else {
+            // Fetch updated messages for group
+            response = await fetch(
+              `${url}/messages/messagesWithCurrentGroup?currentId=${currentUser.id}&groupId=${selectedUser.id}`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
           }
-        };
 
-        // Start polling for messages every X seconds
-        intervalRef.current = setInterval(fetchAndMarkMessages, refreshInterval);
+          // Handle response
+          if (response.ok) {
+            messagesData = await response.json();
+            setMessages(messagesData.data);
+          }
 
-        // Cleanup interval on component unmount or when conditions change
-        return () => {
-          clearInterval(intervalRef.current);
-        };
-      } else {
-        // Clear interval when selectedUser is empty or showWindow is false
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
+          // Call markMessagesAsRead after fetching messages
+          await markMessagesAsRead(currentUser, selectedUser);
+
+          // Also fetch unread messages
+          await fetchUnreadMessages();
+
+        } catch (error) {
+          console.error('An error occurred during auto-refresh:', error);
         }
+      };
+
+      const fetchUnreadMessages = async () => {
+        if (currentUser) {
+          try {
+            // Fetch unread individual messages
+            const response = await fetch(url + `/messages/getUnreadSenderIDs?currentUserId=${currentUser.id}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            if (response.status === 200) {
+              const sendersId = await response.json();
+              setUsersWithUnread(sendersId.data);
+              console.log(sendersId);
+            } else {
+              console.error(`Request failed with status code ${response.status}`);
+            }
+          } catch (error) {
+            console.error('An error occurred:', error);
+          }
+
+          // Fetch unread group messages
+          try {
+            const response = await fetch(url + `/messages/getUnreadSenderIDsGroup?currentUserId=${currentUser.id}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            if (response.ok) {
+              const sendersIdGroup = await response.json();
+              setGroupsWithUnread(sendersIdGroup.data);
+              console.log(sendersIdGroup);
+            } else {
+              console.error(`Request failed with status code ${response.status}`);
+            }
+          } catch (error) {
+            console.error('An error occurred:', error);
+          }
+        }
+      };
+
+      // Start the interval
+      if (selectedUser && showWindow) {
+        intervalRef.current = setInterval(fetchAndMarkMessages, refreshInterval);
+      } else {
+        intervalRef.current = setInterval(fetchUnreadMessages, refreshInterval);
       }
+
+      // Cleanup interval on component unmount or when conditions change
+      return () => {
+        clearInterval(intervalRef.current);
+      };
     }, [selectedUser, showWindow, refreshInterval]);
   };
 
@@ -387,48 +429,6 @@ export default function Home() {
           const usersData = await response.json();
           setUsers(usersData.data.users);
           setGroups(usersData.data.groups)
-        } else {
-          console.error(`Request failed with status code ${response.status}`);
-        }
-      } catch (error) {
-        console.error('An error occurred:', error);
-      }
-    }
-  };
-
-
-  const fetchUnreadMessges = async () => {
-    if (currentUser) {
-      try {
-        const response = await fetch(url + `/messages/getUnreadSenderIDs?currentUserId=${currentUser.id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.status === 200) {
-          const sendersId = await response.json();
-          setUsersWithUnread(sendersId.data);
-          console.log(sendersId);
-        } else {
-          console.error(`Request failed with status code ${response.status}`);
-        }
-      } catch (error) {
-        console.error('An error occurred:', error);
-      }
-
-      // for groups messages unread
-      try {
-        const response = await fetch(url + `/messages/getUnreadSenderIDsGroup?currentUserId=${currentUser.id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.ok) {
-          const sendersIdGroup = await response.json();
-          setGroupsWithUnread(sendersIdGroup.data);
-          console.log(sendersIdGroup);
         } else {
           console.error(`Request failed with status code ${response.status}`);
         }
@@ -742,7 +742,6 @@ export default function Home() {
 
   useEffect(() => {
     fetchUsers();
-    fetchUnreadMessges();
   }, []);
 
   let uniqueKey = 0;
